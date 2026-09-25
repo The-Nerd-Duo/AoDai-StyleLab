@@ -1,0 +1,42 @@
+[
+  {
+    "id": "pattern-may-ngu-sac",
+    "name": "Mây Ngũ Sắc (Tường Vân)",
+    "category": "Thiên nhiên & Vũ trụ",
+    "dynasty": "Thời Lê - Nguyễn",
+    "symbolism": "Mây lành cuộn tròn 5 màu ngũ hành, tượng trưng cho thiên thời địa lợi, cát tường như ý và ơn trời che chở.",
+    "usage": "Thêu trên cổ áo Nhật Bình, tà áo Ngũ Thân hoàng gia và khăn mấn cung đình."
+  },
+  {
+    "id": "pattern-hoa-sen",
+    "name": "Bách Liên Hoa (Hoa Sen)",
+    "category": "Thực vật & Tâm linh",
+    "dynasty": "Thời Lý - Trần - Nay",
+    "symbolism": "'Gần bùn mà chẳng hôi tanh mùi bùn' - Biểu tượng tối cao cho sự thanh khiết, trí tuệ giác ngộ và cốt cách người Việt.",
+    "usage": "Xuất hiện xuyên suốt từ hoa văn gốm sứ thời Lý đến thêu tơ tằm trên tà áo dài tân thời."
+  },
+  {
+    "id": "pattern-rong-phuong",
+    "name": "Long Phụng Trình Tường",
+    "category": "Linh thú Tứ linh",
+    "dynasty": "Cung đình Phong kiến",
+    "symbolism": "Rồng đại diện cho uy quyền quân vương, khí dương mạnh mẽ; Phượng đại diện cho vẻ đẹp vương hậu, đức hạnh và tính âm điều hòa.",
+    "usage": "Dành riêng cho Hoàng đế, Hoàng hậu và trong lễ phục cưới hỏi truyền thống tượng trưng phu thê hòa hợp."
+  },
+  {
+    "id": "pattern-thuy-ba",
+    "name": "Thủy Ba Sóng Nước & Tam Sơn",
+    "category": "Sông núi & Cội nguồn",
+    "dynasty": "Thời Nguyễn",
+    "symbolism": "Dải sóng nước vỗ quanh ba ngọn núi thiêng (Tam sơn), tượng trưng cho sự trường tồn vĩnh cửu của giang sơn bờ cõi đất nước.",
+    "usage": "Trang trí ở gấu áo hoàng bào, tà áo tấc đại triều và bổ phục quan lại."
+  },
+  {
+    "id": "pattern-chu-tho",
+    "name": "Chữ Thọ Cách Điệu",
+    "category": "Cát tường & Văn tự",
+    "dynasty": "Thời Nguyễn - Dân gian",
+    "symbolism": "Cầu chúc sức khỏe trường thọ, cuộc sống an nhiên viên mãn, thường được vẽ theo hình tròn (Thọ đoàn) hoặc vuông.",
+    "usage": "Dệt chìm trên gấm lụa may áo ngũ thân, cài cúc áo hoặc thêu ngực áo."
+  }
+]
