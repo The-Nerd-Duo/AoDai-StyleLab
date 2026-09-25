@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { OutfitState } from "@/lib/utils";
 import mockupsData from "@/config/mockups.json";
+import { generateOutfitPrompt } from "@/lib/ai-prompt";
 import { Sparkles, Layers, ArrowRight, RefreshCw, Eye, Image as ImageIcon } from "lucide-react";
 
 // Dán link copy ở Bước 2 vào đây
@@ -56,12 +57,11 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
     }
     setLoading(true);
     try {
+      const prompt = generateOutfitPrompt(outfit);
       const res = await fetch(WORKER_AI_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompt: `Vietnamese model wearing traditional white ${garment.name}, ${style.name} style, studio light, 8k`
-        }),
+        body: JSON.stringify({ prompt }),
       });
 
       if (!res.ok) throw new Error("Lỗi khi tạo ảnh");
@@ -125,8 +125,12 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
               <RefreshCw className="w-8 h-8 text-heritage-gold animate-spin" />
               <div className="flex flex-col gap-1">
                 <span className="text-xs font-bold text-white">AI đang tạo ảnh trang phục...</span>
-                <span className="text-[11px] text-gray-300">Cloudflare Worker AI</span>
-                <span className="text-[9px] text-gray-400 italic">8K Studio Lighting</span>
+                <span className="text-[11px] text-heritage-gold font-medium">
+                  {color.name} • {garment.name}
+                </span>
+                <span className="text-[9px] text-gray-300 italic">
+                  Nền: {style.name} {accessory.id !== "none" ? `• ${accessory.name}` : ""}
+                </span>
               </div>
             </div>
           ) : resultImage && showAiImage ? (
@@ -216,6 +220,30 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
             <span className="text-gray-400 text-[10px] block">Đại diện:</span>
             <span className="text-heritage-gold font-medium text-[11px]">{persona.name}</span>
           </div>
+        </div>
+      </div>
+
+      {/* Dynamic Prompt Parameters Indicator */}
+      <div className="bg-black/50 border border-white/10 rounded-xl p-2.5 text-[11px] flex flex-col gap-1.5">
+        <div className="flex items-center justify-between text-gray-400 text-[10px]">
+          <span className="flex items-center gap-1 font-semibold text-heritage-gold">
+            <Sparkles className="w-3 h-3" />
+            Chi tiết Prompt AI theo tùy chọn:
+          </span>
+          <span className="text-emerald-400 font-mono text-[9px]">Dynamic AI</span>
+        </div>
+        <div className="flex flex-wrap gap-1 text-[10px]">
+          <span className="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-gray-300">
+            🎨 Màu: <strong className="text-amber-200">{color.name}</strong>
+          </span>
+          <span className="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-gray-300">
+            🏞️ Nền: <strong className="text-emerald-300">{style.name}</strong>
+          </span>
+          {accessory.id !== "none" && (
+            <span className="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-gray-300">
+              💎 Phụ kiện: <strong className="text-sky-300">{accessory.name}</strong>
+            </span>
+          )}
         </div>
       </div>
 

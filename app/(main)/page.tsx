@@ -10,6 +10,7 @@ import { OutfitComparisonModal } from "@/components/studio/OutfitComparisonModal
 import { useOutfitStore } from "@/lib/store";
 import { Sparkles } from "lucide-react";
 import mockupsData from "@/config/mockups.json";
+import { generateOutfitPrompt } from "@/lib/ai-prompt";
 
 // Dán link copy ở Bước 2 vào đây
 const WORKER_AI_URL = "https://vietphuc-ai-api.tunaemm.workers.dev";
@@ -30,18 +31,14 @@ export default function StudioPage() {
   const [customAvatar, setCustomAvatar] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const garment = mockupsData.garments.find((g) => g.id === outfit.garmentId)?.name || outfit.garmentId;
-  const style = mockupsData.styles.find((s) => s.id === outfit.styleId)?.name || outfit.styleId;
-
   async function handleGenerateOutfit() {
     setLoading(true);
     try {
+      const prompt = generateOutfitPrompt(outfit);
       const res = await fetch(WORKER_AI_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompt: `Vietnamese model wearing traditional white ${garment}, ${style} style, studio light, 8k`
-        }),
+        body: JSON.stringify({ prompt }),
       });
 
       if (!res.ok) throw new Error("Lỗi khi tạo ảnh");
