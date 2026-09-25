@@ -4,11 +4,8 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { OutfitState } from "@/lib/utils";
 import mockupsData from "@/config/mockups.json";
-import { generateOutfitPrompt } from "@/lib/ai-prompt";
-import { Sparkles, Layers, ArrowRight, RefreshCw, Eye, Image as ImageIcon } from "lucide-react";
-
-// Dán link copy ở Bước 2 vào đây
-const WORKER_AI_URL = "https://vietphuc-ai-api.tunaemm.workers.dev";
+import { generateOutfitPrompt, callFluxWorkerAi } from "@/lib/ai-prompt";
+import { Sparkles, Layers, ArrowRight, RefreshCw, Eye, Image as ImageIcon, Copy, Check } from "lucide-react";
 
 interface PreviewWorkspaceProps {
   outfit: OutfitState;
@@ -36,6 +33,7 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
   const [internalResultImage, setInternalResultImage] = useState<string | null>(null);
   const [internalLoading, setInternalLoading] = useState(false);
   const [showAiImage, setShowAiImage] = useState(true);
+  const [copiedPrompt, setCopiedPrompt] = useState(false);
 
   const resultImage = externalResultImage !== undefined ? externalResultImage : internalResultImage;
   const setResultImage = externalSetResultImage || setInternalResultImage;
@@ -58,54 +56,11 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
     setLoading(true);
     try {
       const prompt = generateOutfitPrompt(outfit);
-      const res = await fetch(WORKER_AI_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
-      });
-
-      if (!res.ok) throw new Error("Lỗi khi tạo ảnh");
-
-      let imageUrl = "";
-      const contentType = res.headers.get("content-type") || "";
-
-      if (contentType.includes("application/json")) {
-        const json = await res.json();
-        const raw = json.image || json.result?.image || json;
-        if (typeof raw === "string") {
-          imageUrl = raw.startsWith("data:") ? raw : `data:image/jpeg;base64,${raw}`;
-        } else {
-          throw new Error("Không tìm thấy dữ liệu ảnh trong phản hồi JSON");
-        }
-      } else {
-        const blob = await res.blob();
-        const previewText = await blob.slice(0, 50).text();
-
-        if (previewText.trim().startsWith("{")) {
-          try {
-            const fullText = await blob.text();
-            const json = JSON.parse(fullText);
-            const raw = json.image || json.result?.image;
-            if (raw && typeof raw === "string") {
-              imageUrl = raw.startsWith("data:") ? raw : `data:image/jpeg;base64,${raw}`;
-            } else {
-              imageUrl = URL.createObjectURL(blob);
-            }
-          } catch {
-            imageUrl = URL.createObjectURL(blob);
-          }
-        } else if (previewText.includes("[object Object]")) {
-          throw new Error("Cloudflare Worker trả về [object Object]. Hãy cập nhật code Worker.");
-        } else {
-          imageUrl = URL.createObjectURL(blob);
-        }
-      }
-
-      // Gán vào state hiển thị thẻ <img>
+      const imageUrl = await callFluxWorkerAi(prompt);
       setResultImage(imageUrl);
       setShowAiImage(true);
-    } catch (error) {
-      alert("Có lỗi khi tạo ảnh từ AI!");
+    } catch (error: any) {
+      alert(error?.message || "Có lỗi khi tạo ảnh từ AI!");
     } finally {
       setLoading(false);
     }
@@ -247,6 +202,62 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
             <span className="text-gray-400 text-[10px] block">Đại diện:</span>
             <span className="text-heritage-gold font-medium text-[11px]">{persona.name}</span>
           </div>
+        </div>
+      </div>
+
+      {/* Real-time Dynamic AI Prompt Box (Đồng Bộ Trực Tiếp Với Lựa Chọn) */}
+      <div className="bg-black/60 border border-heritage-gold/30 rounded-2xl p-3 flex flex-col gap-2 shadow-inner">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-heritage-gold">
+            <Sparkles className="w-3.5 h-3.5 fill-heritage-gold" />
+            <span>Prompt AI FLUX.1 (Tự động đồng bộ theo lựa chọn)</span>
+          </div>
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(generateOutfitPrompt(outfit));
+              setCopiedPrompt(true);
+              setTimeout(() => setCopiedPrompt(false), 2000);
+            }}
+            className="text-[10px] text-gray-400 hover:text-white flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/5 hover:bg-white/10 transition-colors"
+          >
+            {copiedPrompt ? (
+              <>
+                <Check className="w-3 h-3 text-emerald-400" />
+                <span className="text-emerald-400 font-bold">Đã sao chép!</span>
+              </>
+            ) : (
+              <>
+                <Copy className="w-3 h-3" />
+                <span>Sao chép Prompt</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* 5 Dynamic Tags preview */}
+        <div className="flex flex-wrap gap-1 text-[10px]">
+          <span className="px-2 py-0.5 rounded-lg bg-heritage-gold/15 text-heritage-gold border border-heritage-gold/30 font-medium">
+            👘 {garment.name}
+          </span>
+          <span className="px-2 py-0.5 rounded-lg bg-red-500/15 text-red-300 border border-red-500/30 font-medium">
+            🎨 {color.name}
+          </span>
+          <span className="px-2 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-medium">
+            🏞️ {style.name}
+          </span>
+          <span className="px-2 py-0.5 rounded-lg bg-amber-500/15 text-amber-300 border border-amber-500/30 font-medium">
+            🏮 {occasion.name}
+          </span>
+          {accessory.id !== "none" && (
+            <span className="px-2 py-0.5 rounded-lg bg-sky-500/15 text-sky-300 border border-sky-500/30 font-medium">
+              💎 {accessory.name}
+            </span>
+          )}
+        </div>
+
+        {/* Prompt string text preview */}
+        <div className="p-2 rounded-xl bg-black/80 border border-white/10 text-[10px] text-gray-300 font-mono leading-relaxed max-h-20 overflow-y-auto select-all scrollbar-thin">
+          {generateOutfitPrompt(outfit)}
         </div>
       </div>
 
