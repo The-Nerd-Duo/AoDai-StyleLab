@@ -4,8 +4,9 @@ import React, { useRef, useState } from "react";
 import { OutfitState, encodeOutfitToQuery } from "@/lib/utils";
 import mockupsData from "@/config/mockups.json";
 import framesData from "@/config/frames.json";
+import { useOutfitStore } from "@/lib/store";
 import { toPng } from "html-to-image";
-import { Download, Share2, Sparkles, Check, QrCode } from "lucide-react";
+import { Download, Share2, Sparkles, Check, QrCode, Sparkles as SparkleIcon, RefreshCw, Eye } from "lucide-react";
 
 interface LookbookCardProps {
   outfit: OutfitState;
@@ -13,6 +14,8 @@ interface LookbookCardProps {
 }
 
 export const LookbookCard: React.FC<LookbookCardProps> = ({ outfit, frameId }) => {
+  const { resultImage } = useOutfitStore();
+  const [useAiPhoto, setUseAiPhoto] = useState(true);
   const cardRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -86,34 +89,47 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({ outfit, frameId }) =
 
         {/* Center Mockup Stage */}
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center my-3">
-          {/* Garment Visual */}
-          <div
-            className="w-40 sm:w-48 h-56 sm:h-64 rounded-t-3xl rounded-b-xl shadow-2xl flex flex-col items-center justify-between p-3 border border-white/25 relative"
-            style={{
-              backgroundColor: color.hex,
-              backgroundImage: `radial-gradient(circle at 50% 30%, rgba(255,255,255,0.25) 0%, transparent 70%)`,
-            }}
-          >
-            {/* Traditional Pattern Motif Overlay */}
-            <div className="w-12 h-6 border-b-2 border-heritage-gold rounded-b-full flex items-center justify-center">
-              <div className="w-1.5 h-1.5 rounded-full bg-heritage-gold" />
+          {resultImage && useAiPhoto ? (
+            <div className="w-44 sm:w-52 h-56 sm:h-64 rounded-2xl overflow-hidden shadow-2xl border-2 border-heritage-gold/50 flex items-center justify-center bg-black/40 relative">
+              <img
+                src={resultImage}
+                alt={garment.name}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute bottom-2 left-2 right-2 px-2 py-1 rounded bg-black/60 backdrop-blur-md text-[9px] text-heritage-gold text-center font-medium">
+                Ảnh AI Thực Tế • Cloudflare Worker
+              </div>
             </div>
+          ) : (
+            /* Garment Visual */
+            <div
+              className="w-40 sm:w-48 h-56 sm:h-64 rounded-t-3xl rounded-b-xl shadow-2xl flex flex-col items-center justify-between p-3 border border-white/25 relative"
+              style={{
+                backgroundColor: color.hex,
+                backgroundImage: `radial-gradient(circle at 50% 30%, rgba(255,255,255,0.25) 0%, transparent 70%)`,
+              }}
+            >
+              {/* Traditional Pattern Motif Overlay */}
+              <div className="w-12 h-6 border-b-2 border-heritage-gold rounded-b-full flex items-center justify-center">
+                <div className="w-1.5 h-1.5 rounded-full bg-heritage-gold" />
+              </div>
 
-            <div className="text-center bg-black/50 backdrop-blur-sm px-2.5 py-1.5 rounded-lg border border-white/10 w-full my-auto">
-              <span className="text-[10px] text-amber-200 block font-bold uppercase tracking-wider">
-                Hành {color.element} • {color.name}
-              </span>
-              <span className="text-[9px] text-gray-300 block mt-0.5">
-                {style.name}
-              </span>
+              <div className="text-center bg-black/50 backdrop-blur-sm px-2.5 py-1.5 rounded-lg border border-white/10 w-full my-auto">
+                <span className="text-[10px] text-amber-200 block font-bold uppercase tracking-wider">
+                  Hành {color.element} • {color.name}
+                </span>
+                <span className="text-[9px] text-gray-300 block mt-0.5">
+                  {style.name}
+                </span>
+              </div>
+
+              {accessory.id !== "none" && (
+                <span className="text-[9px] px-2 py-0.5 rounded-full bg-black/70 text-heritage-gold border border-heritage-gold/40">
+                  + {accessory.name}
+                </span>
+              )}
             </div>
-
-            {accessory.id !== "none" && (
-              <span className="text-[9px] px-2 py-0.5 rounded-full bg-black/70 text-heritage-gold border border-heritage-gold/40">
-                + {accessory.name}
-              </span>
-            )}
-          </div>
+          )}
         </div>
 
         {/* Bottom Story & Metadata Card */}
@@ -135,6 +151,33 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({ outfit, frameId }) =
           </div>
         </div>
       </div>
+
+      {/* Switch between AI photo and 2D vector */}
+      {resultImage && (
+        <div className="flex items-center gap-2 bg-heritage-dark-card border border-heritage-dark-border px-3 py-1.5 rounded-full text-xs">
+          <span className="text-gray-400 text-[11px]">Chế độ ảnh:</span>
+          <button
+            onClick={() => setUseAiPhoto(true)}
+            className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold transition-all ${
+              useAiPhoto
+                ? "bg-heritage-gold text-heritage-dark shadow-sm"
+                : "text-gray-400 hover:text-white"
+            }`}
+          >
+            Ảnh AI
+          </button>
+          <button
+            onClick={() => setUseAiPhoto(false)}
+            className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold transition-all ${
+              !useAiPhoto
+                ? "bg-heritage-gold text-heritage-dark shadow-sm"
+                : "text-gray-400 hover:text-white"
+            }`}
+          >
+            Đồ Họa 2D
+          </button>
+        </div>
+      )}
 
       {/* Action Buttons: Download PNG & Copy Share Link */}
       <div className="flex items-center gap-3 w-full max-w-[340px] sm:max-w-[380px]">

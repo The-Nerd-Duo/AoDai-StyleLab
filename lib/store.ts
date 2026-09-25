@@ -20,6 +20,7 @@ export function useOutfitStore() {
   const [outfit, setOutfitState] = useState<OutfitState>(DEFAULT_OUTFIT);
   const [compareOutfit, setCompareOutfitState] = useState<OutfitState | null>(null);
   const [selectedFrame, setSelectedFrameState] = useState<string>("frame-heritage-vermilion");
+  const [resultImage, setResultImageState] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -90,6 +91,8 @@ export function useOutfitStore() {
     clearCompare,
     selectedFrame,
     setSelectedFrame,
+    resultImage,
+    setResultImage: setResultImageState,
     isLoaded,
   };
 }

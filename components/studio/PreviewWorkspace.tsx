@@ -1,16 +1,24 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { OutfitState } from "@/lib/utils";
 import mockupsData from "@/config/mockups.json";
-import { Sparkles, Layers, ArrowRight, ShieldCheck, Heart } from "lucide-react";
+import { Sparkles, Layers, ArrowRight, RefreshCw, Eye, Image as ImageIcon } from "lucide-react";
+
+// Dán link copy ở Bước 2 vào đây
+const WORKER_AI_URL = "https://vietphuc-ai-api.tunaemm.workers.dev";
 
 interface PreviewWorkspaceProps {
   outfit: OutfitState;
   customAvatarUrl?: string | null;
   onSaveToCompare: () => void;
   hasCompareOutfit: boolean;
+  resultImage?: string | null;
+  setResultImage?: (url: string | null) => void;
+  loading?: boolean;
+  setLoading?: (loading: boolean) => void;
+  onGenerateOutfit?: () => void;
 }
 
 export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
@@ -18,13 +26,59 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
   customAvatarUrl,
   onSaveToCompare,
   hasCompareOutfit,
+  resultImage: externalResultImage,
+  setResultImage: externalSetResultImage,
+  loading: externalLoading,
+  setLoading: externalSetLoading,
+  onGenerateOutfit,
 }) => {
+  const [internalResultImage, setInternalResultImage] = useState<string | null>(null);
+  const [internalLoading, setInternalLoading] = useState(false);
+  const [showAiImage, setShowAiImage] = useState(true);
+
+  const resultImage = externalResultImage !== undefined ? externalResultImage : internalResultImage;
+  const setResultImage = externalSetResultImage || setInternalResultImage;
+  const loading = externalLoading !== undefined ? externalLoading : internalLoading;
+  const setLoading = externalSetLoading || setInternalLoading;
+
   const garment = mockupsData.garments.find((g) => g.id === outfit.garmentId) || mockupsData.garments[0];
   const color = mockupsData.colors.find((c) => c.id === outfit.colorId) || mockupsData.colors[0];
   const occasion = mockupsData.occasions.find((o) => o.id === outfit.occasionId) || mockupsData.occasions[0];
   const style = mockupsData.styles.find((s) => s.id === outfit.styleId) || mockupsData.styles[0];
   const accessory = mockupsData.accessories.find((a) => a.id === outfit.accessoryId) || mockupsData.accessories[0];
   const persona = mockupsData.personas.find((p) => p.id === outfit.personaId) || mockupsData.personas[0];
+
+  async function handleGenerateOutfit() {
+    if (onGenerateOutfit) {
+      setShowAiImage(true);
+      onGenerateOutfit();
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch(WORKER_AI_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: `Vietnamese model wearing traditional white ${garment.name}, ${style.name} style, studio light, 8k`
+        }),
+      });
+
+      if (!res.ok) throw new Error("Lỗi khi tạo ảnh");
+
+      // Nhận dữ liệu ảnh nhị phân và tạo link hiển thị
+      const blob = await res.blob();
+      const imageUrl = URL.createObjectURL(blob);
+      
+      // Gán vào state hiển thị thẻ <img>
+      setResultImage(imageUrl);
+      setShowAiImage(true);
+    } catch (error) {
+      alert("Có lỗi khi tạo ảnh từ AI!");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="bg-heritage-dark-card border border-heritage-dark-border rounded-2xl p-4 sm:p-5 flex flex-col gap-4">
@@ -64,54 +118,92 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
           </div>
         </div>
 
-        {/* Center Character & Outfit Illustration Canvas */}
-        <div className="relative flex-1 w-full flex items-center justify-center py-2 z-10">
-          {/* Avatar representation or Custom uploaded avatar */}
-          <div className="relative w-44 sm:w-56 h-full flex flex-col items-center justify-center">
-            {/* Custom Face / Avatar Head */}
-            <div className="relative z-20 -mb-3">
-              {customAvatarUrl ? (
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 border-heritage-gold shadow-lg">
-                  <img src={customAvatarUrl} alt="Custom Avatar" className="w-full h-full object-cover" />
-                </div>
-              ) : (
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-b from-[#EAD2B8] to-[#C9A683] border-2 border-heritage-gold shadow-md flex items-center justify-center text-heritage-dark font-bold text-xs">
-                  {persona.gender === "female" ? "👩🏻" : "👨🏻"}
-                </div>
-              )}
+        {/* Center Character & Outfit Illustration Canvas OR AI Generated Image */}
+        <div className="relative flex-1 w-full flex items-center justify-center py-2 z-10 min-h-[260px] overflow-hidden">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center gap-3 p-5 rounded-2xl bg-black/70 backdrop-blur-md border border-heritage-gold/30 text-center max-w-[280px]">
+              <RefreshCw className="w-8 h-8 text-heritage-gold animate-spin" />
+              <div className="flex flex-col gap-1">
+                <span className="text-xs font-bold text-white">AI đang tạo ảnh trang phục...</span>
+                <span className="text-[11px] text-gray-300">Cloudflare Worker AI</span>
+                <span className="text-[9px] text-gray-400 italic">8K Studio Lighting</span>
+              </div>
             </div>
-
-            {/* Simulated Garment Silhouette with Authentic Cut & Palette */}
-            <div
-              className="relative w-36 sm:w-48 h-56 sm:h-64 rounded-t-3xl rounded-b-xl shadow-2xl transition-all duration-500 flex flex-col items-center justify-between p-3 border border-white/20"
-              style={{
-                backgroundColor: color.hex,
-                backgroundImage: `radial-gradient(circle at 50% 30%, rgba(255,255,255,0.2) 0%, transparent 60%)`,
-              }}
-            >
-              {/* Collar Detail */}
-              <div className="w-12 h-6 border-b-2 border-heritage-gold/80 rounded-b-full flex items-center justify-center">
-                <div className="w-1.5 h-1.5 rounded-full bg-heritage-gold" />
+          ) : resultImage && showAiImage ? (
+            <div className="relative w-full h-full flex flex-col items-center justify-center">
+              <div className="relative max-h-[340px] sm:max-h-[380px] w-full flex items-center justify-center">
+                <img
+                  src={resultImage}
+                  alt={`Ảnh tạo bởi AI: ${garment.name}`}
+                  className="max-h-[340px] sm:max-h-[380px] w-auto max-w-full rounded-2xl object-contain shadow-2xl border-2 border-heritage-gold/50"
+                />
+              </div>
+              <button
+                onClick={() => setShowAiImage(false)}
+                className="mt-2 px-2.5 py-1 rounded-full bg-black/70 hover:bg-black text-[10px] text-gray-300 hover:text-white border border-white/20 transition-all flex items-center gap-1.5"
+                title="Chuyển sang xem bản phác họa 2D"
+              >
+                <Eye className="w-3 h-3 text-heritage-gold" />
+                <span>Xem bản phác họa 2D</span>
+              </button>
+            </div>
+          ) : (
+            <div className="relative w-44 sm:w-56 h-full flex flex-col items-center justify-center">
+              {resultImage && !showAiImage && (
+                <button
+                  onClick={() => setShowAiImage(true)}
+                  className="absolute -top-1 right-0 z-30 px-2.5 py-1 rounded-full bg-heritage-gold hover:bg-heritage-gold-light text-heritage-dark font-bold text-[10px] shadow-lg flex items-center gap-1.5 transition-all"
+                  title="Xem lại ảnh AI đã tạo"
+                >
+                  <ImageIcon className="w-3 h-3 text-heritage-dark" />
+                  <span>Xem ảnh AI</span>
+                </button>
+              )}
+              {/* Custom Face / Avatar Head */}
+              <div className="relative z-20 -mb-3">
+                {customAvatarUrl ? (
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 border-heritage-gold shadow-lg">
+                    <img src={customAvatarUrl} alt="Custom Avatar" className="w-full h-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-b from-[#EAD2B8] to-[#C9A683] border-2 border-heritage-gold shadow-md flex items-center justify-center text-heritage-dark font-bold text-xs">
+                    {persona.gender === "female" ? "👩🏻" : "👨🏻"}
+                  </div>
+                )}
               </div>
 
-              {/* Garment Details & Patterns */}
-              <div className="text-center px-2 py-1 rounded bg-black/40 backdrop-blur-sm border border-white/10 w-full my-auto">
-                <span className="text-[11px] font-bold text-white block uppercase tracking-wider">
-                  {garment.name}
-                </span>
-                <span className="text-[9px] text-amber-200/90 block">
-                  {garment.dynasty}
-                </span>
-              </div>
-
-              {/* Accessory Tag at hem */}
-              {accessory.id !== "none" && (
-                <div className="px-2 py-0.5 rounded-full bg-black/70 border border-heritage-gold/40 text-[9px] text-heritage-gold flex items-center gap-1">
-                  <span>+ {accessory.name}</span>
+              {/* Simulated Garment Silhouette with Authentic Cut & Palette */}
+              <div
+                className="relative w-36 sm:w-48 h-56 sm:h-64 rounded-t-3xl rounded-b-xl shadow-2xl transition-all duration-500 flex flex-col items-center justify-between p-3 border border-white/20"
+                style={{
+                  backgroundColor: color.hex,
+                  backgroundImage: `radial-gradient(circle at 50% 30%, rgba(255,255,255,0.2) 0%, transparent 60%)`,
+                }}
+              >
+                {/* Collar Detail */}
+                <div className="w-12 h-6 border-b-2 border-heritage-gold/80 rounded-b-full flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 rounded-full bg-heritage-gold" />
                 </div>
-              )}
+
+                {/* Garment Details & Patterns */}
+                <div className="text-center px-2 py-1 rounded bg-black/40 backdrop-blur-sm border border-white/10 w-full my-auto">
+                  <span className="text-[11px] font-bold text-white block uppercase tracking-wider">
+                    {garment.name}
+                  </span>
+                  <span className="text-[9px] text-amber-200/90 block">
+                    {garment.dynasty}
+                  </span>
+                </div>
+
+                {/* Accessory Tag at hem */}
+                {accessory.id !== "none" && (
+                  <div className="px-2 py-0.5 rounded-full bg-black/70 border border-heritage-gold/40 text-[9px] text-heritage-gold flex items-center gap-1">
+                    <span>+ {accessory.name}</span>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Bottom Context Info Strip */}
@@ -126,6 +218,28 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Primary Action Button: Tạo ảnh AI với Cloudflare Worker */}
+      <button
+        onClick={() => {
+          setShowAiImage(true);
+          handleGenerateOutfit();
+        }}
+        disabled={loading}
+        className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-heritage-gold to-yellow-400 hover:brightness-110 active:scale-[0.99] text-heritage-dark font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {loading ? (
+          <>
+            <RefreshCw className="w-4 h-4 animate-spin text-heritage-dark" />
+            <span>Đang tạo ảnh AI từ Cloudflare...</span>
+          </>
+        ) : (
+          <>
+            <Sparkles className="w-4 h-4 text-heritage-dark fill-heritage-dark" />
+            <span>{resultImage ? "Tạo Lại Ảnh AI Khác" : "Tạo Ảnh AI Thực Tế (Worker AI)"}</span>
+          </>
+        )}
+      </button>
 
       {/* Action Buttons: A/B Compare and Lookbook */}
       <div className="grid grid-cols-2 gap-2.5">
