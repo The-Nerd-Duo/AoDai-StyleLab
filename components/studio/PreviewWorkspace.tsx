@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { OutfitState } from "@/lib/utils";
 import mockupsData from "@/config/mockups.json";
+import { generateOutfitPrompt } from "@/lib/ai-prompt";
 import { Sparkles, Layers, ArrowRight, RefreshCw, Eye, Image as ImageIcon } from "lucide-react";
 
 // Dán link copy ở Bước 2 vào đây
@@ -56,19 +57,49 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
     }
     setLoading(true);
     try {
+      const prompt = generateOutfitPrompt(outfit);
       const res = await fetch(WORKER_AI_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompt: `Vietnamese model wearing traditional white ${garment.name}, ${style.name} style, studio light, 8k`
-        }),
+        body: JSON.stringify({ prompt }),
       });
 
       if (!res.ok) throw new Error("Lỗi khi tạo ảnh");
 
-      // Nhận dữ liệu ảnh nhị phân và tạo link hiển thị
-      const blob = await res.blob();
-      const imageUrl = URL.createObjectURL(blob);
+      let imageUrl = "";
+      const contentType = res.headers.get("content-type") || "";
+
+      if (contentType.includes("application/json")) {
+        const json = await res.json();
+        const raw = json.image || json.result?.image || json;
+        if (typeof raw === "string") {
+          imageUrl = raw.startsWith("data:") ? raw : `data:image/jpeg;base64,${raw}`;
+        } else {
+          throw new Error("Không tìm thấy dữ liệu ảnh trong phản hồi JSON");
+        }
+      } else {
+        const blob = await res.blob();
+        const previewText = await blob.slice(0, 50).text();
+
+        if (previewText.trim().startsWith("{")) {
+          try {
+            const fullText = await blob.text();
+            const json = JSON.parse(fullText);
+            const raw = json.image || json.result?.image;
+            if (raw && typeof raw === "string") {
+              imageUrl = raw.startsWith("data:") ? raw : `data:image/jpeg;base64,${raw}`;
+            } else {
+              imageUrl = URL.createObjectURL(blob);
+            }
+          } catch {
+            imageUrl = URL.createObjectURL(blob);
+          }
+        } else if (previewText.includes("[object Object]")) {
+          throw new Error("Cloudflare Worker trả về [object Object]. Hãy cập nhật code Worker.");
+        } else {
+          imageUrl = URL.createObjectURL(blob);
+        }
+      }
 
       // Gán vào state hiển thị thẻ <img>
       setResultImage(imageUrl);
