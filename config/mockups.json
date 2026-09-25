@@ -69,6 +69,16 @@
       "culturalSignificance": "Dạng trang phục cổ xưa nhất của người Việt trước khi áo ngũ thân ra đời vào thế kỷ 18.",
       "recommendedOccasions": ["temple-heritage", "street-walk", "school-presentation"],
       "defaultColor": "black-tuyen"
+    },
+    {
+      "id": "ao-lap-linh",
+      "name": "Áo Lập Lĩnh Cổ Đứng",
+      "dynasty": "Thời Hậu Lê - Nguyễn",
+      "tag": "Sĩ phu Trang trọng",
+      "description": "Cổ đứng ngay ngắn cài khuy chính giữa ngực, phom dáng vuông vắn ngay ngắn của bậc văn nhân.",
+      "culturalSignificance": "Dạng áo cổ đứng chuẩn mực của văn nhân sĩ tử và quan lại thời Hậu Lê - Nguyễn, đại diện cho phẩm hạnh chuẩn mực và tính lễ nghi Á Đông.",
+      "recommendedOccasions": ["school-presentation", "temple-heritage", "tet-holiday"],
+      "defaultColor": "indigo-cham"
     }
   ],
   "colors": [
@@ -214,15 +224,21 @@
     },
     {
       "id": "silver-choker",
-      "name": "Vòng Kiềng Bạc Khắc Mây",
+      "name": "Vòng Kiềng Cổ (Vàng / Bạc)",
       "type": "jewelry",
-      "culturalNote": "Phụ kiện truyền thống lâu đời của phụ nữ Việt, tôn lên vẻ thanh tao của chiếc cổ áo."
+      "culturalNote": "Vòng kiềng kim loại đúc đặc, tôn lên đường nét thanh thoát của cổ áo và vẻ sang trọng quý phái."
     },
     {
       "id": "tote-coi",
-      "name": "Túi Cói / Túi Gấm Thêu Tay",
+      "name": "Túi Cói Đan Mộc",
       "type": "bag",
-      "culturalNote": "Chất liệu thủ công làng nghề truyền thống thân thiện với môi trường."
+      "culturalNote": "Túi cói đan thủ công từ sợi cói tự nhiên mộc mạc, điểm nhấn mộc mạc tinh tế."
+    },
+    {
+      "id": "tui-gam",
+      "name": "Túi Gấm Thêu Hoa Hoàng Cung",
+      "type": "bag",
+      "culturalNote": "Túi vải gấm hoa văn hoàng gia dệt chìm, đính dây rút thắt tua rua vàng kim quý phái."
     },
     {
       "id": "non-quai-thao-mini",

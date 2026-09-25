@@ -1,6 +1,17 @@
 import { OutfitState } from "./utils";
 import mockupsData from "@/config/mockups.json";
 
+// Re-export từ src/utils/prompts để thống nhất API trên toàn bộ dự án
+export {
+  GARMENT_PROMPTS,
+  ACCESSORY_PROMPTS,
+  buildFinalPrompt,
+} from "@/src/utils/prompts";
+import { GARMENT_PROMPTS, ACCESSORY_PROMPTS } from "@/src/utils/prompts";
+
+export const GARMENT_PROMPT_MAP = GARMENT_PROMPTS;
+export const ACCESSORY_PROMPT_MAP = ACCESSORY_PROMPTS;
+
 export const COLOR_PROMPT_MAP: Record<string, string> = {
   "red-son": "made of vibrant vermilion red silk fabric (đỏ son chu sa)",
   "gold-hoang-kim": "made of imperial golden yellow silk fabric (vàng hoàng kim)",
@@ -9,16 +20,6 @@ export const COLOR_PROMPT_MAP: Record<string, string> = {
   "white-ngoc-trai": "made of pure pearl ivory silk fabric (trắng ngà tơ tằm)",
   "black-tuyen": "made of luxurious deep pitch black silk fabric (đen huyền tuyền)",
   "pink-sen": "made of graceful lotus blossom pink silk fabric (hồng cánh sen)",
-};
-
-export const GARMENT_PROMPT_MAP: Record<string, string> = {
-  "ao-dai-cach-tan": "modernized Vietnamese Ao Dai (áo dài cách tân) with elegant cropped cut and flowing silk",
-  "ao-dai-truyen-thong": "classic traditional Vietnamese Ao Dai (áo dài truyền thống) silk dress with high stand collar and floor-length split flaps",
-  "ao-ngu-than-tay-chen": "traditional Vietnamese 5-panel Ao Ngu Than robe with fitted tight sleeves (áo ngũ thân tay chẽn)",
-  "ao-tac-ngu-than-tay-thung": "formal ceremonial Vietnamese Ao Tac robe with wide bell sleeves (áo tấc ngũ thân tay thụng)",
-  "ao-tu-than": "heritage northern Vietnamese 4-panel Ao Tu Than (áo tứ thân) with colorful sashes and yếm bodice",
-  "ao-nhat-binh": "royal Nguyen Dynasty imperial Nhat Binh robe (áo nhật bình) with ornate rectangular embroidered collar and five-color cuffs",
-  "ao-giao-linh": "ancient Vietnamese Giao Linh cross-collar robe (áo giao lĩnh) with wide sleeves and traditional overlapping lapel",
 };
 
 export const STYLE_BACKGROUND_MAP: Record<string, { styleDesc: string; background: string }> = {
@@ -42,16 +43,6 @@ export const STYLE_BACKGROUND_MAP: Record<string, { styleDesc: string; backgroun
     styleDesc: "1920s Indochine Vintage nostalgia, classical intellectual mood",
     background: "background of vintage French-Indochina colonial villa interior, dark wooden shutters, antique rattan armchair and warm golden hour sunlight",
   },
-};
-
-export const ACCESSORY_PROMPT_MAP: Record<string, string> = {
-  "man-modern": "accessorized with an elegant decorative modern Vietnamese Man headpiece (khăn đóng / mấn cách điệu)",
-  "sneaker-chunky": "wearing stylish modern white chunky street sneakers",
-  "retro-sunglasses": "wearing trendy retro oval sunglasses",
-  "silver-choker": "wearing an authentic handcrafted engraved traditional Vietnamese silver collar necklace (kiềng bạc chạm mây)",
-  "tote-coi": "holding an artisanal handcrafted woven straw tote bag with delicate silk embroidery",
-  "non-quai-thao-mini": "holding a traditional northern Vietnamese palm hat (nón quai thao / nón lá)",
-  "none": "",
 };
 
 export const OCCASION_PROMPT_MAP: Record<string, string> = {
@@ -92,14 +83,14 @@ export function getOutfitPromptBreakdown(outfit: OutfitState): PromptBreakdown {
   const styleObj = mockupsData.styles.find((s) => s.id === outfit.styleId) || mockupsData.styles[0];
   const accessoryObj = mockupsData.accessories.find((a) => a.id === outfit.accessoryId) || mockupsData.accessories[0];
 
-  const garmentPrompt = GARMENT_PROMPT_MAP[outfit.garmentId] || "traditional Vietnamese attire";
+  const garmentPrompt = GARMENT_PROMPT_MAP[outfit.garmentId] || GARMENT_PROMPT_MAP[garmentObj.name] || "traditional Vietnamese attire";
   const colorPrompt = COLOR_PROMPT_MAP[outfit.colorId] || "traditional colored silk";
   const occasionPrompt = OCCASION_PROMPT_MAP[outfit.occasionId] || "";
   const styleInfo = STYLE_BACKGROUND_MAP[outfit.styleId] || {
     styleDesc: "contemporary Vietnamese fashion style",
     background: "background of elegant cultural studio with warm gentle lighting",
   };
-  const accessoryPrompt = ACCESSORY_PROMPT_MAP[outfit.accessoryId] || "";
+  const accessoryPrompt = ACCESSORY_PROMPT_MAP[outfit.accessoryId] || ACCESSORY_PROMPT_MAP[accessoryObj.name] || "";
   const personaPrompt = PERSONA_MODEL_MAP[outfit.personaId] || "a stylish Vietnamese model";
 
   const fullPrompt = generateOutfitPrompt(outfit);
