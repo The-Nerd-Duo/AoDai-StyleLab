@@ -1,12 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
-  reactStrictMode: true,
+  output: 'export',
   images: {
     unoptimized: true,
-  },
-  experimental: {
-    serverComponentsExternalPackages: ['@google/genai'],
   },
 };
 

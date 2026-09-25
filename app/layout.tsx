@@ -1,6 +1,12 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { BottomNav } from "@/components/shared/BottomNav";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
 
 export const metadata: Metadata = {
   title: "Việt Phục Remix • AI Arena Vietnam 2026",
@@ -18,7 +24,6 @@ export const metadata: Metadata = {
     "Di sản văn hóa Việt",
   ],
   authors: [{ name: "The Nerd Duo", url: "https://github.com/The-Nerd-Duo/AoDai-StyleLab" }],
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
 };
 
 export default function RootLayout({
