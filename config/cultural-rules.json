@@ -1,0 +1,35 @@
+{
+  "fiveElements": {
+    "Kim": { "color": "white-ngoc-trai", "generates": "Thủy", "overcomes": "Mộc" },
+    "Thủy": { "color": "indigo-cham", "generates": "Mộc", "overcomes": "Hỏa" },
+    "Mộc": { "color": "jade-thanh-thien", "generates": "Hỏa", "overcomes": "Thổ" },
+    "Hỏa": { "color": "red-son", "generates": "Thổ", "overcomes": "Kim" },
+    "Thổ": { "color": "gold-hoang-kim", "generates": "Kim", "overcomes": "Thủy" }
+  },
+  "forbiddenCombinations": [
+    {
+      "garmentId": "ao-tac-ngu-than-tay-thung",
+      "occasionId": "street-walk",
+      "severity": "warning",
+      "reason": "Áo Tấc là đại lễ phục trang nghiêm thời Nguyễn. Khi mặc dạo phố hay uống cafe, tà áo và tay thụng rộng sẽ gây vướng víu và có thể làm giảm tính tôn nghiêm. Nên chọn Áo Ngũ Thân Tay Chẽn sẽ phù hợp hơn."
+    },
+    {
+      "occasionId": "temple-heritage",
+      "styleId": "y2k-party",
+      "severity": "critical",
+      "reason": "Cảnh báo thuần phong mỹ tục: Khi đến nơi tôn nghiêm như đền chùa hay di tích lịch sử, phong cách phá cách Y2K hoặc trang phục xẻ tà ngắn là không phù hợp với văn hóa thờ tự truyền thống. Vui lòng chọn phong cách đoan trang, kín đáo."
+    },
+    {
+      "garmentId": "ao-nhat-binh",
+      "accessoryId": "retro-sunglasses",
+      "severity": "advice",
+      "reason": "Áo Nhật Bình có diềm cổ hình chữ nhật rất lộng lẫy và mang phong thái hoàng tộc. Việc phối kính râm tạo ấn tượng phá cách hiện đại mạnh mẽ, phù hợp chụp Lookbook thời trang nhưng cần lưu ý ngữ cảnh biểu diễn."
+    }
+  ],
+  "culturalGuidelines": {
+    "aoDai": "Tà áo dài cần giữ được độ rủ tự nhiên, đường may eo vừa vặn mà không bó sát quá mức gây phản cảm. Quần áo dài chuẩn mực nên chạm mu bàn chân.",
+    "nguThan": "Quy tắc 5 thân tượng trưng cho Tứ thân phụ mẫu (cha mẹ đẻ, cha mẹ vợ/chồng) và bản thân ở giữa. 5 cúc áo đại diện cho Ngũ Thường (Nhân, Lễ, Nghĩa, Trí, Tín). Khi mặc cần cài đủ cúc.",
+    "nhatBinh": "Cổ áo khoác Nhật bình mang hình chữ nhật, tuyệt đối không bẻ gập hay gài lệch làm biến dạng cấu trúc cung đình.",
+    "giaoLinh": "Vạt áo bên trái luôn đè lên vạt bên phải (tả nhậm), tượng trưng cho sự sống và văn minh lúa nước (ngược lại là trang phục cho người đã khuất)."
+  }
+}

@@ -1,0 +1,47 @@
+[
+  {
+    "id": "frame-heritage-vermilion",
+    "name": "Chu Sa Hoàng Kim (Lookbook Tiêu Chuẩn)",
+    "description": "Viền đỏ son rực rỡ kết hợp góc mây cuộn cổ điển, tạo cảm giác sang trọng đậm chất cung đình.",
+    "theme": "royal",
+    "borderColor": "#BA2D27",
+    "badgeText": "VIỆT PHỤC REMIX • LOOKBOOK 2026",
+    "aspectRatio": "9:16"
+  },
+  {
+    "id": "frame-minimal-gold",
+    "name": "Hoàng Kim Tinh Giản (Minimal Luxury)",
+    "description": "Đường viền chỉ vàng mảnh mai, khoảng thở thị giác thanh tao, phong thái tạp chí thời trang cao cấp Vogue/Harper's Bazaar.",
+    "theme": "minimal",
+    "borderColor": "#D4AF37",
+    "badgeText": "HERITAGE COUTURE • LAB EDITION",
+    "aspectRatio": "9:16"
+  },
+  {
+    "id": "frame-cyber-indochine",
+    "name": "Cyber Indochine (Neo Heritage)",
+    "description": "Hiệu ứng viền phát sáng viễn tưởng cyberpunk hòa quyện với biểu tượng hoa sen và họa tiết hình học Á Đông.",
+    "theme": "cyber",
+    "borderColor": "#2DD4BF",
+    "badgeText": "GEN-Z RETROFUTURISM • 2026",
+    "aspectRatio": "9:16"
+  },
+  {
+    "id": "frame-vintage-stamp",
+    "name": "Tem Thư Hà Thành (Indochine Vintage)",
+    "description": "Màu giấy điệp cổ phong, dấu mộc son truyền thống, gợi nhớ những bức bưu thiếp Đông Dương thanh lịch.",
+    "theme": "vintage",
+    "borderColor": "#78350F",
+    "badgeText": "DI SẢN TRĂM NĂM • BƯU THIẾP VIỆT",
+    "aspectRatio": "9:16"
+  },
+  {
+    "id": "frame-museum-curator",
+    "name": "Giám Tuyển Di Sản (Museum Collector)",
+    "description": "Khung viền sơn mài đen tuyền viền vàng, kèm mã vạch triển lãm và thông số văn hóa lịch sử độc bản.",
+    "theme": "curator",
+    "borderColor": "#1E293B",
+    "badgeText": "ARCHIVE NO. 2026 • VIETNAM VAULT",
+    "aspectRatio": "9:16"
+  }
+]

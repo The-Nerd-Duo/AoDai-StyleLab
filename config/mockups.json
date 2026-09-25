@@ -1,0 +1,266 @@
+{
+  "garments": [
+    {
+      "id": "ao-dai-cach-tan",
+      "name": "Áo Dài Cách Tân",
+      "dynasty": "Hiện đại & Tân thời",
+      "tag": "Trending Gen Z",
+      "description": "Biến tấu từ áo dài truyền thống với tà lửng, tay lỡ hoặc tay phồng, linh hoạt khi vận động dạo phố.",
+      "culturalSignificance": "Biểu tượng giao thoa giữa vẻ đẹp thanh lịch truyền thống và nhịp sống trẻ trung đô thị.",
+      "recommendedOccasions": ["street-walk", "tet-holiday", "school-presentation", "y2k-party"],
+      "defaultColor": "red-son"
+    },
+    {
+      "id": "ao-dai-truyen-thong",
+      "name": "Áo Dài Truyền Thống",
+      "dynasty": "Thế kỷ 18 - Nay",
+      "tag": "Kinh điển",
+      "description": "Cổ cao kiêu sa, hai tà thướt tha chạm gót, tôn vinh nét duyên dáng người con gái Việt.",
+      "culturalSignificance": "Quốc phục danh giá của người Việt, gắn liền với các dịp trọng đại và niềm tự hào dân tộc.",
+      "recommendedOccasions": ["tet-holiday", "wedding-party", "temple-heritage", "school-presentation"],
+      "defaultColor": "white-ngoc-trai"
+    },
+    {
+      "id": "ao-ngu-than-tay-chen",
+      "name": "Áo Ngũ Thân Tay Chẽn",
+      "dynasty": "Thời Nguyễn (1802-1945)",
+      "tag": "Di sản Phục hưng",
+      "description": "Áo may 5 thân tượng trưng tứ thân phụ mẫu và bản thân, ống tay ôm gọn ghẽ năng động.",
+      "culturalSignificance": "Trang phục hàng ngày tiêu biểu thời Nguyễn, thể hiện sự khiêm nhường, lễ độ và trật tự luân lý.",
+      "recommendedOccasions": ["street-walk", "tet-holiday", "temple-heritage", "school-presentation"],
+      "defaultColor": "indigo-cham"
+    },
+    {
+      "id": "ao-tac-ngu-than-tay-thung",
+      "name": "Áo Tấc (Ngũ Thân Tay Thụng)",
+      "dynasty": "Thời Nguyễn (1802-1945)",
+      "tag": "Lễ phục trang trọng",
+      "description": "Áo ngũ thân có ống tay thụng rộng, dài qua bàn tay, mặc khi khoanh tay hành lễ cung kính.",
+      "culturalSignificance": "Lễ phục chuẩn mực cho các nghi thức cưới hỏi, cúng tế, thể hiện lòng tôn kính bề trên.",
+      "recommendedOccasions": ["wedding-party", "temple-heritage", "tet-holiday"],
+      "defaultColor": "gold-hoang-kim"
+    },
+    {
+      "id": "ao-tu-than",
+      "name": "Áo Tứ Thân Kinh Bắc",
+      "dynasty": "Thời Trần - Lê - Nguyễn",
+      "tag": "Dân gian Bắc Bộ",
+      "description": "Gồm 4 vạt áo, thường khoác ngoài yếm đào, thắt dải lưng xanh mướt, gợi nhớ điệu hát Quan họ.",
+      "culturalSignificance": "Hình ảnh người phụ nữ tần tảo, duyên dáng và mộc mạc của đồng bằng Bắc Bộ.",
+      "recommendedOccasions": ["temple-heritage", "tet-holiday", "street-walk"],
+      "defaultColor": "pink-sen"
+    },
+    {
+      "id": "ao-nhat-binh",
+      "name": "Áo Nhật Bình Cung Đình",
+      "dynasty": "Thời Nguyễn (1802-1945)",
+      "tag": "Quý tộc Hoàng tộc",
+      "description": "Áo đối khâm với cổ áo hình chữ nhật viền hoa văn tinh xảo, dải ngũ sắc nơi cổ tay áo.",
+      "culturalSignificance": "Thường phục cao cấp của Hoàng hậu, Công chúa và các bậc mệnh phụ triều đình Huế xưa.",
+      "recommendedOccasions": ["wedding-party", "tet-holiday", "y2k-party"],
+      "defaultColor": "red-son"
+    },
+    {
+      "id": "ao-giao-linh",
+      "name": "Áo Giao Lĩnh Cổ Chéo",
+      "dynasty": "Thời Lý - Trần - Hậu Lê",
+      "tag": "Cổ trang Hào hùng",
+      "description": "Áo vạt chéo giao nhau trước ngực, ống tay rộng, phong thái ung dung tự tại của các bậc sĩ phu.",
+      "culturalSignificance": "Dạng trang phục cổ xưa nhất của người Việt trước khi áo ngũ thân ra đời vào thế kỷ 18.",
+      "recommendedOccasions": ["temple-heritage", "street-walk", "school-presentation"],
+      "defaultColor": "black-tuyen"
+    }
+  ],
+  "colors": [
+    {
+      "id": "red-son",
+      "name": "Đỏ Son (Chu Sa)",
+      "hex": "#BA2D27",
+      "element": "Hỏa",
+      "meaning": "Tượng trưng cho may mắn, hỷ sự, năng lượng bùng nổ và sự thịnh vượng ngày Tết."
+    },
+    {
+      "id": "gold-hoang-kim",
+      "name": "Vàng Hoàng Kim",
+      "hex": "#D4AF37",
+      "element": "Thổ",
+      "meaning": "Màu của trung tâm vũ trụ, quý phái hoàng gia, phú quý và ấm no trường cửu."
+    },
+    {
+      "id": "jade-thanh-thien",
+      "name": "Xanh Ngọc Bích (Thanh Thiên)",
+      "hex": "#1F4E46",
+      "element": "Mộc",
+      "meaning": "Màu của bầu trời trong trẻo và ngọc quý, tượng trưng cho sự thanh liêm và sinh sôi nảy nở."
+    },
+    {
+      "id": "indigo-cham",
+      "name": "Xanh Chàm Cổ Kính",
+      "hex": "#1D2D50",
+      "element": "Thủy",
+      "meaning": "Màu nhuộm tự nhiên từ cây chàm, biểu tượng cho chiều sâu tri thức, sự trầm tĩnh và kiên định."
+    },
+    {
+      "id": "white-ngoc-trai",
+      "name": "Trắng Ngà Tơ Tằm",
+      "hex": "#F4F1EA",
+      "element": "Kim",
+      "meaning": "Thuần khiết, mộc mạc và tao nhã, gợi nhớ tà áo dài nữ sinh và lụa Hà Đông danh tiếng."
+    },
+    {
+      "id": "black-tuyen",
+      "name": "Đen Huyền Tuyền",
+      "hex": "#1A1D24",
+      "element": "Thủy",
+      "meaning": "Sắc đen quý phái, trang trọng trong lễ phục ngũ thân xưa và tôn vinh khí chất điềm đạm."
+    },
+    {
+      "id": "pink-sen",
+      "name": "Hồng Cánh Sen",
+      "hex": "#D9658B",
+      "element": "Hỏa",
+      "meaning": "Dịu dàng, đằm thắm, mang tinh thần quốc hoa thanh cao vươn lên từ bùn lầy."
+    }
+  ],
+  "occasions": [
+    {
+      "id": "street-walk",
+      "name": "Dạo Phố & Cafe Cuối Tuần",
+      "icon": "Coffee",
+      "formalityLevel": "Thoải mái (Casual)",
+      "weatherHint": "Thời tiết mát mẻ, nắng nhẹ, cần trang phục thoáng mát dễ cử động."
+    },
+    {
+      "id": "tet-holiday",
+      "name": "Du Xuân Chúc Tết Giáp Thìn",
+      "icon": "Sparkles",
+      "formalityLevel": "Lễ hội & Gia đình",
+      "weatherHint": "Gió xuân se lạnh miền Bắc hoặc nắng ấm phương Nam, ưu tiên sắc màu rực rỡ đón lộc."
+    },
+    {
+      "id": "wedding-party",
+      "name": "Dự Tiệc Cưới & Hỷ Lễ",
+      "icon": "HeartHandshake",
+      "formalityLevel": "Trang trọng (Formal)",
+      "weatherHint": "Không gian tiệc sang trọng máy lạnh, cần chỉn chu, tránh lấn át cô dâu chú rể."
+    },
+    {
+      "id": "temple-heritage",
+      "name": "Chiêm Bái Chùa Chiền & Di Tích",
+      "icon": "Landmark",
+      "formalityLevel": "Cực kỳ tôn nghiêm (Sacred)",
+      "weatherHint": "Trang phục kín đáo, lịch thiệp, tay dài, tà phủ gối, tuyệt đối không hở hang phản cảm."
+    },
+    {
+      "id": "school-presentation",
+      "name": "Thuyết Trình & Ngày Hội Văn Hóa",
+      "icon": "GraduationCap",
+      "formalityLevel": "Học đường & Thanh lịch",
+      "weatherHint": "Môi trường trường học năng động, cần sự tươi sáng, chuẩn mực văn hóa di sản."
+    },
+    {
+      "id": "y2k-party",
+      "name": "Sự Kiện Sáng Tạo & Party Gen Z",
+      "icon": "Flame",
+      "formalityLevel": "Phá cách & Cá tính (Expressive)",
+      "weatherHint": "Không khí sôi động âm nhạc, cho phép mix match độc lạ nhưng vẫn giữ hồn cốt trang phục."
+    }
+  ],
+  "styles": [
+    {
+      "id": "y2k-neo",
+      "name": "Y2K Neo-Heritage",
+      "description": "Kết hợp trang phục cổ truyền với phụ kiện futuristic, kính râm cyberpunk và boots gót vuông."
+    },
+    {
+      "id": "streetwear",
+      "name": "Streetwear Hầm Hố",
+      "description": "Mix tà áo dài hoặc áo tấc với sneaker chunky, quần ống thụng hoặc túi đeo chéo utilitarian."
+    },
+    {
+      "id": "minimal-chic",
+      "name": "Minimalist Đương Đại",
+      "description": "Lược bỏ chi tiết rườm rà, tập trung vào phom dáng kiến trúc, chất liệu lụa đũi mộc và màu đơn sắc."
+    },
+    {
+      "id": "cyber-retro",
+      "name": "Cyberpunk Á Đông",
+      "description": "Dải ánh sáng neon, dây xích bạc viền vạt áo, pha trộn giữa truyền thuyết cổ tích và công nghệ viễn tưởng."
+    },
+    {
+      "id": "vintage-academia",
+      "name": "Indochine Vintage",
+      "description": "Cảm hứng văn nhân đầu thế kỷ 20, phối cùng túi da thuộc, mũ beret và đồng hồ quả quýt."
+    }
+  ],
+  "accessories": [
+    {
+      "id": "man-modern",
+      "name": "Mấn Tết Cách Điệu",
+      "type": "headwear",
+      "culturalNote": "Biến tấu từ khăn đóng truyền thống, gọn nhẹ và đính ngọc trai hoặc thêu hoa."
+    },
+    {
+      "id": "sneaker-chunky",
+      "name": "Sneaker Trắng Chunky",
+      "type": "footwear",
+      "culturalNote": "Cú bắt tay hoàn hảo giữa sự phóng khoáng Gen Z và nét thanh lịch Việt phục."
+    },
+    {
+      "id": "retro-sunglasses",
+      "name": "Kính Râm Oval Y2K",
+      "type": "eyewear",
+      "culturalNote": "Tạo điểm nhấn thị giác cực ngầu cho các bức ảnh chụp Lookbook dạo phố."
+    },
+    {
+      "id": "silver-choker",
+      "name": "Vòng Kiềng Bạc Khắc Mây",
+      "type": "jewelry",
+      "culturalNote": "Phụ kiện truyền thống lâu đời của phụ nữ Việt, tôn lên vẻ thanh tao của chiếc cổ áo."
+    },
+    {
+      "id": "tote-coi",
+      "name": "Túi Cói / Túi Gấm Thêu Tay",
+      "type": "bag",
+      "culturalNote": "Chất liệu thủ công làng nghề truyền thống thân thiện với môi trường."
+    },
+    {
+      "id": "non-quai-thao-mini",
+      "name": "Nón Quai Thao / Nón Lá Mini",
+      "type": "props",
+      "culturalNote": "Đạo cụ biểu tượng đậm chất Kinh Bắc, biến hóa thành phụ kiện chụp ảnh ấn tượng."
+    },
+    {
+      "id": "none",
+      "name": "Không dùng phụ kiện",
+      "type": "none",
+      "culturalNote": "Giữ trọn nét đẹp mộc mạc nguyên bản của trang phục."
+    }
+  ],
+  "personas": [
+    {
+      "id": "female-modern",
+      "name": "Gen Z Nữ - Năng Động",
+      "gender": "female",
+      "vibe": "Tươi sáng, tự tin, yêu thích sự kết hợp màu sắc tương phản."
+    },
+    {
+      "id": "male-modern",
+      "name": "Gen Z Nam - Cá Tính",
+      "gender": "male",
+      "vibe": "Phóng khoáng, hiện đại, thích form áo ngũ thân rộng rãi mix sneaker."
+    },
+    {
+      "id": "female-classic",
+      "name": "Thục Nữ - Đằm Thắm",
+      "gender": "female",
+      "vibe": "Dịu dàng, quý phái, chuộng áo dài truyền thống và áo Nhật bình cung đình."
+    },
+    {
+      "id": "male-heritage",
+      "name": "Sĩ Phu - Thanh Lịch",
+      "gender": "male",
+      "vibe": "Điềm đạm, đậm chất học thức, ưa thích áo ngũ thân tay thụng và giao lĩnh."
+    }
+  ]
+}
