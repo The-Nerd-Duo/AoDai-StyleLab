@@ -478,6 +478,14 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
           <span className="px-2 py-0.5 rounded-lg bg-vermilion-red/10 text-vermilion-red border border-vermilion-red/20 font-medium truncate">
             🎨 {breakdown.colorName}
           </span>
+          {breakdown.accessoryPrompt ? (
+            <span className="px-2 py-0.5 rounded-lg bg-amber-500/10 text-amber-800 border border-amber-500/20 font-medium truncate">
+              👓 {breakdown.accessoryName}
+            </span>
+          ) : null}
+          <span className="px-2 py-0.5 rounded-lg bg-sky-500/10 text-sky-800 border border-sky-500/20 font-medium truncate">
+            📍 {breakdown.occasionName}
+          </span>
           <span className="px-2 py-0.5 rounded-lg bg-guardrail-pass-surface text-guardrail-pass border border-guardrail-pass/30 font-medium truncate">
             ⚡ {breakdown.styleName}
           </span>

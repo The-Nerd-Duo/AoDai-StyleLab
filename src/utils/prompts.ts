@@ -1,83 +1,245 @@
 /**
- * File mapping Prompt cho mô hình FLUX.1 - Áo Dài StyleLab
+ * File mapping Prompt cho mô hình FLUX Schnell - Áo Dài StyleLab
  * Hỗ trợ tra cứu theo cả Tên hiển thị tiếng Việt lẫn ID hệ thống.
+ * Cấu trúc chuẩn hóa:
+ * 1. Anchor Prompt "Khóa Hình Thể" (Bắt buộc)
+ * 2. Từ điển Giải phẫu Cắt may (Tailoring Specs) cho Flux
+ * 3. Phụ kiện, Bối cảnh & Phong cách (Tách lớp mô tả)
  */
 
-// 1. Chi tiết cấu trúc 5 loại Việt phục chính + Áo Tấc & Áo Nhật Bình
-export const GARMENT_PROMPTS: Record<string, string> = {
-  // Key theo tên tiếng Việt
-  "Áo Ngũ Thân":
-    "an authentic Vietnamese five-panel traditional robe (Ao Ngu Than), structured standing Mandarin collar (Lap Linh) upright and closed at the throat, asymmetric diagonal front flap wrapping across the chest and fastening down the right flank, row of five traditional fabric loop-and-knot buttons, straight loose draped silhouette, split side vents starting from the lower waist, wide tailored silk sleeves, flowing raw natural silk fabric with subtle matte sheen",
-  "Áo Dài":
-    "an iconic Vietnamese traditional Ao Dai tunic, fitted high standing Mandarin collar gently contouring the neck, tailored bodice gracefully hugging the torso, long flowing front and back panels hanging down to ankle length, high side waist slits extending up to the waistline, worn over billowing loose-fitting silk wide-leg trousers that graze the floor, elegant minimalist matte silk fabric",
-  "Áo Tứ Thân":
-    "traditional Northern Vietnamese four-panel tunic (Ao Tu Than), open neckline showing a layered inner diamond halter-top undergarment (Yem), outer robe divided into four panels: two back panels sewn into a central seam, two front long flowing panels untied and elegantly draping down or loosely knotted at the waist, wrapped with a contrasting vibrant silk sash belt tied at the front, loose rural airy silhouette with soft organic linen-silk drape",
-  "Áo Giao Lĩnh":
-    "traditional ancient Vietnamese crossed-collar robe (Ao Giao Linh), diagonal wrap-over V-shaped neckline crossing firmly right over left, overlapping diagonal front lapels forming an asymmetrical collar, voluminous extra-wide hanging butterfly sleeves, fastened securely around the waist with a broad silk sash belt (Dai), ankle-length straight flowing hem, historic royal court aesthetic",
-  "Áo Lập Lĩnh":
-    "traditional Vietnamese stand-up collar robe (Ao Lap Linh), rigid standing upright Mandarin collar clasped neatly at the front center of the throat, straight vertical frontal placket closure down the chest with traditional bead knot fastenings, structured clean rectangular shoulders, long straight draping sleeves, formal ceremonial scholar aesthetic, crisp pressed silk material",
-  "Áo Tấc":
-    "formal ceremonial Vietnamese Ao Tac robe (wide-sleeved Ao Ngu Than), structured standing collar, expansive flowing bell sleeves extending past the hands, asymmetric five-panel front closure with traditional loop buttons, solemn cultural ritual aesthetic",
-  "Áo Nhật Bình":
-    "royal Nguyen Dynasty imperial Nhat Binh robe (Ao Nhat Binh), rectangular decorative collar bordered with ornate embroidery, wide multi-colored five-element silk sleeve bands, front overlapping placket fastened with metallic cord buttons, regal imperial Vietnamese court aesthetic",
+// 1. Anchor Prompt "Khóa Hình Thể" (Bắt buộc)
+// Dùng đoạn này làm tiền tố cố định để triệt tiêu lỗi góc chụp nghiêng, crop nửa người hoặc sai tư thế
+export const ANCHOR_PROMPT =
+  "Full-length full-body studio portrait, head-to-toe shot with feet visible on floor, model standing upright strictly facing forward, direct eye contact with camera, perfectly centered symmetrical framing, eye-level perspective, no tilt, no dynamic pose, no cropped limbs, clear hyperrealistic fabric drape, sharp studio lighting, 8k uhd.";
 
-  // Key theo ID hệ thống trong config/mockups.json
+// 2. Từ điển Giải phẫu Cắt may (Tailoring Specs) cho Flux
+// Mô tả thuần cấu trúc may mặc để Flux vẽ đúng từng nếp áo, cổ áo và tay áo
+export const GARMENT_PROMPTS: Record<string, string> = {
+  // Áo ngũ thân tay chẽn
   "ao-ngu-than-tay-chen":
-    "an authentic Vietnamese five-panel traditional robe (Ao Ngu Than), structured standing Mandarin collar (Lap Linh) upright and closed at the throat, asymmetric diagonal front flap wrapping across the chest and fastening down the right flank, row of five traditional fabric loop-and-knot buttons, straight loose draped silhouette, split side vents starting from the lower waist, wide tailored silk sleeves, flowing raw natural silk fabric with subtle matte sheen",
-  "ao-dai-cach-tan":
-    "an iconic modern Vietnamese Ao Dai tunic, fitted standing Mandarin collar gently contouring the neck, tailored bodice gracefully hugging the torso, cropped ankle-grazing flowing panels with high waist slits, worn over loose wide-leg silk trousers, elegant contemporary matte silk fabric",
-  "ao-dai-truyen-thong":
-    "an iconic Vietnamese traditional Ao Dai tunic, fitted high standing Mandarin collar gently contouring the neck, tailored bodice gracefully hugging the torso, long flowing front and back panels hanging down to ankle length, high side waist slits extending up to the waistline, worn over billowing loose-fitting silk wide-leg trousers that graze the floor, elegant minimalist matte silk fabric",
-  "ao-tu-than":
-    "traditional Northern Vietnamese four-panel tunic (Ao Tu Than), open neckline showing a layered inner diamond halter-top undergarment (Yem), outer robe divided into four panels: two back panels sewn into a central seam, two front long flowing panels untied and elegantly draping down or loosely knotted at the waist, wrapped with a contrasting vibrant silk sash belt tied at the front, loose rural airy silhouette with soft organic linen-silk drape",
-  "ao-giao-linh":
-    "traditional ancient Vietnamese crossed-collar robe (Ao Giao Linh), diagonal wrap-over V-shaped neckline crossing firmly right over left, overlapping diagonal front lapels forming an asymmetrical collar, voluminous extra-wide hanging butterfly sleeves, fastened securely around the waist with a broad silk sash belt (Dai), ankle-length straight flowing hem, historic royal court aesthetic",
-  "ao-lap-linh":
-    "traditional Vietnamese stand-up collar robe (Ao Lap Linh), rigid standing upright Mandarin collar clasped neatly at the front center of the throat, straight vertical frontal placket closure down the chest with traditional bead knot fastenings, structured clean rectangular shoulders, long straight draping sleeves, formal ceremonial scholar aesthetic, crisp pressed silk material",
+    "Traditional Vietnamese 5-panel garment (Ao Ngu Than Tay Chen), tailored modest form, asymmetrical curved front flap buttoned firmly down the right side with 5 small sphere buttons, high tight upright mandarin collar hugging the throat, narrow tight-fitting sleeves hugging the forearms to wrists, split side seams starting below waist, worn over loose white straight-leg silk pants.",
+  "Áo Ngũ Thân Tay Chẽn":
+    "Traditional Vietnamese 5-panel garment (Ao Ngu Than Tay Chen), tailored modest form, asymmetrical curved front flap buttoned firmly down the right side with 5 small sphere buttons, high tight upright mandarin collar hugging the throat, narrow tight-fitting sleeves hugging the forearms to wrists, split side seams starting below waist, worn over loose white straight-leg silk pants.",
+  "Áo Ngũ Thân":
+    "Traditional Vietnamese 5-panel garment (Ao Ngu Than Tay Chen), tailored modest form, asymmetrical curved front flap buttoned firmly down the right side with 5 small sphere buttons, high tight upright mandarin collar hugging the throat, narrow tight-fitting sleeves hugging the forearms to wrists, split side seams starting below waist, worn over loose white straight-leg silk pants.",
+
+  // Áo tấc (Ngũ thân tay thụng)
   "ao-tac-ngu-than-tay-thung":
-    "formal ceremonial Vietnamese Ao Tac robe (wide-sleeved Ao Ngu Than), structured standing collar, expansive flowing bell sleeves extending past the hands, asymmetric five-panel front closure with traditional loop buttons, solemn cultural ritual aesthetic",
+    "Traditional Vietnamese ceremonial Ao Tac robe, standing upright collar, diagonal right-side overlapping closure, loose voluminous silhouette with extremely wide rectangular drooping sleeves (bell sleeves) falling straight down past fingertips, long straight-cut hem reaching ankles over matching loose silk trousers.",
+  "Áo Tấc (Ngũ Thân Tay Thụng)":
+    "Traditional Vietnamese ceremonial Ao Tac robe, standing upright collar, diagonal right-side overlapping closure, loose voluminous silhouette with extremely wide rectangular drooping sleeves (bell sleeves) falling straight down past fingertips, long straight-cut hem reaching ankles over matching loose silk trousers.",
+  "Áo Tấc":
+    "Traditional Vietnamese ceremonial Ao Tac robe, standing upright collar, diagonal right-side overlapping closure, loose voluminous silhouette with extremely wide rectangular drooping sleeves (bell sleeves) falling straight down past fingertips, long straight-cut hem reaching ankles over matching loose silk trousers.",
+
+  // Áo Nhật Bình
   "ao-nhat-binh":
-    "royal Nguyen Dynasty imperial Nhat Binh robe (Ao Nhat Binh), rectangular decorative collar bordered with ornate embroidery, wide multi-colored five-element silk sleeve bands, front overlapping placket fastened with metallic cord buttons, regal imperial Vietnamese court aesthetic",
+    "Nguyen Dynasty royal court Ao Nhat Binh robe, open-front design fastened with small ties, iconic large stiff rectangular neckband framing chest adorned with 5-colored horizontal embroidered silk bands, embroidered golden five-clawed dragon or phoenix roundels, wide draped flowing sleeves with multicolor ribbon cuffs.",
+  "Áo Nhật Bình Cung Đình":
+    "Nguyen Dynasty royal court Ao Nhat Binh robe, open-front design fastened with small ties, iconic large stiff rectangular neckband framing chest adorned with 5-colored horizontal embroidered silk bands, embroidered golden five-clawed dragon or phoenix roundels, wide draped flowing sleeves with multicolor ribbon cuffs.",
+  "Áo Nhật Bình":
+    "Nguyen Dynasty royal court Ao Nhat Binh robe, open-front design fastened with small ties, iconic large stiff rectangular neckband framing chest adorned with 5-colored horizontal embroidered silk bands, embroidered golden five-clawed dragon or phoenix roundels, wide draped flowing sleeves with multicolor ribbon cuffs.",
+
+  // Áo tứ thân Kinh Bắc
+  "ao-tu-than":
+    "Northern Vietnamese Kinh Bac Ao Tu Than folk costume, four long fluttering panels, two back panels sewn together, two front panels tied casually at belly, worn over an inner diamond-shaped scarlet red halter top (Yem bib), bound at waist with a bright flowing silk sash, paired with a dark floor-length flowing wrap skirt.",
+  "Áo Tứ Thân Kinh Bắc":
+    "Northern Vietnamese Kinh Bac Ao Tu Than folk costume, four long fluttering panels, two back panels sewn together, two front panels tied casually at belly, worn over an inner diamond-shaped scarlet red halter top (Yem bib), bound at waist with a bright flowing silk sash, paired with a dark floor-length flowing wrap skirt.",
+  "Áo Tứ Thân":
+    "Northern Vietnamese Kinh Bac Ao Tu Than folk costume, four long fluttering panels, two back panels sewn together, two front panels tied casually at belly, worn over an inner diamond-shaped scarlet red halter top (Yem bib), bound at waist with a bright flowing silk sash, paired with a dark floor-length flowing wrap skirt.",
+
+  // Áo giao lĩnh (Cổ chéo)
+  "ao-giao-linh":
+    "Historical Vietnamese Ao Giao Linh robe, loose unisex robe, prominent diagonal overlapping crossover V-neck collar where left collar crosses over right, tied securely with a matching cloth waistband, ankle-length flowing layered robe hem.",
+  "Áo Giao Lĩnh Cổ Chéo":
+    "Historical Vietnamese Ao Giao Linh robe, loose unisex robe, prominent diagonal overlapping crossover V-neck collar where left collar crosses over right, tied securely with a matching cloth waistband, ankle-length flowing layered robe hem.",
+  "Áo Giao Lĩnh":
+    "Historical Vietnamese Ao Giao Linh robe, loose unisex robe, prominent diagonal overlapping crossover V-neck collar where left collar crosses over right, tied securely with a matching cloth waistband, ankle-length flowing layered robe hem.",
+
+  // Áo lập lĩnh (Cổ đứng)
+  "ao-lap-linh":
+    "Vietnamese traditional Lap Linh structured robe, prominent high erect stiff standing neckband collar (mandarin style) completely closed at neck center, seamless right-side diagonal fastener, structured straight shoulders, minimalist historical tailoring.",
+  "Áo Lập Lĩnh Cổ Đứng":
+    "Vietnamese traditional Lap Linh structured robe, prominent high erect stiff standing neckband collar (mandarin style) completely closed at neck center, seamless right-side diagonal fastener, structured straight shoulders, minimalist historical tailoring.",
+  "Áo Lập Lĩnh":
+    "Vietnamese traditional Lap Linh structured robe, prominent high erect stiff standing neckband collar (mandarin style) completely closed at neck center, seamless right-side diagonal fastener, structured straight shoulders, minimalist historical tailoring.",
+
+  // Áo dài truyền thống
+  "ao-dai-truyen-thong":
+    "Classic Vietnamese female Ao Dai, iconic 2-panel long dress, fitted tightly at waist and chest, high 3cm stiff standing collar, front and back panels hanging down to ankles, side slits cut high up to the ribcage, worn over floor-sweeping loose white silk palazzo trousers.",
+  "Áo Dài Truyền Thống":
+    "Classic Vietnamese female Ao Dai, iconic 2-panel long dress, fitted tightly at waist and chest, high 3cm stiff standing collar, front and back panels hanging down to ankles, side slits cut high up to the ribcage, worn over floor-sweeping loose white silk palazzo trousers.",
+  "Áo Dài":
+    "Classic Vietnamese female Ao Dai, iconic 2-panel long dress, fitted tightly at waist and chest, high 3cm stiff standing collar, front and back panels hanging down to ankles, side slits cut high up to the ribcage, worn over floor-sweeping loose white silk palazzo trousers.",
+
+  // Áo dài cách tân
+  "ao-dai-cach-tan":
+    "Modern redesigned Vietnamese Ao Dai, relaxed contemporary silhouette, knee-length short tunic panels, modified collarless scoop neck or low mock neck, elbow-length or puff sleeves, paired with ankle-length wide-leg pleated culottes.",
+  "Áo Dài Cách Tân":
+    "Modern redesigned Vietnamese Ao Dai, relaxed contemporary silhouette, knee-length short tunic panels, modified collarless scoop neck or low mock neck, elbow-length or puff sleeves, paired with ankle-length wide-leg pleated culottes.",
 };
 
-// 2. Chi tiết cấu trúc các loại Phụ kiện
+// 3. Phụ kiện (Accessories)
 export const ACCESSORY_PROMPTS: Record<string, string> = {
-  // Key theo tên tiếng Việt
-  "Nón Quai Thao":
-    "wearing or holding a traditional Vietnamese oversized flat disc palm hat (Non Quai Thao / Non Ba Tam), wide circular brim made of finely woven dried palm leaves, shallow flat crown, adorned with long flowing black and maroon silk chin-strap ribbons hanging down the shoulders",
-  "Nón Ba Tầm":
-    "wearing or holding a traditional Vietnamese oversized flat disc palm hat (Non Quai Thao / Non Ba Tam), wide circular brim made of finely woven dried palm leaves, shallow flat crown, adorned with long flowing black and maroon silk chin-strap ribbons hanging down the shoulders",
-  "Mấn Tết":
-    "wearing an authentic Vietnamese braided headpiece (Man Tet), tightly rolled and interwoven fabric turban wrapped neatly around the top of the head forming a neat circular crown, textured woven silk wrap, framing an elegant sleek updo hairstyle",
-  "Vòng Kiềng Vàng":
-    "wearing an authentic traditional Vietnamese solid golden neck torc (Vong Kieng Vang), smooth polished rigid metallic open-collar ring resting closely against the collarbone, minimalist classic jewelry with mirror-gold reflection",
-  "Kiềng Vàng":
-    "wearing an authentic traditional Vietnamese solid golden neck torc (Vong Kieng Vang), smooth polished rigid metallic open-collar ring resting closely against the collarbone, minimalist classic jewelry with mirror-gold reflection",
-  "Túi Cói":
-    "carrying a minimalist hand-woven Vietnamese natural dried straw-reed tote bag (Tui Coi), organic wicker basket texture, modern rustic craftsmanship",
-  "Túi Gấm":
-    "holding an ornate Vietnamese silk brocade pouch (Tui Gam), rich woven jacquard fabric with subtle embossed traditional floral patterns, braided golden drawstring cords with hanging silk tassels",
-
-  // Key theo ID hệ thống trong config/mockups.json
-  "non-quai-thao-mini":
-    "wearing or holding a traditional Vietnamese oversized flat disc palm hat (Non Quai Thao / Non Ba Tam), wide circular brim made of finely woven dried palm leaves, shallow flat crown, adorned with long flowing black and maroon silk chin-strap ribbons hanging down the shoulders",
+  // Mấn tết
   "man-modern":
-    "wearing an authentic Vietnamese braided headpiece (Man Tet), tightly rolled and interwoven fabric turban wrapped neatly around the top of the head forming a neat circular crown, textured woven silk wrap, framing an elegant sleek updo hairstyle",
+    "rigid cylindrical layered fabric turban wrapped tightly around the head (Man Tet), flat clean crown.",
+  "man-tet":
+    "rigid cylindrical layered fabric turban wrapped tightly around the head (Man Tet), flat clean crown.",
+  "Mấn Tết":
+    "rigid cylindrical layered fabric turban wrapped tightly around the head (Man Tet), flat clean crown.",
+  "Mấn tết":
+    "rigid cylindrical layered fabric turban wrapped tightly around the head (Man Tet), flat clean crown.",
+  "Mấn Tết Cách Điệu":
+    "rigid cylindrical layered fabric turban wrapped tightly around the head (Man Tet), flat clean crown.",
+
+  // Vòng kiềng
   "silver-choker":
-    "wearing an authentic traditional Vietnamese solid golden neck torc (Vong Kieng Vang), smooth polished rigid metallic open-collar ring resting closely against the collarbone, minimalist classic jewelry with mirror-gold reflection",
-  "tote-coi":
-    "carrying a minimalist hand-woven Vietnamese natural dried straw-reed tote bag (Tui Coi), organic wicker basket texture, modern rustic craftsmanship",
+    "solid thick polished circular silver neck ring choker (Vong Kieng), smooth reflective surface without pendant.",
+  "vong-kieng":
+    "solid thick polished circular silver neck ring choker (Vong Kieng), smooth reflective surface without pendant.",
+  "Vòng Kiềng":
+    "solid thick polished circular silver neck ring choker (Vong Kieng), smooth reflective surface without pendant.",
+  "Vòng kiềng":
+    "solid thick polished circular silver neck ring choker (Vong Kieng), smooth reflective surface without pendant.",
+  "Vòng Kiềng Cổ (Vàng / Bạc)":
+    "solid thick polished circular silver neck ring choker (Vong Kieng), smooth reflective surface without pendant.",
+
+  // Nón quai thao
+  "non-quai-thao":
+    "large oversized flat disc-shaped straw hat (Non Quai Thao), worn behind shoulders or held, long hanging black silk ribbon straps.",
+  "non-quai-thao-mini":
+    "large oversized flat disc-shaped straw hat (Non Quai Thao), worn behind shoulders or held, long hanging black silk ribbon straps.",
+  "Nón Quai Thao":
+    "large oversized flat disc-shaped straw hat (Non Quai Thao), worn behind shoulders or held, long hanging black silk ribbon straps.",
+  "Nón quai thao":
+    "large oversized flat disc-shaped straw hat (Non Quai Thao), worn behind shoulders or held, long hanging black silk ribbon straps.",
+  "Nón Quai Thao / Nón Lá Mini":
+    "large oversized flat disc-shaped straw hat (Non Quai Thao), worn behind shoulders or held, long hanging black silk ribbon straps.",
+
+  // Nón lá
+  "non-la":
+    "traditional pointed conical palm leaf hat (Non La) held at side.",
+  "Nón Lá":
+    "traditional pointed conical palm leaf hat (Non La) held at side.",
+  "Nón lá":
+    "traditional pointed conical palm leaf hat (Non La) held at side.",
+
+  // Túi gấm hoàng cung
   "tui-gam":
-    "holding an ornate Vietnamese silk brocade pouch (Tui Gam), rich woven jacquard fabric with subtle embossed traditional floral patterns, braided golden drawstring cords with hanging silk tassels",
+    "small rectangular royal silk brocade pouch with gold metallic thread embroidery and hanging tassel.",
+  "tui-gam-hoang-cung":
+    "small rectangular royal silk brocade pouch with gold metallic thread embroidery and hanging tassel.",
+  "Túi Gấm Hoàng Cung":
+    "small rectangular royal silk brocade pouch with gold metallic thread embroidery and hanging tassel.",
+  "Túi gấm hoàng cung":
+    "small rectangular royal silk brocade pouch with gold metallic thread embroidery and hanging tassel.",
+  "Túi Gấm Thêu Hoa Hoàng Cung":
+    "small rectangular royal silk brocade pouch with gold metallic thread embroidery and hanging tassel.",
+
+  // Túi cói mộc
+  "tote-coi":
+    "minimalist hand-woven natural beige straw basket tote bag with woven handles.",
+  "tui-coi-moc":
+    "minimalist hand-woven natural beige straw basket tote bag with woven handles.",
+  "Túi Cói Mộc":
+    "minimalist hand-woven natural beige straw basket tote bag with woven handles.",
+  "Túi cói mộc":
+    "minimalist hand-woven natural beige straw basket tote bag with woven handles.",
+  "Túi Cói Đan Mộc":
+    "minimalist hand-woven natural beige straw basket tote bag with woven handles.",
+
+  // Phụ kiện biến tấu Gen Z
   "sneaker-chunky":
-    "wearing stylish modern white chunky street sneakers creating a bold Gen Z contrast",
+    "stylish modern white chunky street sneakers creating a bold Gen Z contrast.",
+  "Sneaker Trắng Chunky":
+    "stylish modern white chunky street sneakers creating a bold Gen Z contrast.",
   "retro-sunglasses":
-    "wearing trendy retro oval Y2K sunglasses",
+    "trendy retro oval Y2K sunglasses.",
+  "Kính Râm Oval Y2K":
+    "trendy retro oval Y2K sunglasses.",
+
+  // Không dùng phụ kiện
   "none": "",
+  "Không dùng phụ kiện": "",
+};
+
+// 4. Bối cảnh (Settings)
+export const SETTING_PROMPTS: Record<string, string> = {
+  // Dạo phố & Cafe
+  "street-walk":
+    "sidewalk patio of an aesthetic Indochine-style coffee shop in Saigon, outdoor wooden bistro chairs, warm morning sunlight.",
+  "Dạo phố & Cafe":
+    "sidewalk patio of an aesthetic Indochine-style coffee shop in Saigon, outdoor wooden bistro chairs, warm morning sunlight.",
+  "Dạo Phố & Cafe Cuối Tuần":
+    "sidewalk patio of an aesthetic Indochine-style coffee shop in Saigon, outdoor wooden bistro chairs, warm morning sunlight.",
+
+  // Du xuân chúc Tết Giáp Thìn
+  "tet-holiday":
+    "traditional Lunar New Year Tet festival, blooming pink peach blossom branches, hanging red silk lanterns, festive gold calligraphy banners.",
+  "Du xuân chúc Tết Giáp Thìn":
+    "traditional Lunar New Year Tet festival, blooming pink peach blossom branches, hanging red silk lanterns, festive gold calligraphy banners.",
+
+  // Dự tiệc cưới & Hỷ lễ
+  "wedding-party":
+    "high-end modern wedding hall, floral arrangements with red lotus and silk drapes, warm candlelit illumination.",
+  "Dự tiệc cưới & Hỷ lễ":
+    "high-end modern wedding hall, floral arrangements with red lotus and silk drapes, warm candlelit illumination.",
+
+  // Chiêm bái chùa chiền & Di tích
+  "temple-heritage":
+    "ancient courtyard of a Vietnamese Buddhist pagoda, carved dark teak wood pillars, mossy flagstones, faint wisps of incense smoke.",
+  "Chiêm bái chùa chiền & Di tích":
+    "ancient courtyard of a Vietnamese Buddhist pagoda, carved dark teak wood pillars, mossy flagstones, faint wisps of incense smoke.",
+
+  // Thuyết trình & Ngày hội văn hóa
+  "school-presentation":
+    "minimalist cultural exhibition stage, stark gallery white floor, soft museum spotlighting on the subject.",
+  "Thuyết trình & Ngày hội văn hóa":
+    "minimalist cultural exhibition stage, stark gallery white floor, soft museum spotlighting on the subject.",
+
+  // Sự kiện sáng tạo & Party Gen Z
+  "y2k-party":
+    "contemporary art gallery event, neon accent strip lights, raw concrete walls, vibrant youth social atmosphere.",
+  "Sự kiện sáng tạo & Party Gen Z":
+    "contemporary art gallery event, neon accent strip lights, raw concrete walls, vibrant youth social atmosphere.",
+};
+
+// 5. Phong cách nghệ thuật (Art Direction / Aesthetics)
+export const STYLE_PROMPTS: Record<string, string> = {
+  // Y2K Neo-Heritage
+  "y2k-neo":
+    "Y2K futuristic retro aesthetic, metallic silk sheen, iridescent pastel tints, cyber-nostalgia styling.",
+  "Y2K Neo-Heritage":
+    "Y2K futuristic retro aesthetic, metallic silk sheen, iridescent pastel tints, cyber-nostalgia styling.",
+
+  // Streetwear Hầm Hố
+  "streetwear":
+    "raw urban high-fashion streetwear, layered utilitarian straps, chunky platform combat boots, dark mood lighting.",
+  "Streetwear Hầm Hố":
+    "raw urban high-fashion streetwear, layered utilitarian straps, chunky platform combat boots, dark mood lighting.",
+
+  // Minimalist Đương Đại
+  "minimal-chic":
+    "monochrome muted earth tones, Scandinavian-Asian minimalist clean lines, diffuse soft daylight, zero clutter.",
+  "Minimalist Đương Đại":
+    "monochrome muted earth tones, Scandinavian-Asian minimalist clean lines, diffuse soft daylight, zero clutter.",
+
+  // Cyberpunk Á Đông
+  "cyber-retro":
+    "Eastern cyberpunk mood, glowing neon cyan and crimson rim lights casting reflections on silk, high-contrast shadows.",
+  "Cyberpunk Á Đông":
+    "Eastern cyberpunk mood, glowing neon cyan and crimson rim lights casting reflections on silk, high-contrast shadows.",
+
+  // Indochine Vintage
+  "vintage-academia":
+    "1930s French Indochine vintage film photography, nostalgic sepia and celadon green color grading, subtle 35mm film grain.",
+  "Indochine Vintage":
+    "1930s French Indochine vintage film photography, nostalgic sepia and celadon green color grading, subtle 35mm film grain.",
 };
 
 /**
- * Hàm ghép câu prompt hoàn chỉnh theo cấu trúc chuẩn Lookbook FLUX.1
+ * Hàm ghép câu prompt chuẩn hóa cho FLUX Schnell:
+ * Formula: {camera_anchor} {model} wearing {attire_spec}, crafted from {color_spec}. Accessorized with {accessory_spec}. Setting: {setting_spec}. Aesthetics: {style_spec}.
  */
 export function buildFinalPrompt(
   garment: string,
@@ -91,15 +253,17 @@ export function buildFinalPrompt(
 ): string {
   const garmentDesc =
     GARMENT_PROMPTS[garment] ||
-    GARMENT_PROMPTS["Áo Dài"] ||
-    GARMENT_PROMPTS["ao-dai-truyen-thong"];
+    GARMENT_PROMPTS["ao-dai-truyen-thong"] ||
+    "Classic Vietnamese female Ao Dai, iconic 2-panel long dress, fitted tightly at waist and chest, high 3cm stiff standing collar, front and back panels hanging down to ankles, side slits cut high up to the ribcage, worn over floor-sweeping loose white silk palazzo trousers.";
 
   const rawAccessory = ACCESSORY_PROMPTS[accessory] || "";
-  const accessoryDesc = rawAccessory ? `accessorized with ${rawAccessory},` : "";
+  const accessoryPart = rawAccessory ? ` Accessorized with ${rawAccessory}` : "";
+  const modelPart = options?.model || "Vietnamese model";
+  const colorPart = options?.color ? `, crafted from ${options.color}` : "";
+  const rawSetting = options?.occasion ? (SETTING_PROMPTS[options.occasion] || options.occasion) : "";
+  const settingPart = rawSetting ? ` Setting: ${rawSetting}` : "";
+  const rawStyle = STYLE_PROMPTS[style] || style;
+  const stylePart = rawStyle ? ` Aesthetics: ${rawStyle}` : "";
 
-  const colorPart = options?.color ? `made of ${options.color},` : "";
-  const occasionPart = options?.occasion ? `${options.occasion},` : "";
-  const modelPart = options?.model || "a stylish Vietnamese Gen Z model";
-
-  return `Full-body editorial lookbook photograph of ${modelPart} wearing ${garmentDesc}, ${colorPart} ${accessoryDesc} ${occasionPart} remixed with ${style} aesthetic, plain studio backdrop, high-fashion softbox lighting, hyper-realistic, 8k resolution`.replace(/\s{2,}/g, " ").trim();
+  return `${ANCHOR_PROMPT} ${modelPart} wearing ${garmentDesc}${colorPart}.${accessoryPart}${settingPart}${stylePart}`.replace(/\s{2,}/g, " ").trim();
 }
