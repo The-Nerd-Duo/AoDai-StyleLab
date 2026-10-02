@@ -15,6 +15,7 @@ export const DEFAULT_OUTFIT: OutfitState = {
 const STORAGE_KEY = "vietphuc_current_outfit";
 const COMPARE_KEY = "vietphuc_compare_outfit";
 const FRAME_KEY = "vietphuc_selected_frame";
+const RESULT_IMAGE_KEY = "vietphuc_result_image";
 
 export function useOutfitStore() {
   const [outfit, setOutfitState] = useState<OutfitState>(DEFAULT_OUTFIT);
@@ -36,6 +37,10 @@ export function useOutfitStore() {
       const savedFrame = localStorage.getItem(FRAME_KEY);
       if (savedFrame) {
         setSelectedFrameState(savedFrame);
+      }
+      const savedImage = localStorage.getItem(RESULT_IMAGE_KEY);
+      if (savedImage) {
+        setResultImageState(savedImage);
       }
     } catch {
       // Ignore localStorage errors (e.g. incognito)
@@ -82,6 +87,17 @@ export function useOutfitStore() {
     } catch {}
   };
 
+  const setResultImage = (url: string | null) => {
+    setResultImageState(url);
+    try {
+      if (url) {
+        localStorage.setItem(RESULT_IMAGE_KEY, url);
+      } else {
+        localStorage.removeItem(RESULT_IMAGE_KEY);
+      }
+    } catch {}
+  };
+
   return {
     outfit,
     setOutfit,
@@ -92,7 +108,7 @@ export function useOutfitStore() {
     selectedFrame,
     setSelectedFrame,
     resultImage,
-    setResultImage: setResultImageState,
+    setResultImage,
     isLoaded,
   };
 }

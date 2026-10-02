@@ -14,7 +14,7 @@ export interface OutfitState {
   personaId: string;
 }
 
-export function encodeOutfitToQuery(state: OutfitState, frameId?: string): string {
+export function encodeOutfitToQuery(state: OutfitState, frameId?: string, imageUrl?: string | null): string {
   const params = new URLSearchParams({
     g: state.garmentId,
     c: state.colorId,
@@ -26,12 +26,16 @@ export function encodeOutfitToQuery(state: OutfitState, frameId?: string): strin
   if (frameId) {
     params.set("f", frameId);
   }
+  if (imageUrl && !imageUrl.startsWith("data:")) {
+    params.set("img", imageUrl);
+  }
   return params.toString();
 }
 
 export function decodeOutfitFromQuery(searchParams: { [key: string]: string | string[] | undefined }): {
   outfit: OutfitState;
   frameId: string;
+  imageUrl: string | null;
 } {
   const getParam = (key: string, defaultVal: string) => {
     const val = searchParams[key];
@@ -39,6 +43,9 @@ export function decodeOutfitFromQuery(searchParams: { [key: string]: string | st
     if (Array.isArray(val) && val[0]) return val[0];
     return defaultVal;
   };
+
+  const rawImg = searchParams["img"];
+  const imageUrl = typeof rawImg === "string" && rawImg.length > 0 ? rawImg : Array.isArray(rawImg) && rawImg[0] ? rawImg[0] : null;
 
   return {
     outfit: {
@@ -50,5 +57,6 @@ export function decodeOutfitFromQuery(searchParams: { [key: string]: string | st
       personaId: getParam("p", "female-modern"),
     },
     frameId: getParam("f", "frame-minimal-gold"),
+    imageUrl,
   };
 }

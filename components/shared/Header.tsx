@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { Sparkles, Compass, Layers } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 interface HeaderProps {
   onOpenCompare?: () => void;
@@ -10,53 +10,68 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ onOpenCompare, hasCompareOutfit }) => {
+  const pathname = usePathname();
+
+  const navItems = [
+    {
+      href: "/",
+      label: "Studio Phối đồ",
+      icon: "tune",
+      isActive: pathname === "/",
+    },
+    {
+      href: "/lookbook",
+      label: "Bộ sưu tập Lookbook",
+      icon: "photo_library",
+      isActive: pathname === "/lookbook",
+    },
+    {
+      href: "/bach-khoa",
+      label: "Bách khoa Di sản",
+      icon: "menu_book",
+      isActive: pathname === "/bach-khoa",
+    },
+  ];
+
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-heritage-dark/85 border-b border-heritage-dark-border px-4 py-3 sm:px-6">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Brand */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-heritage-red to-heritage-gold flex items-center justify-center shadow-lg shadow-heritage-red/20 group-hover:scale-105 transition-transform duration-300">
-            <span className="text-white font-serif font-bold text-xl tracking-wider">VP</span>
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-base sm:text-lg font-bold tracking-tight text-white group-hover:text-heritage-gold transition-colors">
-                Việt Phục Remix
-              </h1>
-              <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-heritage-gold/20 text-heritage-gold border border-heritage-gold/30">
-                v2.0
+    <header className="sticky top-0 w-full z-50 bg-[#FDFBF7]/95 backdrop-blur-md border-b border-border-bronze-light/50 shadow-[0_2px_12px_rgba(26,26,26,0.05)]">
+      <div className="h-16 max-w-7xl mx-auto px-4 sm:px-6 md:px-8 flex items-center justify-between gap-4">
+        {/* Brand & Responsible AI Badge */}
+        <div className="flex items-center gap-3 sm:gap-4">
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="flex flex-col">
+              <span className="font-serif font-bold text-lg sm:text-xl text-vermilion-red tracking-tight leading-none group-hover:opacity-90 transition-opacity">
+                AoDai StyleLab
+              </span>
+              <span className="font-mono text-[9px] uppercase tracking-widest text-bronze-gold font-bold">
+                Cyber-Heritage v3.0
               </span>
             </div>
-            <p className="text-[11px] text-gray-400 hidden sm:block">
-              AI Arena Vietnam 2026 • Di Sản Việt Trong Hơi Thở Gen Z
-            </p>
-          </div>
-        </Link>
+          </Link>
+        </div>
 
-        {/* Actions & Badge */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {onOpenCompare && (
-            <button
-              onClick={onOpenCompare}
-              className={`relative px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all ${
-                hasCompareOutfit
-                  ? "bg-heritage-gold text-heritage-dark font-semibold shadow-md shadow-heritage-gold/20 hover:bg-heritage-gold-light"
-                  : "bg-heritage-dark-card border border-heritage-dark-border text-gray-300 hover:text-white hover:border-gray-600"
+        {/* Pill Segmented Switcher / Floating Capsule Bar */}
+        <nav aria-label="Main Navigation" className="hidden md:flex items-center bg-[#F2EDE7]/90 p-1 rounded-full border border-border-bronze-light/60 shadow-inner gap-1">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`px-4 py-1.5 rounded-full font-sans text-[13px] leading-tight flex items-center gap-1.5 transition-all ${
+                item.isActive
+                  ? "bg-vermilion-red text-white font-semibold shadow-sm"
+                  : "text-stone-700 hover:text-text-charcoal hover:bg-surface-pure/80 font-medium"
               }`}
             >
-              <Layers className="w-3.5 h-3.5" />
-              <span>So sánh A/B</span>
-              {hasCompareOutfit && (
-                <span className="w-2 h-2 rounded-full bg-heritage-red absolute -top-1 -right-1 animate-ping" />
-              )}
-            </button>
-          )}
+              <span className={`material-symbols-outlined text-[16px] ${item.isActive ? "text-white" : "text-stone-500"}`}>
+                {item.icon}
+              </span>
+              <span>{item.label}</span>
+            </Link>
+          ))}
+        </nav>
 
-          <div className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full bg-heritage-red/10 border border-heritage-red/30 text-heritage-red-light text-xs font-medium">
-            <Sparkles className="w-3 h-3 text-heritage-gold" />
-            <span>VNU x Google AI</span>
-          </div>
-        </div>
+        {/* Right Corner (Balanced spacer) */}
+        <div className="hidden sm:block w-28" />
       </div>
     </header>
   );
