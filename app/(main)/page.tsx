@@ -2,28 +2,24 @@
 
 import React, { useState } from "react";
 import { Header } from "@/components/shared/Header";
+import { Footer } from "@/components/shared/Footer";
 import { OptionSelector } from "@/components/studio/OptionSelector";
 import { PreviewWorkspace } from "@/components/studio/PreviewWorkspace";
 import { CulturalAdvisorCard } from "@/components/studio/CulturalAdvisorCard";
-import { PersonaSelector } from "@/components/studio/PersonaSelector";
-import { OutfitComparisonModal } from "@/components/studio/OutfitComparisonModal";
+import { StudioRightPanel } from "@/components/studio/StudioRightPanel";
 import { useOutfitStore } from "@/lib/store";
-import { Sparkles } from "lucide-react";
 import { generateOutfitPrompt, callFluxWorkerAi } from "@/lib/ai-prompt";
 
 export default function StudioPage() {
   const {
     outfit,
-    setOutfit,
     updateOutfitField,
-    compareOutfit,
-    saveToCompare,
-    clearCompare,
     resultImage,
     setResultImage,
+    selectedFrame,
+    setSelectedFrame,
   } = useOutfitStore();
 
-  const [isCompareOpen, setIsCompareOpen] = useState(false);
   const [customAvatar, setCustomAvatar] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -41,74 +37,48 @@ export default function StudioPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header
-        onOpenCompare={() => setIsCompareOpen(true)}
-        hasCompareOutfit={!!compareOutfit}
-      />
+    <div className="min-h-screen flex flex-col bg-[#F8F5F0]">
+      {/* Header */}
+      <Header />
 
-      <div className="max-w-7xl mx-auto w-full px-4 py-4 sm:px-6 sm:py-6 flex flex-col gap-6">
-        {/* Hero Tagline */}
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-heritage-gold flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5" />
-              Tab 1 • Studio Phối Đồ & Cố Vấn AI
-            </span>
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 py-5 flex flex-col gap-5">
+        {/* MAIN THREE-COLUMN STUDIO DASHBOARD */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          {/* LEFT COLUMN: Mix & Match Matrix (col-span-4) */}
+          <div className="lg:col-span-4 flex flex-col gap-5 order-2 lg:order-1">
+            <OptionSelector
+              outfit={outfit}
+              onChange={updateOutfitField}
+              customAvatarUrl={customAvatar}
+              onUploadCustomAvatar={(dataUrl) => setCustomAvatar(dataUrl)}
+            />
           </div>
-          <h2 className="text-xl sm:text-2xl font-serif font-bold text-white">
-            Phối Trang Phục Truyền Thống Theo Phong Cách Gen Z
-          </h2>
-          <p className="text-xs sm:text-sm text-gray-400 max-w-3xl">
-            Tự do thử nghiệm các bản phối giữa Áo Dài, Áo Ngũ Thân, Áo Tấc cùng gu thời trang đương đại.
-            Hệ thống AI Gemini bảo đảm tính thẩm mỹ và thuần phong mỹ tục di sản.
-          </p>
-        </div>
 
-        {/* Persona & Avatar Selector */}
-        <PersonaSelector
-          selectedPersonaId={outfit.personaId}
-          onSelectPersona={(id) => updateOutfitField("personaId", id)}
-          customAvatarUrl={customAvatar}
-          onUploadCustomAvatar={(dataUrl) => setCustomAvatar(dataUrl)}
-        />
-
-        {/* Studio Main Grid: Left is Options & AI Advisor, Right is Preview */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Column (7 cols): Option Controls & AI Advisor */}
-          <div className="lg:col-span-7 flex flex-col gap-6 order-2 lg:order-1">
-            <OptionSelector outfit={outfit} onChange={updateOutfitField} />
+          {/* CENTER COLUMN: Showcase Canvas & Cultural Harmony AI (col-span-5) */}
+          <div className="lg:col-span-5 flex flex-col gap-5 order-1 lg:order-2">
+            <PreviewWorkspace
+              outfit={outfit}
+              resultImage={resultImage}
+              setResultImage={setResultImage}
+              loading={loading}
+              onGenerateOutfit={handleGenerateOutfit}
+            />
             <CulturalAdvisorCard outfit={outfit} />
           </div>
 
-          {/* Right Column (5 cols): Live Preview Sticky Workspace */}
-          <div className="lg:col-span-5 order-1 lg:order-2">
-            <div className="sticky top-20">
-              <PreviewWorkspace
-                outfit={outfit}
-                customAvatarUrl={customAvatar}
-                onSaveToCompare={saveToCompare}
-                hasCompareOutfit={!!compareOutfit}
-                resultImage={resultImage}
-                setResultImage={setResultImage}
-                loading={loading}
-                onGenerateOutfit={handleGenerateOutfit}
-              />
-            </div>
+          {/* RIGHT COLUMN: Lookbook 9:16 Digital ID (col-span-3, sticky) */}
+          <div className="lg:col-span-3 flex flex-col gap-5 order-3 sticky top-20">
+            <StudioRightPanel
+              outfit={outfit}
+              resultImage={resultImage}
+              selectedFrame={selectedFrame}
+              onSelectFrame={setSelectedFrame}
+            />
           </div>
         </div>
       </div>
 
-      {/* Outfit Comparison Modal */}
-      <OutfitComparisonModal
-        isOpen={isCompareOpen}
-        onClose={() => setIsCompareOpen(false)}
-        outfitA={compareOutfit}
-        outfitB={outfit}
-        onSelectA={() => {
-          if (compareOutfit) setOutfit(compareOutfit);
-        }}
-      />
+      <Footer />
     </div>
   );
 }

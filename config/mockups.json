@@ -256,27 +256,15 @@
   "personas": [
     {
       "id": "female-modern",
-      "name": "Gen Z Nữ - Năng Động",
+      "name": "Nữ",
       "gender": "female",
-      "vibe": "Tươi sáng, tự tin, yêu thích sự kết hợp màu sắc tương phản."
+      "vibe": "Năng động, thanh lịch, hiện đại"
     },
     {
       "id": "male-modern",
-      "name": "Gen Z Nam - Cá Tính",
+      "name": "Nam",
       "gender": "male",
-      "vibe": "Phóng khoáng, hiện đại, thích form áo ngũ thân rộng rãi mix sneaker."
-    },
-    {
-      "id": "female-classic",
-      "name": "Thục Nữ - Đằm Thắm",
-      "gender": "female",
-      "vibe": "Dịu dàng, quý phái, chuộng áo dài truyền thống và áo Nhật bình cung đình."
-    },
-    {
-      "id": "male-heritage",
-      "name": "Sĩ Phu - Thanh Lịch",
-      "gender": "male",
-      "vibe": "Điềm đạm, đậm chất học thức, ưa thích áo ngũ thân tay thụng và giao lĩnh."
+      "vibe": "Cá tính, phóng khoáng, hiện đại"
     }
   ]
 }

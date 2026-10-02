@@ -2,13 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import { OutfitState } from "@/lib/utils";
+import mockupsData from "@/config/mockups.json";
 import { CulturalAdvisorResponse } from "@/app/api/cultural-advisor/route";
 import {
   Sparkles,
   ShieldAlert,
-  SunMedium,
-  Palette,
-  CheckCircle2,
   RefreshCw,
   Lightbulb,
 } from "lucide-react";
@@ -20,6 +18,8 @@ interface CulturalAdvisorCardProps {
 export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit }) => {
   const [data, setData] = useState<CulturalAdvisorResponse | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const occasion = mockupsData.occasions.find((o) => o.id === outfit.occasionId) || mockupsData.occasions[0];
 
   const fetchAdvice = async () => {
     setLoading(true);
@@ -44,154 +44,150 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
     fetchAdvice();
   }, [outfit.garmentId, outfit.colorId, outfit.occasionId, outfit.styleId, outfit.accessoryId]);
 
+  // Convert 100-point score to 5-star rating (e.g., 98 -> 4.9, 90 -> 4.5)
+  const starRating = data ? (data.overallScore / 20).toFixed(1) : "4.9";
+  const numStars = data ? Math.min(5, Math.max(1, Math.round(data.overallScore / 20))) : 5;
+
   return (
-    <div className="bg-heritage-dark-card border border-heritage-dark-border rounded-2xl p-4 sm:p-5 flex flex-col gap-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="bg-surface-pure rounded-2xl p-4 shadow-sm border border-border-bronze-light/60 space-y-3">
+      {/* Header with 5-star Rating */}
+      <div className="flex flex-wrap items-center justify-between pb-2 border-b border-border-bronze-light/40 gap-2">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-heritage-gold/20 flex items-center justify-center text-heritage-gold">
-            <Sparkles className="w-4 h-4" />
-          </div>
-          <div>
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              AI Cố Vấn Văn Hóa & Phong Cách
-            </h3>
-            <span className="text-[10px] text-gray-400">Powered by Gemini 2.0 Flash • Responsible AI</span>
-          </div>
+          <span className="material-symbols-outlined text-vermilion-red text-[20px]">
+            verified
+          </span>
+          <h2 className="font-serif text-sm sm:text-base font-bold text-text-charcoal">
+            Cultural Harmony AI
+          </h2>
+          <button
+            onClick={fetchAdvice}
+            disabled={loading}
+            className="p-1 rounded-lg text-text-warm-gray hover:text-text-charcoal hover:bg-paper-cream transition-colors ml-1"
+            title="Thẩm định lại"
+            type="button"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-vermilion-red" : ""}`} />
+          </button>
         </div>
 
-        <button
-          onClick={fetchAdvice}
-          disabled={loading}
-          className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
-          title="Phân tích lại"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-heritage-gold" : ""}`} />
-        </button>
+        {/* 5-Star Rating Badge */}
+        <div className="flex items-center gap-2.5 bg-paper-cream px-3 py-1 rounded-full border border-border-bronze-light/50 shadow-inner">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-text-warm-gray font-bold hidden sm:inline">
+            Đánh giá tổng thể AI:
+          </span>
+          <div className="flex items-center gap-0.5 text-bronze-gold">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <span
+                key={star}
+                className="material-symbols-outlined text-[16px] text-bronze-gold"
+                style={{
+                  fontVariationSettings: star <= numStars ? "'FILL' 1" : "'FILL' 0",
+                }}
+              >
+                star
+              </span>
+            ))}
+            <span className="font-sans text-[14px] text-text-charcoal font-bold ml-1">
+              {starRating}
+              <span className="text-[10px] text-text-warm-gray font-normal font-mono">/5</span>
+            </span>
+          </div>
+        </div>
       </div>
 
       {loading && !data && (
-        <div className="py-8 flex flex-col items-center justify-center gap-2 text-gray-400">
-          <RefreshCw className="w-6 h-6 animate-spin text-heritage-gold" />
+        <div className="py-6 flex flex-col items-center justify-center gap-2 text-text-warm-gray">
+          <RefreshCw className="w-5 h-5 animate-spin text-bronze-gold" />
           <span className="text-xs">Gemini AI đang thẩm định chuẩn mực văn hóa...</span>
         </div>
       )}
 
       {data && (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {/* Warnings Banner if any */}
           {data.warnings && data.warnings.length > 0 && (
-            <div className="p-3 rounded-xl bg-red-950/40 border border-red-500/40 text-red-200 text-xs flex items-start gap-2.5">
-              <ShieldAlert className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+            <div className="p-3 rounded-xl bg-guardrail-warning-surface border border-guardrail-warning/30 text-text-charcoal text-xs flex items-start gap-2 shadow-xs">
+              <ShieldAlert className="w-4 h-4 text-guardrail-warning flex-shrink-0 mt-0.5" />
               <div>
-                <span className="font-bold block text-red-300">Cảnh báo quy chuẩn nghi lễ & văn hóa:</span>
+                <span className="font-bold text-guardrail-warning block text-[11px]">
+                  Cảnh báo nghi lễ &amp; quy chuẩn:
+                </span>
                 {data.warnings.map((w, idx) => (
-                  <p key={idx} className="mt-0.5 leading-relaxed text-[11px] text-red-200/90">{w}</p>
+                  <p key={idx} className="mt-0.5 leading-relaxed text-[11px] text-text-charcoal">
+                    {w}
+                  </p>
                 ))}
               </div>
             </div>
           )}
 
-          {/* 3 Metric Score Gauges */}
-          <div className="grid grid-cols-3 gap-2">
-            {/* Metric 1: Color */}
-            <div className="p-2.5 rounded-xl bg-heritage-dark border border-heritage-dark-border text-center">
-              <div className="flex items-center justify-center gap-1 text-[10px] text-gray-400 mb-1">
-                <Palette className="w-3 h-3 text-pink-400" />
-                <span>Màu Sắc</span>
+          {/* 3 Diagnostic Cards Matching Prototype Design */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1">
+            {/* Metric 1: Thời tiết & Chất liệu */}
+            <div className="p-2.5 rounded-xl bg-paper-cream border border-border-bronze-light/50 flex flex-col justify-between space-y-1.5 shadow-xs">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[14px] text-bronze-gold">
+                    thermostat
+                  </span>
+                  Thời tiết &amp; Chất liệu
+                </span>
+                <span className="text-[9px] font-mono text-guardrail-pass font-bold px-1.5 py-0.5 rounded bg-guardrail-pass-surface border border-guardrail-pass/30">
+                  {data.weatherFitScore >= 80 ? "LÝ TƯỞNG" : `${data.weatherFitScore}%`}
+                </span>
               </div>
-              <div className="text-base font-bold text-white">
-                {data.colorHarmonyScore}<span className="text-[10px] text-gray-500">/100</span>
-              </div>
-              <div className="w-full bg-gray-800 h-1 rounded-full mt-1.5 overflow-hidden">
-                <div
-                  className="bg-gradient-to-r from-pink-500 to-heritage-gold h-full rounded-full transition-all duration-500"
-                  style={{ width: `${data.colorHarmonyScore}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Metric 2: Weather & Context */}
-            <div className="p-2.5 rounded-xl bg-heritage-dark border border-heritage-dark-border text-center">
-              <div className="flex items-center justify-center gap-1 text-[10px] text-gray-400 mb-1">
-                <SunMedium className="w-3 h-3 text-amber-400" />
-                <span>Bối Cảnh</span>
-              </div>
-              <div className="text-base font-bold text-white">
-                {data.weatherFitScore}<span className="text-[10px] text-gray-500">/100</span>
-              </div>
-              <div className="w-full bg-gray-800 h-1 rounded-full mt-1.5 overflow-hidden">
-                <div
-                  className="bg-gradient-to-r from-amber-500 to-emerald-400 h-full rounded-full transition-all duration-500"
-                  style={{ width: `${data.weatherFitScore}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Metric 3: Cultural Respect */}
-            <div className="p-2.5 rounded-xl bg-heritage-dark border border-heritage-dark-border text-center">
-              <div className="flex items-center justify-center gap-1 text-[10px] text-gray-400 mb-1">
-                <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                <span>Thuần Phong</span>
-              </div>
-              <div className="text-base font-bold text-white">
-                {data.culturalRespectScore}<span className="text-[10px] text-gray-500">/100</span>
-              </div>
-              <div className="w-full bg-gray-800 h-1 rounded-full mt-1.5 overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all duration-500 ${data.culturalRespectScore < 70 ? "bg-red-500" : "bg-emerald-400"
-                    }`}
-                  style={{ width: `${data.culturalRespectScore}%` }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* AI Insights & Reasoning */}
-          <div className="space-y-2 text-xs">
-            {/* Color & Wu Xing */}
-            <div className="p-2.5 rounded-xl bg-heritage-dark/60 border border-heritage-dark-border">
-              <span className="font-semibold text-heritage-gold block mb-0.5">
-                Ngũ Hành & Hòa Sắc (Hành {data.elementAnalysis?.element || "Thổ"}):
-              </span>
-              <p className="text-gray-300 text-[11px] leading-relaxed">
-                {data.colorHarmonyVerdict}
-              </p>
-            </div>
-
-            {/* Weather & Fabric */}
-            <div className="p-2.5 rounded-xl bg-heritage-dark/60 border border-heritage-dark-border">
-              <span className="font-semibold text-emerald-400 block mb-0.5">
-                Thời Tiết & Chất Liệu Phù Hợp:
-              </span>
-              <p className="text-gray-300 text-[11px] leading-relaxed">
+              <p className="text-text-warm-gray leading-relaxed text-[11px] line-clamp-3">
                 {data.weatherAdvice}
               </p>
             </div>
 
-            {/* Cultural Integrity */}
-            <div className="p-2.5 rounded-xl bg-heritage-dark/60 border border-heritage-dark-border">
-              <span className="font-semibold text-sky-400 block mb-0.5">
-                Giá Trị Văn Hóa & Thuần Phong Mỹ Tục:
-              </span>
-              <p className="text-gray-300 text-[11px] leading-relaxed">
-                {data.culturalNotes}
+            {/* Metric 2: Bối cảnh & Không gian */}
+            <div className="p-2.5 rounded-xl bg-paper-cream border border-border-bronze-light/50 flex flex-col justify-between space-y-1.5 shadow-xs">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1 truncate max-w-[140px]">
+                  <span className="material-symbols-outlined text-[14px] text-vermilion-red">
+                    nightlife
+                  </span>
+                  {occasion.name.split("&")[0].trim()}
+                </span>
+                <span className="text-[9px] font-mono text-bronze-gold font-bold px-1.5 py-0.5 rounded bg-[#F4EFEA] border border-border-bronze-light/40">
+                  NỔI BẬT
+                </span>
+              </div>
+              <p className="text-text-warm-gray leading-relaxed text-[11px] line-clamp-3">
+                {data.colorHarmonyVerdict}
               </p>
             </div>
 
-            {/* Gen Z Styling Tip */}
-            {data.genZStylingTip && (
-              <div className="p-2.5 rounded-xl bg-heritage-gold/10 border border-heritage-gold/30 text-amber-200">
-                <div className="flex items-center gap-1.5 font-bold mb-0.5 text-heritage-gold">
-                  <Lightbulb className="w-3.5 h-3.5" />
-                  <span>Mẹo Mix Match Gen Z:</span>
-                </div>
-                <p className="text-[11px] leading-relaxed text-amber-100">
-                  {data.genZStylingTip}
-                </p>
+            {/* Metric 3: Quy chế Di sản */}
+            <div className="p-2.5 rounded-xl bg-paper-cream border border-border-bronze-light/50 flex flex-col justify-between space-y-1.5 shadow-xs">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[14px] text-guardrail-pass">
+                    rule
+                  </span>
+                  Quy chế Di sản
+                </span>
+                <span className="text-[9px] font-mono text-guardrail-pass font-bold px-1.5 py-0.5 rounded bg-guardrail-pass-surface border border-guardrail-pass/30">
+                  {data.culturalRespectScore >= 85 ? "CHUẨN 100%" : "CẦN LƯU Ý"}
+                </span>
               </div>
-            )}
+              <p className="text-text-warm-gray leading-relaxed text-[11px] line-clamp-3">
+                {data.culturalNotes}
+              </p>
+            </div>
           </div>
+
+          {/* Gen Z Styling Tip */}
+          {data.genZStylingTip && (
+            <div className="p-2.5 rounded-xl bg-bronze-gold/10 border border-bronze-gold/30 text-text-charcoal flex items-start gap-2">
+              <Lightbulb className="w-4 h-4 text-bronze-gold flex-shrink-0 mt-0.5" />
+              <p className="text-[11px] leading-relaxed text-text-charcoal">
+                <strong className="text-bronze-gold">Mẹo Phối Đồ Gen Z: </strong>
+                {data.genZStylingTip}
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>

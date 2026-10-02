@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import mockupsData from "@/config/mockups.json";
 import { OutfitState } from "@/lib/utils";
 import {
@@ -21,71 +21,160 @@ import {
   Check,
   Flame,
   Copy,
+  User,
+  Upload,
 } from "lucide-react";
+
+const GARMENT_IMAGES: Record<string, string> = {
+  "ngu-than-tay-chen":
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuDyzXUf3BHqxz22reppUwLUA64GI1o-bQIfrd6t-Gf95IXjLF2dbgICCvu9WhERkwWkNFdlx5CaSUhqptaaar-eraMinIv50Q0P9ykSoR5oM5-4UkHfwn8g9FwZMJT9f9j8CSefE4QfE1S4rRtuF0bZUgrUuv0tafPcfVp9_1cGdt8wc_EsfucFHOsmywxYrWF0wGOxsmuwZw86jgMPbn6cbG8tEkHKe4XlfwlJv-nmq-JGLuDFdomE",
+  "giao-linh":
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuCknccmCrDHpUjcXWnqFvpC3WkpVR6ks8ptQd98VveeBqkzD6RsIxzqbeMMpYeg5QqEuSk0XKBDrrsc8gtvMQuEhXSUoaO-XQ7NM_EkHqoaCAynEGdFj96O0v4i3M_P697Uvce3v62cRUZU6996BBl5LiTCpO76pCF8JVomuzQNFEaAhSxR7AtAd359lexe6HSM-ytB91YwF-8C_sC7a_Snvyt7USFte4hsZrHEvlUXF0-WDBk9N5tc",
+  "tu-than":
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuC0x4FRbQdHyYtXiqXPyTy2Oy8eJrqST-GzG8oGVOlFrYq74lExqXakd8_LbEls06XuwsNSNe8P0J1OkOmRHw-tZcNkvTp7L-tzFDWZ8Tn4UQRWHFYMnWSw-EjRyYgJtOouGkdTcfaBlCvUQTqAs9A6nC3LJfUSF7BMA72kysYRFxozCZjr5Aui_HVNtsf5Rf9jJMhWMS94jx_5JHu9zIZDEoYgrYQfHx33FMv3IS3LhvOnsbi7xxbr",
+  "vien-linh":
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuAn4fyx0tMRm5-2yZ9TwSJBC06VH33TEUNPgWskLleCx_LASZdV3pClbmtbFjisbxD-YpMAzFEJ2fr49WRkzYvEnT8lOzaAsB6rKO5payeqtqvAX4Bt144LP_n8JSYNaZrMQt3s8lEBbbPIdPKl6SLLgsVbIHXZl5IQZSwIcLkf8_Dcbtny_IdxDnZXl9EtmiLreZH0blxCPKdLsPWpD1BTEx29ULJOmyNkxU_SYng29VY0lMvnzl_k",
+  "nhat-binh":
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuDSCMz45PF4ZIsUApnOtp6niwqv_EK_pT4hBY9SgkjmfNWH4T6FiiQw4_6R8zGjc5wnMVLooa5nTLoJ-XBp_4zpv6in9IU7VvLlDxUZ3vepkIetKVISxrPcoSEuVFTsPteJ4zpFLt8fqiviusKq2fMQsUHN6NCB0mmJRm6-kh1nnLXcCfLPhXw-9nNMkvRP89_cvdmfhHsP-Wh6tp77zdKzZ7Oi51J9mkA9lwVqoSUW8YHllXwHLa-G",
+  "lemur-1930":
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuAzptqeiNiTrbpOFPHDtyChIEsDbduFujGuEa9mgJ3NMAaItGBIRVtwS8XHnGZgqFZ4MuuGTI9beznhEPjRLYxrMfOIhSeIXDdFNvvDfjoMYpMkjLmSHGL2agoWKnJnW2AgdzKqLvUQMYO7WCUs_shYP3noVwJTIb-WlYvqQthOHMFxezkDDQ2UAHEEd2zBe_LqJojdzKzD0P9rNgJvk_h8IMpzfJks1lX2kSZIDpKTFIfv-O7Pills",
+  "ao-tac":
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuAzpOAxeyNU-ueqoWFNbL-ZWkeNj_gjNNw_IH0R6MaLYnmA5lwgX6cDXSW3j2nSiB58n9a0gsUHBNPjncrqYfARAkBcleHlPlijMDaYSfMJCcwK5BMeETHgKz_cKCVcASjl7USFlAC3p14fmLGtjZRIcbft5H-dzD5dgJYslHPfXnSuoU_0vOPN2s_DXcI8A3OtvYxsOUVzjUIrUg-kHug1PIjmSt2B9PhhZ_6WHvphT6wH5aHMj7al",
+  "ao-dai-nam":
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuAqtloS8lWBgKJhemPxI9fMALOCcDHTW--rwkUpbl2AXqjxB808PiLxsfqEMo7faBVfCumkLRYKPQR4CHOVF0DGjG7t4rDqTJ0igvTmuLethE02zP_LNXNriN720o68BHRKgC4NPizgJ4wQPk5pVGDEQC5lLRJEt2djGRZ-ka02ReBOVlCMpS_PYYs9sa_9cqCXJbhqGIUixn7EV8WnLEVq3BfyYWCWuLPW3dYRFh-5BtWmbLkC-nPs",
+};
 
 interface OptionSelectorProps {
   outfit: OutfitState;
   onChange: <K extends keyof OutfitState>(key: K, value: OutfitState[K]) => void;
+  customAvatarUrl?: string | null;
+  onUploadCustomAvatar?: (dataUrl: string) => void;
 }
 
-export const OptionSelector: React.FC<OptionSelectorProps> = ({ outfit, onChange }) => {
+export const OptionSelector: React.FC<OptionSelectorProps> = ({
+  outfit,
+  onChange,
+  customAvatarUrl,
+  onUploadCustomAvatar,
+}) => {
   const [activeCategory, setActiveCategory] = useState<"garment" | "color" | "occasion" | "style" | "accessory">("garment");
   const [copied, setCopied] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onUploadCustomAvatar) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === "string") {
+          onUploadCustomAvatar(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const categories = [
-    { id: "garment", label: "Trang Phục", icon: Shirt },
-    { id: "color", label: "Màu & Ngũ Hành", icon: Palette },
-    { id: "occasion", label: "Bối Cảnh / Dịp", icon: Calendar },
-    { id: "style", label: "Phong Cách Gen Z", icon: Flame },
+    { id: "garment", label: "Cổ Phục", icon: Shirt },
+    { id: "color", label: "Màu Sắc", icon: Palette },
     { id: "accessory", label: "Phụ Kiện", icon: Glasses },
+    { id: "occasion", label: "Bối Cảnh", icon: Calendar },
+    { id: "style", label: "Phong Cách", icon: Flame },
   ];
 
   const breakdown = getOutfitPromptBreakdown(outfit);
 
-  // Lấy đoạn prompt tương ứng với tab đang chọn để người dùng thấy rõ
-  const getActiveTabPromptSnippet = () => {
-    switch (activeCategory) {
-      case "garment":
-        return {
-          label: "Trang phục",
-          name: breakdown.garmentName,
-          english: GARMENT_PROMPT_MAP[outfit.garmentId] || outfit.garmentId,
-        };
-      case "color":
-        return {
-          label: "Màu sắc",
-          name: breakdown.colorName,
-          english: COLOR_PROMPT_MAP[outfit.colorId] || outfit.colorId,
-        };
-      case "occasion":
-        return {
-          label: "Bối cảnh / Dịp",
-          name: breakdown.occasionName,
-          english: OCCASION_PROMPT_MAP[outfit.occasionId] || outfit.occasionId,
-        };
-      case "style":
-        return {
-          label: "Phong cách",
-          name: breakdown.styleName,
-          english: STYLE_BACKGROUND_MAP[outfit.styleId]?.styleDesc || outfit.styleId,
-        };
-      case "accessory":
-        return {
-          label: "Phụ kiện",
-          name: breakdown.accessoryName,
-          english: ACCESSORY_PROMPT_MAP[outfit.accessoryId] || "none",
-        };
-      default:
-        return { label: "", name: "", english: "" };
-    }
-  };
-
-  const currentTabInfo = getActiveTabPromptSnippet();
-
   return (
-    <div className="bg-heritage-dark-card border border-heritage-dark-border rounded-2xl p-4 sm:p-5 flex flex-col gap-4">
-      {/* Category Pills Header */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none border-b border-heritage-dark-border">
+    <aside className="w-full flex flex-col gap-4 bg-surface-pure rounded-2xl p-4 shadow-sm border border-border-bronze-light/60">
+      {/* Title Header */}
+      <div className="border-b border-border-bronze-light/40 pb-2.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-vermilion-red text-[20px]">
+              hub
+            </span>
+            <h2 className="font-serif text-base font-bold text-text-charcoal">
+              Studio Mix &amp; Match
+            </h2>
+          </div>
+        </div>
+      </div>
+
+      {/* KHỐI NHÂN VẬT ĐẠI DIỆN (PERSONA) CỐ ĐỊNH Ở ĐẦU */}
+      <div className="bg-paper-cream p-3 rounded-xl border border-border-bronze-light/50 space-y-2.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <User className="w-4 h-4 text-vermilion-red" />
+            <span className="font-serif text-xs font-bold text-text-charcoal">
+              Nhân Vật Đại Diện (Persona)
+            </span>
+          </div>
+          <span className="text-[10px] font-mono text-bronze-gold font-bold">
+            2 Giới Tính &amp; Face Upload
+          </span>
+        </div>
+
+        {/* 2 Options: Nữ & Nam */}
+        <div className="grid grid-cols-2 gap-2">
+          {mockupsData.personas.map((p) => {
+            const isSelected = outfit.personaId === p.id && !customAvatarUrl;
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => {
+                  if (onUploadCustomAvatar) onUploadCustomAvatar("");
+                  onChange("personaId", p.id);
+                }}
+                className={`p-2.5 rounded-xl text-left border transition-all relative flex flex-col justify-between ${
+                  isSelected
+                    ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs ring-1 ring-vermilion-red/30"
+                    : "bg-surface-pure border-border-bronze-light/50 hover:bg-paper-cream text-text-charcoal"
+                }`}
+              >
+                <div className="flex items-center justify-between w-full mb-1">
+                  <span className="text-xs font-bold text-text-charcoal">{p.name}</span>
+                  {isSelected && (
+                    <span className="w-4 h-4 rounded-full bg-vermilion-red text-white flex items-center justify-center">
+                      <Check className="w-3 h-3 stroke-[3]" />
+                    </span>
+                  )}
+                </div>
+                <p className="text-[10px] text-text-warm-gray line-clamp-1">{p.vibe}</p>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Upload Custom User Avatar */}
+        <div className="pt-2 border-t border-border-bronze-light/40 flex items-center justify-between gap-2">
+          <div className="text-[11px] text-text-warm-gray flex items-center gap-1.5 truncate">
+            <Upload className="w-3.5 h-3.5 text-bronze-gold flex-shrink-0" />
+            <span className="truncate">Hoặc tải ảnh khuôn mặt cá nhân:</span>
+          </div>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/*"
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className={`text-[11px] px-2.5 py-1 rounded-lg border font-semibold transition-colors shadow-2xs whitespace-nowrap ${
+              customAvatarUrl
+                ? "bg-guardrail-pass-surface border-guardrail-pass/40 text-guardrail-pass"
+                : "border-border-bronze-light/60 bg-surface-pure text-text-charcoal hover:bg-paper-cream"
+            }`}
+          >
+            {customAvatarUrl ? "✓ Đã tải ảnh riêng" : "Tải ảnh lên"}
+          </button>
+        </div>
+      </div>
+
+      {/* Category Navigation Pills */}
+      <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none border-b border-border-bronze-light/40">
         {categories.map((cat) => {
           const Icon = cat.icon;
           const isActive = activeCategory === cat.id;
@@ -93,10 +182,10 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({ outfit, onChange
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id as any)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                 isActive
-                  ? "bg-heritage-red text-white shadow-md shadow-heritage-red/30"
-                  : "bg-heritage-dark text-gray-400 hover:text-gray-200 hover:bg-heritage-dark-hover"
+                  ? "bg-vermilion-red text-white shadow-xs"
+                  : "bg-paper-cream text-text-warm-gray hover:text-text-charcoal border border-border-bronze-light/50"
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -106,116 +195,121 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({ outfit, onChange
         })}
       </div>
 
-      {/* Real-time sync banner: Báo từ khóa tab đang chọn được thêm vào Prompt AI */}
-      <div className="bg-black/40 border border-heritage-gold/20 rounded-xl p-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-heritage-gold animate-pulse flex-shrink-0" />
-          <span className="text-gray-300 font-medium">
-            Đang đồng bộ <strong className="text-white">[{currentTabInfo.label}]</strong>:
-          </span>
-          <span className="px-2 py-0.5 rounded-md bg-heritage-gold/20 text-heritage-gold border border-heritage-gold/30 font-semibold text-[11px]">
-            {currentTabInfo.name}
-          </span>
-        </div>
-        <div className="text-[11px] text-amber-300/90 font-mono truncate max-w-sm">
-          + prompt: &quot;{currentTabInfo.english}&quot;
-        </div>
-      </div>
-
-      {/* Category 1: Garment */}
+      {/* SECTION 1: CỔ PHỤC GIÁM TUYỂN (GARMENTS LIST) */}
       {activeCategory === "garment" && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-gray-400">Chọn nhóm trang phục truyền thống:</span>
-            <span className="text-[11px] text-heritage-gold">{mockupsData.garments.length} mẫu thiết kế</span>
+        <div className="space-y-2.5">
+          <div className="flex items-center justify-between pb-1">
+            <span className="font-mono text-[11px] font-bold text-text-charcoal uppercase tracking-wider">
+              Cổ phục giám tuyển
+            </span>
+            <span className="text-[11px] text-bronze-gold font-bold">
+              {mockupsData.garments.length} Kiểu Dáng
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div className="max-h-[380px] overflow-y-auto space-y-2 pr-1" style={{ scrollbarWidth: "thin" }}>
             {mockupsData.garments.map((g) => {
               const isSelected = outfit.garmentId === g.id;
+              const imgUrl = GARMENT_IMAGES[g.id] || "https://lh3.googleusercontent.com/aida-public/AB6AXuDyzXUf3BHqxz22reppUwLUA64GI1o-bQIfrd6t-Gf95IXjLF2dbgICCvu9WhERkwWkNFdlx5CaSUhqptaaar-eraMinIv50Q0P9ykSoR5oM5-4UkHfwn8g9FwZMJT9f9j8CSefE4QfE1S4rRtuF0bZUgrUuv0tafPcfVp9_1cGdt8wc_EsfucFHOsmywxYrWF0wGOxsmuwZw86jgMPbn6cbG8tEkHKe4XlfwlJv-nmq-JGLuDFdomE";
               const promptKeyword = GARMENT_PROMPT_MAP[g.id] || "";
+
               return (
-                <button
+                <div
                   key={g.id}
                   onClick={() => onChange("garmentId", g.id)}
-                  className={`p-3 rounded-xl text-left border transition-all relative flex flex-col justify-between gap-2 ${
+                  className={`relative p-2.5 rounded-xl border-2 transition-all cursor-pointer group ${
                     isSelected
-                      ? "bg-heritage-red/10 border-heritage-red shadow-sm shadow-heritage-red/20 ring-1 ring-heritage-red/40"
-                      : "bg-heritage-dark/60 border-heritage-dark-border hover:border-gray-600 text-gray-300"
+                      ? "bg-gradient-to-r from-paper-cream to-surface-pure border-vermilion-red shadow-xs"
+                      : "bg-surface-pure hover:bg-paper-cream border-border-bronze-light/40 shadow-xs"
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <div className="text-xs font-bold text-white flex items-center gap-2">
-                        {g.name}
-                        {isSelected && <Check className="w-3.5 h-3.5 text-heritage-red-light stroke-[3]" />}
-                      </div>
-                      <span className="text-[10px] text-heritage-gold font-medium">{g.dynasty}</span>
+                  {isSelected && (
+                    <div className="absolute -top-2 right-3 bg-vermilion-red text-white font-mono text-[9px] px-2 py-0.2 rounded-full font-bold shadow-xs">
+                      ĐANG MẶC
                     </div>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-gray-400">
-                      {g.tag}
-                    </span>
+                  )}
+
+                  <div className="flex gap-2.5">
+                    <div className="w-16 h-20 rounded-lg overflow-hidden bg-surface-container-high flex-shrink-0 relative border border-border-bronze-light">
+                      <img
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        src={imgUrl}
+                        alt={g.name}
+                      />
+                    </div>
+
+                    <div className="flex flex-col justify-between flex-1 min-w-0">
+                      <div>
+                        <div className="flex items-center justify-between gap-1">
+                          <h3 className="font-serif text-[13px] leading-tight text-text-charcoal font-bold truncate">
+                            {g.name}
+                          </h3>
+                          {isSelected && (
+                            <span className="material-symbols-outlined text-[16px] text-vermilion-red flex-shrink-0">
+                              check_circle
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-text-warm-gray mt-0.5 line-clamp-1">
+                          {g.dynasty} • {g.description}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-surface-pure border border-border-bronze-light font-bold text-text-charcoal">
+                          {g.tag}
+                        </span>
+                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-bronze-gold/15 text-stone-800 font-bold truncate max-w-[120px]">
+                          {promptKeyword}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-[11px] text-gray-400 line-clamp-2">{g.description}</p>
-                  
-                  {/* Prompt FLUX tag */}
-                  <div className="pt-1 border-t border-white/5 flex items-center gap-1 text-[9px] text-gray-400 font-mono truncate">
-                    <span className="text-heritage-gold font-semibold">AI FLUX:</span>
-                    <span className="truncate">{promptKeyword}</span>
-                  </div>
-                </button>
+                </div>
               );
             })}
           </div>
         </div>
       )}
 
-      {/* Category 2: Color & Wu Xing */}
+      {/* SECTION 2: MÀU SẮC CHI TIẾT */}
       {activeCategory === "color" && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-gray-400">Chọn sắc màu Di sản & Ngũ Hành:</span>
-            <span className="text-[11px] text-heritage-gold">Triết lý Ngũ Sắc Á Đông</span>
+        <div className="space-y-2.5">
+          <div className="flex items-center justify-between pb-1">
+            <span className="font-mono text-[11px] font-bold text-text-charcoal uppercase tracking-wider">
+              Bảng Màu Di Sản
+            </span>
+            <span className="text-[11px] text-bronze-gold font-bold">
+              {mockupsData.colors.length} Sắc Màu
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-1 gap-2 max-h-[380px] overflow-y-auto pr-1">
             {mockupsData.colors.map((c) => {
               const isSelected = outfit.colorId === c.id;
-              const promptKeyword = COLOR_PROMPT_MAP[c.id] || "";
               return (
                 <button
                   key={c.id}
                   onClick={() => onChange("colorId", c.id)}
-                  className={`p-3 rounded-xl text-left border transition-all flex flex-col gap-2 ${
+                  className={`p-2.5 rounded-xl text-left border transition-all flex items-center gap-3 ${
                     isSelected
-                      ? "bg-white/10 border-heritage-gold shadow-md ring-1 ring-heritage-gold/50"
-                      : "bg-heritage-dark/60 border-heritage-dark-border hover:border-gray-600"
+                      ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs"
+                      : "bg-surface-pure hover:bg-paper-cream border-border-bronze-light/50"
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-10 h-10 rounded-xl flex-shrink-0 shadow-inner border border-white/20 flex items-center justify-center"
-                      style={{ backgroundColor: c.hex }}
-                    >
-                      {isSelected && (
-                        <Check className={`w-4 h-4 stroke-[3] ${c.id === "white-ngoc-trai" ? "text-gray-900" : "text-white"}`} />
-                      )}
+                  <div
+                    className="w-9 h-9 rounded-xl shadow-inner border border-black/10 flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: c.hex }}
+                  >
+                    {isSelected && (
+                      <Check className={`w-4 h-4 stroke-[3] ${c.id === "white-ngoc-trai" ? "text-gray-900" : "text-white"}`} />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-xs font-bold text-text-charcoal truncate">{c.name}</span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-1">
-                        <span className="text-xs font-bold text-white truncate">{c.name}</span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-heritage-gold/15 text-heritage-gold font-semibold border border-heritage-gold/30">
-                          Hành {c.element}
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-gray-400 truncate mt-0.5">{c.meaning}</p>
-                    </div>
-                  </div>
-
-                  {/* Prompt FLUX tag */}
-                  <div className="pt-1 border-t border-white/5 flex items-center gap-1 text-[9px] text-gray-400 font-mono truncate">
-                    <span className="text-amber-400 font-semibold">+ Màu AI:</span>
-                    <span className="truncate">{promptKeyword}</span>
+                    <p className="text-[10px] text-text-warm-gray truncate mt-0.5">{c.meaning}</p>
                   </div>
                 </button>
               );
@@ -224,120 +318,53 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({ outfit, onChange
         </div>
       )}
 
-      {/* Category 3: Occasion */}
-      {activeCategory === "occasion" && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-gray-400">Chọn hoàn cảnh & không gian xuất hiện:</span>
-            <span className="text-[11px] text-heritage-gold">Phù hợp nghi lễ & bối cảnh</span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            {mockupsData.occasions.map((o) => {
-              const isSelected = outfit.occasionId === o.id;
-              const promptKeyword = OCCASION_PROMPT_MAP[o.id] || "";
-              return (
-                <button
-                  key={o.id}
-                  onClick={() => onChange("occasionId", o.id)}
-                  className={`p-3 rounded-xl text-left border transition-all flex flex-col gap-2 ${
-                    isSelected
-                      ? "bg-heritage-indigo/30 border-heritage-gold shadow-sm ring-1 ring-heritage-gold/40"
-                      : "bg-heritage-dark/60 border-heritage-dark-border hover:border-gray-600"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-white">{o.name}</span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-gray-300 border border-white/10">
-                      {o.formalityLevel}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-gray-400 line-clamp-2">{o.weatherHint}</p>
-                  
-                  {/* Prompt FLUX tag */}
-                  <div className="pt-1 border-t border-white/5 flex items-center gap-1 text-[9px] text-gray-400 font-mono truncate">
-                    <span className="text-emerald-400 font-semibold">+ Bối cảnh AI:</span>
-                    <span className="truncate">{promptKeyword}</span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Category 4: Gen Z Style */}
-      {activeCategory === "style" && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-gray-400">Chọn tinh thần thời trang Gen Z:</span>
-            <span className="text-[11px] text-heritage-gold">Remix cá tính</span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            {mockupsData.styles.map((s) => {
-              const isSelected = outfit.styleId === s.id;
-              const styleDesc = STYLE_BACKGROUND_MAP[s.id]?.styleDesc || "";
-              return (
-                <button
-                  key={s.id}
-                  onClick={() => onChange("styleId", s.id)}
-                  className={`p-3 rounded-xl text-left border transition-all flex flex-col gap-2 ${
-                    isSelected
-                      ? "bg-heritage-jade/20 border-teal-400 shadow-sm ring-1 ring-teal-400/40"
-                      : "bg-heritage-dark/60 border-heritage-dark-border hover:border-gray-600"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-white">{s.name}</span>
-                    {isSelected && <Sparkles className="w-3.5 h-3.5 text-teal-300" />}
-                  </div>
-                  <p className="text-[11px] text-gray-400 line-clamp-2">{s.description}</p>
-                  
-                  {/* Prompt FLUX tag */}
-                  <div className="pt-1 border-t border-white/5 flex items-center gap-1 text-[9px] text-gray-400 font-mono truncate">
-                    <span className="text-teal-300 font-semibold">+ Style & Nền:</span>
-                    <span className="truncate">{styleDesc}</span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Category 5: Accessories */}
+      {/* SECTION 3: PHỤ KIỆN NEO-Y2K */}
       {activeCategory === "accessory" && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-gray-400">Điểm xuyết phụ kiện hiện đại & truyền thống:</span>
-            <span className="text-[11px] text-heritage-gold">Chi tiết nâng tầm</span>
+        <div className="space-y-2.5">
+          <div className="flex items-center justify-between pb-1">
+            <span className="font-mono text-[11px] font-bold text-text-charcoal uppercase tracking-wider">
+              Phụ kiện Neo-Y2K
+            </span>
+            <span className="text-[11px] text-bronze-gold font-bold">
+              {mockupsData.accessories.length} Lựa Chọn
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-1 gap-2 max-h-[380px] overflow-y-auto pr-1">
             {mockupsData.accessories.map((a) => {
               const isSelected = outfit.accessoryId === a.id;
-              const promptKeyword = ACCESSORY_PROMPT_MAP[a.id] || (a.id === "none" ? "Không dùng phụ kiện" : "");
+              const promptKeyword = ACCESSORY_PROMPT_MAP[a.id] || "";
               return (
                 <button
                   key={a.id}
                   onClick={() => onChange("accessoryId", a.id)}
-                  className={`p-3 rounded-xl text-left border transition-all flex flex-col gap-2 ${
+                  className={`p-2.5 rounded-xl text-left border transition-all flex items-center justify-between gap-2 ${
                     isSelected
-                      ? "bg-heritage-gold/15 border-heritage-gold shadow-sm ring-1 ring-heritage-gold/40"
-                      : "bg-heritage-dark/60 border-heritage-dark-border hover:border-gray-600"
+                      ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs"
+                      : "bg-surface-pure hover:bg-paper-cream border-border-bronze-light/50"
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-white">{a.name}</span>
-                    {isSelected && <Check className="w-3.5 h-3.5 text-heritage-gold stroke-[3]" />}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-bold text-text-charcoal">{a.name}</span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-paper-cream border border-border-bronze-light/50 text-text-warm-gray font-mono">
+                        {a.type}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-text-warm-gray line-clamp-1 mt-0.5">
+                      {a.culturalNote}
+                    </p>
                   </div>
-                  <p className="text-[11px] text-gray-400 line-clamp-2">{a.culturalNote}</p>
-                  
-                  {/* Prompt FLUX tag */}
-                  <div className="pt-1 border-t border-white/5 flex items-center gap-1 text-[9px] text-gray-400 font-mono truncate">
-                    <span className="text-sky-300 font-semibold">+ Phụ kiện:</span>
-                    <span className="truncate">{promptKeyword || "none"}</span>
+                  <div className="flex items-center gap-1">
+                    {isSelected ? (
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-vermilion-red text-white font-bold">
+                        Đang chọn
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-paper-cream border border-border-bronze-light text-text-warm-gray">
+                        + Thêm
+                      </span>
+                    )}
                   </div>
                 </button>
               );
@@ -346,58 +373,121 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({ outfit, onChange
         </div>
       )}
 
-      {/* Bottom Live Prompt FLUX.1 Assembly Bar */}
-      <div className="mt-2 pt-3 border-t border-heritage-dark-border flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-heritage-gold">
-            <Sparkles className="w-3.5 h-3.5 fill-heritage-gold" />
-            <span>Prompt FLUX.1 Tổng Hợp (Tự Động Ghép Từ Các Tab)</span>
+      {/* SECTION 4: BỐI CẢNH / DỊP */}
+      {activeCategory === "occasion" && (
+        <div className="space-y-2.5">
+          <div className="flex items-center justify-between pb-1">
+            <span className="font-mono text-[11px] font-bold text-text-charcoal uppercase tracking-wider">
+              Bối Cảnh / Hoàn Cảnh
+            </span>
+            <span className="text-[11px] text-bronze-gold font-bold">
+              {mockupsData.occasions.length} Bối Cảnh
+            </span>
           </div>
+
+          <div className="grid grid-cols-1 gap-2 max-h-[380px] overflow-y-auto pr-1">
+            {mockupsData.occasions.map((o) => {
+              const isSelected = outfit.occasionId === o.id;
+              return (
+                <button
+                  key={o.id}
+                  onClick={() => onChange("occasionId", o.id)}
+                  className={`p-2.5 rounded-xl text-left border transition-all flex flex-col gap-1 ${
+                    isSelected
+                      ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs"
+                      : "bg-surface-pure hover:bg-paper-cream border-border-bronze-light/50"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-text-charcoal">{o.name}</span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-paper-cream border border-border-bronze-light/50 text-text-warm-gray font-mono">
+                      {o.formalityLevel}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-text-warm-gray line-clamp-1">{o.weatherHint}</p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* SECTION 5: PHONG CÁCH GEN Z */}
+      {activeCategory === "style" && (
+        <div className="space-y-2.5">
+          <div className="flex items-center justify-between pb-1">
+            <span className="font-mono text-[11px] font-bold text-text-charcoal uppercase tracking-wider">
+              Phong Cách Gen Z
+            </span>
+            <span className="text-[11px] text-bronze-gold font-bold">
+              {mockupsData.styles.length} Phong Cách
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 gap-2 max-h-[380px] overflow-y-auto pr-1">
+            {mockupsData.styles.map((s) => {
+              const isSelected = outfit.styleId === s.id;
+              return (
+                <button
+                  key={s.id}
+                  onClick={() => onChange("styleId", s.id)}
+                  className={`p-2.5 rounded-xl text-left border transition-all flex flex-col gap-1 ${
+                    isSelected
+                      ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs"
+                      : "bg-surface-pure hover:bg-paper-cream border-border-bronze-light/50"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-text-charcoal">{s.name}</span>
+                    {isSelected && <Check className="w-3.5 h-3.5 text-vermilion-red stroke-[3]" />}
+                  </div>
+                  <p className="text-[10px] text-text-warm-gray line-clamp-2">{s.description}</p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Full Prompt Preview Footer */}
+      <div className="pt-2 border-t border-border-bronze-light/40 flex flex-col gap-2">
+        <div className="flex items-center justify-between text-xs">
+          <span className="font-semibold text-text-charcoal flex items-center gap-1.5 text-[11px]">
+            <Sparkles className="w-3.5 h-3.5 text-bronze-gold" />
+            Prompt AI FLUX (Tự động đồng bộ):
+          </span>
           <button
             onClick={() => {
-              navigator.clipboard.writeText(breakdown.fullPrompt);
+              const fullPrompt = generateOutfitPrompt(outfit);
+              navigator.clipboard.writeText(fullPrompt);
               setCopied(true);
               setTimeout(() => setCopied(false), 2000);
             }}
-            className="text-[10px] text-gray-400 hover:text-white flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/5 hover:bg-white/10 transition-colors"
+            className="flex items-center gap-1 text-[10px] text-vermilion-red hover:underline font-semibold"
           >
-            {copied ? (
-              <span className="text-emerald-400 font-bold">Đã sao chép!</span>
-            ) : (
-              <>
-                <Copy className="w-3 h-3" />
-                <span>Sao chép Prompt</span>
-              </>
-            )}
+            <Copy className="w-3 h-3" />
+            <span>{copied ? "Đã sao chép!" : "Sao chép"}</span>
           </button>
         </div>
 
-        {/* 5 Chips showing each tab's active value */}
-        <div className="flex flex-wrap gap-1.5 text-[10px]">
-          <span className="px-2 py-0.5 rounded-lg bg-heritage-gold/15 text-heritage-gold border border-heritage-gold/30 font-medium">
+        {/* 5 Chips showing each active choice */}
+        <div className="flex flex-wrap gap-1 text-[9px]">
+          <span className="px-2 py-0.5 rounded-lg bg-bronze-gold/15 text-stone-800 border border-bronze-gold/30 font-medium truncate max-w-[120px]">
             👘 {breakdown.garmentName}
           </span>
-          <span className="px-2 py-0.5 rounded-lg bg-red-500/15 text-red-300 border border-red-500/30 font-medium">
+          <span className="px-2 py-0.5 rounded-lg bg-vermilion-red/10 text-vermilion-red border border-vermilion-red/20 font-medium truncate">
             🎨 {breakdown.colorName}
           </span>
-          <span className="px-2 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-medium">
-            🏞️ {breakdown.occasionName}
-          </span>
-          <span className="px-2 py-0.5 rounded-lg bg-teal-500/15 text-teal-300 border border-teal-500/30 font-medium">
+          <span className="px-2 py-0.5 rounded-lg bg-guardrail-pass-surface text-guardrail-pass border border-guardrail-pass/30 font-medium truncate">
             ⚡ {breakdown.styleName}
           </span>
-          {outfit.accessoryId !== "none" && (
-            <span className="px-2 py-0.5 rounded-lg bg-sky-500/15 text-sky-300 border border-sky-500/30 font-medium">
-              💎 {breakdown.accessoryName}
-            </span>
-          )}
         </div>
 
         {/* Full prompt string text box */}
-        <div className="p-2.5 rounded-xl bg-black/70 border border-white/10 text-[10px] text-gray-300 font-mono leading-relaxed select-all">
+        <p className="text-[10px] text-text-warm-gray font-mono bg-paper-cream p-2 rounded-xl border border-border-bronze-light/50 leading-relaxed max-h-16 overflow-y-auto select-all">
           {breakdown.fullPrompt}
-        </div>
+        </p>
       </div>
-    </div>
+    </aside>
   );
 };

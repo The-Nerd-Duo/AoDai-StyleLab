@@ -9,7 +9,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Việt Phục Remix • AI Arena Vietnam 2026",
+  title: "AoDai StyleLab • Không Gian Sáng Tạo Cyber-Heritage",
   description:
     "Ứng dụng phối trang phục truyền thống Việt Nam (Áo dài, Áo ngũ thân, Áo tấc...) theo phong cách Gen Z đương đại với AI Cố vấn văn hóa và Lookbook thời trang.",
   keywords: [
@@ -22,6 +22,7 @@ export const metadata: Metadata = {
     "Google AI Studio",
     "Gemini 2.0",
     "Di sản văn hóa Việt",
+    "AoDai StyleLab",
   ],
   authors: [{ name: "The Nerd Duo", url: "https://github.com/The-Nerd-Duo/AoDai-StyleLab" }],
 };
@@ -32,9 +33,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="vi" className="dark">
-      <body className="min-h-screen flex flex-col bg-heritage-dark text-slate-100 font-sans selection:bg-heritage-gold/30 selection:text-white">
-        <main className="flex-1 pb-24">{children}</main>
+    <html lang="vi">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap"
+          rel="stylesheet"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="min-h-screen flex flex-col bg-[#F8F5F0] text-text-charcoal font-sans selection:bg-vermilion-red/20 selection:text-vermilion-red">
+        <main className="flex-1 pb-16 md:pb-0 flex flex-col">{children}</main>
         <BottomNav />
       </body>
     </html>
