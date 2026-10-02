@@ -126,21 +126,18 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
                   if (onUploadCustomAvatar) onUploadCustomAvatar("");
                   onChange("personaId", p.id);
                 }}
-                className={`p-2.5 rounded-xl text-left border transition-all relative flex flex-col justify-between ${
+                className={`py-2 px-3 rounded-xl text-left border transition-all relative flex items-center justify-between ${
                   isSelected
                     ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs ring-1 ring-vermilion-red/30"
                     : "bg-surface-pure border-border-bronze-light/50 hover:bg-paper-cream text-text-charcoal"
                 }`}
               >
-                <div className="flex items-center justify-between w-full mb-1">
-                  <span className="text-xs font-bold text-text-charcoal">{p.name}</span>
-                  {isSelected && (
-                    <span className="w-4 h-4 rounded-full bg-vermilion-red text-white flex items-center justify-center">
-                      <Check className="w-3 h-3 stroke-[3]" />
-                    </span>
-                  )}
-                </div>
-                <p className="text-[10px] text-text-warm-gray line-clamp-1">{p.vibe}</p>
+                <span className="text-xs font-bold text-text-charcoal">{p.name}</span>
+                {isSelected && (
+                  <span className="w-4 h-4 rounded-full bg-vermilion-red text-white flex items-center justify-center shrink-0">
+                    <Check className="w-3 h-3 stroke-[3]" />
+                  </span>
+                )}
               </button>
             );
           })}
@@ -173,23 +170,26 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
         </div>
       </div>
 
-      {/* Category Navigation Pills */}
-      <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none border-b border-border-bronze-light/40">
+      {/* Category Navigation - 5 Options Grid (No horizontal scrolling) */}
+      <div className="grid grid-cols-5 gap-1 sm:gap-1.5 p-1 bg-paper-cream/70 rounded-xl border border-border-bronze-light/50">
         {categories.map((cat) => {
           const Icon = cat.icon;
           const isActive = activeCategory === cat.id;
           return (
             <button
               key={cat.id}
+              type="button"
               onClick={() => setActiveCategory(cat.id as any)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+              className={`flex flex-col items-center justify-center py-2 px-0.5 sm:px-1 rounded-lg text-center transition-all ${
                 isActive
-                  ? "bg-vermilion-red text-white shadow-xs"
-                  : "bg-paper-cream text-text-warm-gray hover:text-text-charcoal border border-border-bronze-light/50"
+                  ? "bg-vermilion-red text-white shadow-xs font-bold"
+                  : "text-text-warm-gray hover:text-text-charcoal hover:bg-surface-pure font-medium"
               }`}
             >
-              <Icon className="w-3.5 h-3.5" />
-              <span>{cat.label}</span>
+              <Icon className="w-4 h-4 mb-1 shrink-0" />
+              <span className="text-[10px] sm:text-xs leading-tight font-semibold">
+                {cat.label}
+              </span>
             </button>
           );
         })}
@@ -284,33 +284,31 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
             </span>
           </div>
 
-          <div className="grid grid-cols-1 gap-2 max-h-[380px] overflow-y-auto pr-1">
+          <div className="grid grid-cols-2 gap-2 max-h-[380px] overflow-y-auto pr-1">
             {mockupsData.colors.map((c) => {
               const isSelected = outfit.colorId === c.id;
               return (
                 <button
                   key={c.id}
+                  type="button"
                   onClick={() => onChange("colorId", c.id)}
-                  className={`p-2.5 rounded-xl text-left border transition-all flex items-center gap-3 ${
+                  className={`p-2 rounded-xl text-left border transition-all flex items-center gap-2.5 ${
                     isSelected
-                      ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs"
+                      ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs ring-1 ring-vermilion-red/20"
                       : "bg-surface-pure hover:bg-paper-cream border-border-bronze-light/50"
                   }`}
                 >
                   <div
-                    className="w-9 h-9 rounded-xl shadow-inner border border-black/10 flex items-center justify-center flex-shrink-0"
+                    className="w-7 h-7 rounded-lg shadow-inner border border-black/10 flex items-center justify-center flex-shrink-0"
                     style={{ backgroundColor: c.hex }}
                   >
                     {isSelected && (
-                      <Check className={`w-4 h-4 stroke-[3] ${c.id === "white-ngoc-trai" ? "text-gray-900" : "text-white"}`} />
+                      <Check
+                        className={`w-3.5 h-3.5 stroke-[3] ${c.id === "white-ngoc-trai" ? "text-gray-900" : "text-white"}`}
+                      />
                     )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-1">
-                      <span className="text-xs font-bold text-text-charcoal truncate">{c.name}</span>
-                    </div>
-                    <p className="text-[10px] text-text-warm-gray truncate mt-0.5">{c.meaning}</p>
-                  </div>
+                  <span className="text-xs font-bold text-text-charcoal truncate">{c.name}</span>
                 </button>
               );
             })}
@@ -333,29 +331,24 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
           <div className="grid grid-cols-1 gap-2 max-h-[380px] overflow-y-auto pr-1">
             {mockupsData.accessories.map((a) => {
               const isSelected = outfit.accessoryId === a.id;
-              const promptKeyword = ACCESSORY_PROMPT_MAP[a.id] || "";
               return (
                 <button
                   key={a.id}
+                  type="button"
                   onClick={() => onChange("accessoryId", a.id)}
                   className={`p-2.5 rounded-xl text-left border transition-all flex items-center justify-between gap-2 ${
                     isSelected
-                      ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs"
+                      ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs ring-1 ring-vermilion-red/20"
                       : "bg-surface-pure hover:bg-paper-cream border-border-bronze-light/50"
                   }`}
                 >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-bold text-text-charcoal">{a.name}</span>
-                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-paper-cream border border-border-bronze-light/50 text-text-warm-gray font-mono">
-                        {a.type}
-                      </span>
-                    </div>
-                    <p className="text-[10px] text-text-warm-gray line-clamp-1 mt-0.5">
-                      {a.culturalNote}
-                    </p>
+                  <div className="min-w-0 flex items-center gap-2">
+                    <span className="text-xs font-bold text-text-charcoal truncate">{a.name}</span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-paper-cream border border-border-bronze-light/50 text-text-warm-gray font-mono shrink-0">
+                      {a.type}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 shrink-0">
                     {isSelected ? (
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-vermilion-red text-white font-bold">
                         Đang chọn
@@ -385,26 +378,30 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
             </span>
           </div>
 
-          <div className="grid grid-cols-1 gap-2 max-h-[380px] overflow-y-auto pr-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[380px] overflow-y-auto pr-1">
             {mockupsData.occasions.map((o) => {
               const isSelected = outfit.occasionId === o.id;
               return (
                 <button
                   key={o.id}
+                  type="button"
                   onClick={() => onChange("occasionId", o.id)}
-                  className={`p-2.5 rounded-xl text-left border transition-all flex flex-col gap-1 ${
+                  className={`p-2.5 rounded-xl text-left border transition-all flex items-center justify-between gap-1.5 ${
                     isSelected
-                      ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs"
+                      ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs ring-1 ring-vermilion-red/20"
                       : "bg-surface-pure hover:bg-paper-cream border-border-bronze-light/50"
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-text-charcoal">{o.name}</span>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-paper-cream border border-border-bronze-light/50 text-text-warm-gray font-mono">
+                  <span className="text-xs font-bold text-text-charcoal truncate">{o.name}</span>
+                  {isSelected ? (
+                    <span className="w-4 h-4 rounded-full bg-vermilion-red text-white flex items-center justify-center shrink-0">
+                      <Check className="w-3 h-3 stroke-[3]" />
+                    </span>
+                  ) : (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-paper-cream border border-border-bronze-light/50 text-text-warm-gray font-mono shrink-0">
                       {o.formalityLevel}
                     </span>
-                  </div>
-                  <p className="text-[10px] text-text-warm-gray line-clamp-1">{o.weatherHint}</p>
+                  )}
                 </button>
               );
             })}
@@ -424,24 +421,26 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
             </span>
           </div>
 
-          <div className="grid grid-cols-1 gap-2 max-h-[380px] overflow-y-auto pr-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[380px] overflow-y-auto pr-1">
             {mockupsData.styles.map((s) => {
               const isSelected = outfit.styleId === s.id;
               return (
                 <button
                   key={s.id}
+                  type="button"
                   onClick={() => onChange("styleId", s.id)}
-                  className={`p-2.5 rounded-xl text-left border transition-all flex flex-col gap-1 ${
+                  className={`p-2.5 rounded-xl text-left border transition-all flex items-center justify-between gap-1.5 ${
                     isSelected
-                      ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs"
+                      ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs ring-1 ring-vermilion-red/20"
                       : "bg-surface-pure hover:bg-paper-cream border-border-bronze-light/50"
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-text-charcoal">{s.name}</span>
-                    {isSelected && <Check className="w-3.5 h-3.5 text-vermilion-red stroke-[3]" />}
-                  </div>
-                  <p className="text-[10px] text-text-warm-gray line-clamp-2">{s.description}</p>
+                  <span className="text-xs font-bold text-text-charcoal truncate">{s.name}</span>
+                  {isSelected && (
+                    <span className="w-4 h-4 rounded-full bg-vermilion-red text-white flex items-center justify-center shrink-0">
+                      <Check className="w-3.5 h-3.5 stroke-[3]" />
+                    </span>
+                  )}
                 </button>
               );
             })}

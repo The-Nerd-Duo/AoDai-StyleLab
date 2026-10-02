@@ -46,7 +46,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen flex flex-col bg-[#F8F5F0] text-text-charcoal font-sans selection:bg-vermilion-red/20 selection:text-vermilion-red">
+      <body className="min-h-screen flex flex-col bg-[#F8F5F0] text-text-charcoal font-sans">
         <main className="flex-1 pb-16 md:pb-0 flex flex-col">{children}</main>
         <BottomNav />
       </body>
