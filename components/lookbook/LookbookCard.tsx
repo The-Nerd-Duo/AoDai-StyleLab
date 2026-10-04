@@ -8,6 +8,7 @@ import framesData from "@/config/frames.json";
 import { useOutfitStore } from "@/lib/store";
 import { toPng } from "html-to-image";
 import { Download, Share2, Check, Sparkles } from "lucide-react";
+import { ShareCommunityModal } from "./ShareCommunityModal";
 
 interface LookbookCardProps {
   outfit: OutfitState;
@@ -20,6 +21,7 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({ outfit, frameId, ima
   const cardRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [communityModalOpen, setCommunityModalOpen] = useState(false);
 
   const garment = mockupsData.garments.find((g) => g.id === outfit.garmentId) || mockupsData.garments[0];
   const color = mockupsData.colors.find((c) => c.id === outfit.colorId) || mockupsData.colors[0];
@@ -207,33 +209,60 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({ outfit, frameId, ima
       )}
 
       {/* Action Buttons */}
-      <div className="flex items-center gap-3 w-full max-w-[340px] sm:max-w-[380px]">
+      <div className="flex flex-col gap-2.5 w-full max-w-[340px] sm:max-w-[380px]">
+        {/* Primary CTA: Chia sẻ lên Cộng đồng */}
         <button
-          onClick={handleDownload}
-          disabled={downloading}
-          className="flex-1 py-3 px-4 rounded-xl bg-vermilion-red hover:bg-primary text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 disabled:opacity-50"
+          onClick={() => setCommunityModalOpen(true)}
+          className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-vermilion-red via-primary to-vermilion-red hover:opacity-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-95 group"
         >
-          <Download className={`w-4 h-4 ${downloading ? "animate-bounce" : ""}`} />
-          <span>{downloading ? "Đang xuất PNG..." : "Tải Ảnh PNG (9:16 HD)"}</span>
+          <Sparkles className="w-4 h-4 text-bronze-gold group-hover:rotate-12 transition-transform" />
+          <span>Chia Sẻ Lên Thư Viện Cộng Đồng</span>
+          <span className="text-[10px] font-mono bg-white/20 px-2 py-0.5 rounded-full ml-1 font-semibold">
+            Live
+          </span>
         </button>
 
-        <button
-          onClick={handleCopyShareLink}
-          className="flex-1 py-3 px-4 rounded-xl bg-surface-pure hover:bg-paper-cream border border-border-bronze-light text-text-charcoal font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-xs"
-        >
-          {copied ? (
-            <>
-              <Check className="w-4 h-4 text-guardrail-pass stroke-[3]" />
-              <span className="text-guardrail-pass font-bold">Đã chép Link!</span>
-            </>
-          ) : (
-            <>
-              <Share2 className="w-4 h-4 text-bronze-gold" />
-              <span>Chia sẻ Link</span>
-            </>
-          )}
-        </button>
+        {/* Secondary Actions: Tải PNG & Chép Link */}
+        <div className="flex items-center gap-2.5 w-full">
+          <button
+            onClick={handleDownload}
+            disabled={downloading}
+            className="flex-1 py-2.5 px-3 rounded-xl bg-paper-cream hover:bg-surface-pure border border-border-bronze-light text-text-charcoal font-semibold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all active:scale-95 disabled:opacity-50"
+          >
+            <Download className={`w-3.5 h-3.5 text-vermilion-red ${downloading ? "animate-bounce" : ""}`} />
+            <span>{downloading ? "Đang xuất..." : "Tải PNG (9:16)"}</span>
+          </button>
+
+          <button
+            onClick={handleCopyShareLink}
+            className="flex-1 py-2.5 px-3 rounded-xl bg-surface-pure hover:bg-paper-cream border border-border-bronze-light text-text-charcoal font-semibold text-xs flex items-center justify-center gap-1.5 transition-all shadow-2xs"
+          >
+            {copied ? (
+              <>
+                <Check className="w-3.5 h-3.5 text-guardrail-pass stroke-[3]" />
+                <span className="text-guardrail-pass font-bold">Đã chép!</span>
+              </>
+            ) : (
+              <>
+                <Share2 className="w-3.5 h-3.5 text-bronze-gold" />
+                <span>Sao chép Link</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
+
+      {/* Community Share Modal */}
+      <ShareCommunityModal
+        isOpen={communityModalOpen}
+        onClose={() => setCommunityModalOpen(false)}
+        outfit={outfit}
+        frameId={frameId}
+        imageUrl={displayImage}
+        onSuccess={() => {
+          setCommunityModalOpen(false);
+        }}
+      />
     </div>
   );
 };
