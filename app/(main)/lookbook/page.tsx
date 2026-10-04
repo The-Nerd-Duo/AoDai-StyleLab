@@ -100,7 +100,11 @@ export default function LookbookPage() {
               });
 
               // Mark as newly added for pulse animation
-              setNewlyAddedIds((prev) => new Set([...prev, newCard.id]));
+              setNewlyAddedIds((prev) => {
+                const next = new Set(prev);
+                next.add(newCard.id);
+                return next;
+              });
               showToast(`🔔 ${newCard.author} vừa chia sẻ: "${newCard.title}"!`);
 
               // Remove highlight after 8 seconds
@@ -156,7 +160,11 @@ export default function LookbookPage() {
               if (prev.some((item) => item.id === newCard.id)) return prev;
               return [newCard, ...prev];
             });
-            setNewlyAddedIds((prev) => new Set([...prev, newCard.id]));
+            setNewlyAddedIds((prev) => {
+              const next = new Set(prev);
+              next.add(newCard.id);
+              return next;
+            });
             showToast(`🔔 ${newCard.author} vừa chia sẻ: "${newCard.title}"!`);
           } else if (payload?.type === "UPDATE_LIKES" && payload.data) {
             setItems((prev) =>
