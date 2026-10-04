@@ -9,6 +9,7 @@ export const DEFAULT_OUTFIT: OutfitState = {
   occasionId: "street-walk",
   styleId: "y2k-neo",
   accessoryId: "man-modern",
+  accessoryIds: ["man-modern"],
   personaId: "female-modern",
 };
 
@@ -28,7 +29,11 @@ export function useOutfitStore() {
     try {
       const savedOutfit = localStorage.getItem(STORAGE_KEY);
       if (savedOutfit) {
-        setOutfitState(JSON.parse(savedOutfit));
+        const parsed = JSON.parse(savedOutfit);
+        if (!Array.isArray(parsed.accessoryIds)) {
+          parsed.accessoryIds = parsed.accessoryId ? [parsed.accessoryId] : [];
+        }
+        setOutfitState(parsed);
       }
       const savedCompare = localStorage.getItem(COMPARE_KEY);
       if (savedCompare) {
@@ -40,7 +45,13 @@ export function useOutfitStore() {
       }
       const savedImage = localStorage.getItem(RESULT_IMAGE_KEY);
       if (savedImage) {
-        setResultImageState(savedImage);
+        // Blob URLs expire upon page reload/session end. Discard them to ensure empty state works cleanly.
+        if (savedImage.startsWith("blob:") || !savedImage.trim()) {
+          localStorage.removeItem(RESULT_IMAGE_KEY);
+          setResultImageState(null);
+        } else {
+          setResultImageState(savedImage);
+        }
       }
     } catch {
       // Ignore localStorage errors (e.g. incognito)
@@ -90,7 +101,7 @@ export function useOutfitStore() {
   const setResultImage = (url: string | null) => {
     setResultImageState(url);
     try {
-      if (url) {
+      if (url && !url.startsWith("blob:")) {
         localStorage.setItem(RESULT_IMAGE_KEY, url);
       } else {
         localStorage.removeItem(RESULT_IMAGE_KEY);

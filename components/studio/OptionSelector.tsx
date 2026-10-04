@@ -126,21 +126,18 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
                   if (onUploadCustomAvatar) onUploadCustomAvatar("");
                   onChange("personaId", p.id);
                 }}
-                className={`p-2.5 rounded-xl text-left border transition-all relative flex flex-col justify-between ${
+                className={`py-2 px-3 rounded-xl text-left border transition-all relative flex items-center justify-between ${
                   isSelected
                     ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs ring-1 ring-vermilion-red/30"
                     : "bg-surface-pure border-border-bronze-light/50 hover:bg-paper-cream text-text-charcoal"
                 }`}
               >
-                <div className="flex items-center justify-between w-full mb-1">
-                  <span className="text-xs font-bold text-text-charcoal">{p.name}</span>
-                  {isSelected && (
-                    <span className="w-4 h-4 rounded-full bg-vermilion-red text-white flex items-center justify-center">
-                      <Check className="w-3 h-3 stroke-[3]" />
-                    </span>
-                  )}
-                </div>
-                <p className="text-[10px] text-text-warm-gray line-clamp-1">{p.vibe}</p>
+                <span className="text-xs font-bold text-text-charcoal">{p.name}</span>
+                {isSelected && (
+                  <span className="w-4 h-4 rounded-full bg-vermilion-red text-white flex items-center justify-center shrink-0">
+                    <Check className="w-3 h-3 stroke-[3]" />
+                  </span>
+                )}
               </button>
             );
           })}
@@ -173,23 +170,26 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
         </div>
       </div>
 
-      {/* Category Navigation Pills */}
-      <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none border-b border-border-bronze-light/40">
+      {/* Category Navigation - 5 Options Grid (No horizontal scrolling) */}
+      <div className="grid grid-cols-5 gap-1 sm:gap-1.5 p-1 bg-paper-cream/70 rounded-xl border border-border-bronze-light/50">
         {categories.map((cat) => {
           const Icon = cat.icon;
           const isActive = activeCategory === cat.id;
           return (
             <button
               key={cat.id}
+              type="button"
               onClick={() => setActiveCategory(cat.id as any)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+              className={`flex flex-col items-center justify-center py-2 px-0.5 sm:px-1 rounded-lg text-center transition-all ${
                 isActive
-                  ? "bg-vermilion-red text-white shadow-xs"
-                  : "bg-paper-cream text-text-warm-gray hover:text-text-charcoal border border-border-bronze-light/50"
+                  ? "bg-vermilion-red text-white shadow-xs font-bold"
+                  : "text-text-warm-gray hover:text-text-charcoal hover:bg-surface-pure font-medium"
               }`}
             >
-              <Icon className="w-3.5 h-3.5" />
-              <span>{cat.label}</span>
+              <Icon className="w-4 h-4 mb-1 shrink-0" />
+              <span className="text-[10px] sm:text-xs leading-tight font-semibold">
+                {cat.label}
+              </span>
             </button>
           );
         })}
@@ -284,33 +284,31 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
             </span>
           </div>
 
-          <div className="grid grid-cols-1 gap-2 max-h-[380px] overflow-y-auto pr-1">
+          <div className="grid grid-cols-2 gap-2 max-h-[380px] overflow-y-auto pr-1">
             {mockupsData.colors.map((c) => {
               const isSelected = outfit.colorId === c.id;
               return (
                 <button
                   key={c.id}
+                  type="button"
                   onClick={() => onChange("colorId", c.id)}
-                  className={`p-2.5 rounded-xl text-left border transition-all flex items-center gap-3 ${
+                  className={`p-2 rounded-xl text-left border transition-all flex items-center gap-2.5 ${
                     isSelected
-                      ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs"
+                      ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs ring-1 ring-vermilion-red/20"
                       : "bg-surface-pure hover:bg-paper-cream border-border-bronze-light/50"
                   }`}
                 >
                   <div
-                    className="w-9 h-9 rounded-xl shadow-inner border border-black/10 flex items-center justify-center flex-shrink-0"
+                    className="w-7 h-7 rounded-lg shadow-inner border border-black/10 flex items-center justify-center flex-shrink-0"
                     style={{ backgroundColor: c.hex }}
                   >
                     {isSelected && (
-                      <Check className={`w-4 h-4 stroke-[3] ${c.id === "white-ngoc-trai" ? "text-gray-900" : "text-white"}`} />
+                      <Check
+                        className={`w-3.5 h-3.5 stroke-[3] ${c.id === "white-ngoc-trai" ? "text-gray-900" : "text-white"}`}
+                      />
                     )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-1">
-                      <span className="text-xs font-bold text-text-charcoal truncate">{c.name}</span>
-                    </div>
-                    <p className="text-[10px] text-text-warm-gray truncate mt-0.5">{c.meaning}</p>
-                  </div>
+                  <span className="text-xs font-bold text-text-charcoal truncate">{c.name}</span>
                 </button>
               );
             })}
@@ -318,60 +316,100 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
         </div>
       )}
 
-      {/* SECTION 3: PHỤ KIỆN NEO-Y2K */}
-      {activeCategory === "accessory" && (
-        <div className="space-y-2.5">
-          <div className="flex items-center justify-between pb-1">
-            <span className="font-mono text-[11px] font-bold text-text-charcoal uppercase tracking-wider">
-              Phụ kiện Neo-Y2K
-            </span>
-            <span className="text-[11px] text-bronze-gold font-bold">
-              {mockupsData.accessories.length} Lựa Chọn
-            </span>
-          </div>
+      {/* SECTION 3: PHỤ KIỆN NEO-Y2K (MULTI-SELECT) */}
+      {activeCategory === "accessory" && (() => {
+        const selectedAccessoryIds = outfit.accessoryIds !== undefined
+          ? outfit.accessoryIds
+          : outfit.accessoryId && outfit.accessoryId !== "none"
+          ? [outfit.accessoryId]
+          : [];
 
-          <div className="grid grid-cols-1 gap-2 max-h-[380px] overflow-y-auto pr-1">
-            {mockupsData.accessories.map((a) => {
-              const isSelected = outfit.accessoryId === a.id;
-              const promptKeyword = ACCESSORY_PROMPT_MAP[a.id] || "";
-              return (
+        const handleToggleAccessory = (accId: string) => {
+          let nextIds: string[];
+          if (selectedAccessoryIds.includes(accId)) {
+            nextIds = selectedAccessoryIds.filter((id) => id !== accId);
+          } else {
+            nextIds = [...selectedAccessoryIds, accId];
+          }
+          onChange("accessoryIds", nextIds);
+          onChange("accessoryId", nextIds[0] || "none");
+        };
+
+        const handleClearAll = () => {
+          onChange("accessoryIds", []);
+          onChange("accessoryId", "none");
+        };
+
+        return (
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between pb-1">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[11px] font-bold text-text-charcoal uppercase tracking-wider">
+                  Phụ kiện Neo-Y2K
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-bronze-gold/15 text-stone-800 font-bold">
+                  Đã chọn {selectedAccessoryIds.length}/{mockupsData.accessories.length}
+                </span>
+              </div>
+              {selectedAccessoryIds.length > 0 && (
                 <button
-                  key={a.id}
-                  onClick={() => onChange("accessoryId", a.id)}
-                  className={`p-2.5 rounded-xl text-left border transition-all flex items-center justify-between gap-2 ${
-                    isSelected
-                      ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs"
-                      : "bg-surface-pure hover:bg-paper-cream border-border-bronze-light/50"
-                  }`}
+                  type="button"
+                  onClick={handleClearAll}
+                  className="text-[10px] text-text-warm-gray hover:text-vermilion-red font-semibold transition-colors"
                 >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-bold text-text-charcoal">{a.name}</span>
-                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-paper-cream border border-border-bronze-light/50 text-text-warm-gray font-mono">
+                  Bỏ chọn tất cả
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 gap-2 max-h-[380px] overflow-y-auto pr-1">
+              {mockupsData.accessories.map((a) => {
+                const isSelected = selectedAccessoryIds.includes(a.id);
+                return (
+                  <button
+                    key={a.id}
+                    type="button"
+                    onClick={() => handleToggleAccessory(a.id)}
+                    className={`p-2.5 rounded-xl text-left border transition-all flex items-center justify-between gap-2 group ${
+                      isSelected
+                        ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs ring-1 ring-vermilion-red/20"
+                        : "bg-surface-pure hover:bg-paper-cream border-border-bronze-light/50 hover:border-border-bronze-light"
+                    }`}
+                  >
+                    <div className="min-w-0 flex items-center gap-2.5">
+                      <div
+                        className={`w-4 h-4 rounded flex items-center justify-center border transition-colors shrink-0 ${
+                          isSelected
+                            ? "bg-vermilion-red border-vermilion-red text-white"
+                            : "border-border-bronze-light/80 bg-surface-pure text-transparent group-hover:border-bronze-gold"
+                        }`}
+                      >
+                        <Check className="w-3 h-3 stroke-[3]" />
+                      </div>
+                      <span className="text-xs font-bold text-text-charcoal truncate">{a.name}</span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-paper-cream border border-border-bronze-light/50 text-text-warm-gray font-mono shrink-0">
                         {a.type}
                       </span>
                     </div>
-                    <p className="text-[10px] text-text-warm-gray line-clamp-1 mt-0.5">
-                      {a.culturalNote}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {isSelected ? (
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-vermilion-red text-white font-bold">
-                        Đang chọn
-                      </span>
-                    ) : (
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-paper-cream border border-border-bronze-light text-text-warm-gray">
-                        + Thêm
-                      </span>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
+                    <div className="flex items-center gap-1 shrink-0">
+                      {isSelected ? (
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-vermilion-red text-white font-bold flex items-center gap-1 shadow-2xs">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                          Đã chọn
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-paper-cream border border-border-bronze-light text-text-warm-gray group-hover:text-text-charcoal transition-colors">
+                          + Thêm
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* SECTION 4: BỐI CẢNH / DỊP */}
       {activeCategory === "occasion" && (
@@ -385,26 +423,42 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
             </span>
           </div>
 
-          <div className="grid grid-cols-1 gap-2 max-h-[380px] overflow-y-auto pr-1">
+          <div className="flex flex-col gap-2 max-h-[390px] overflow-y-auto pr-1">
             {mockupsData.occasions.map((o) => {
               const isSelected = outfit.occasionId === o.id;
               return (
                 <button
                   key={o.id}
+                  type="button"
                   onClick={() => onChange("occasionId", o.id)}
-                  className={`p-2.5 rounded-xl text-left border transition-all flex flex-col gap-1 ${
+                  className={`w-full p-2.5 sm:p-3 rounded-xl text-left border transition-all flex items-center justify-between gap-3 group ${
                     isSelected
-                      ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs"
-                      : "bg-surface-pure hover:bg-paper-cream border-border-bronze-light/50"
+                      ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs ring-1 ring-vermilion-red/20"
+                      : "bg-surface-pure hover:bg-paper-cream border-border-bronze-light/50 hover:border-border-bronze-light"
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-text-charcoal">{o.name}</span>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-paper-cream border border-border-bronze-light/50 text-text-warm-gray font-mono">
-                      {o.formalityLevel}
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <span
+                      className={`w-2 h-2 rounded-full shrink-0 transition-colors ${
+                        isSelected
+                          ? "bg-vermilion-red ring-2 ring-vermilion-red/30"
+                          : "bg-border-bronze-light group-hover:bg-bronze-gold"
+                      }`}
+                    />
+                    <span className="text-xs sm:text-[13px] font-bold text-text-charcoal leading-snug break-words">
+                      {o.name}
                     </span>
                   </div>
-                  <p className="text-[10px] text-text-warm-gray line-clamp-1">{o.weatherHint}</p>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-[9px] px-2 py-0.5 rounded bg-paper-cream border border-border-bronze-light/50 text-text-warm-gray font-mono">
+                      {o.formalityLevel}
+                    </span>
+                    {isSelected && (
+                      <span className="w-4 h-4 rounded-full bg-vermilion-red text-white flex items-center justify-center shrink-0 shadow-xs">
+                        <Check className="w-3 h-3 stroke-[3]" />
+                      </span>
+                    )}
+                  </div>
                 </button>
               );
             })}
@@ -424,24 +478,26 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
             </span>
           </div>
 
-          <div className="grid grid-cols-1 gap-2 max-h-[380px] overflow-y-auto pr-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[380px] overflow-y-auto pr-1">
             {mockupsData.styles.map((s) => {
               const isSelected = outfit.styleId === s.id;
               return (
                 <button
                   key={s.id}
+                  type="button"
                   onClick={() => onChange("styleId", s.id)}
-                  className={`p-2.5 rounded-xl text-left border transition-all flex flex-col gap-1 ${
+                  className={`p-2.5 rounded-xl text-left border transition-all flex items-center justify-between gap-1.5 ${
                     isSelected
-                      ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs"
+                      ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs ring-1 ring-vermilion-red/20"
                       : "bg-surface-pure hover:bg-paper-cream border-border-bronze-light/50"
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-text-charcoal">{s.name}</span>
-                    {isSelected && <Check className="w-3.5 h-3.5 text-vermilion-red stroke-[3]" />}
-                  </div>
-                  <p className="text-[10px] text-text-warm-gray line-clamp-2">{s.description}</p>
+                  <span className="text-xs font-bold text-text-charcoal truncate">{s.name}</span>
+                  {isSelected && (
+                    <span className="w-4 h-4 rounded-full bg-vermilion-red text-white flex items-center justify-center shrink-0">
+                      <Check className="w-3.5 h-3.5 stroke-[3]" />
+                    </span>
+                  )}
                 </button>
               );
             })}

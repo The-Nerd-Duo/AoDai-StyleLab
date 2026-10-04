@@ -110,38 +110,24 @@ export default function LookbookPage() {
       <Header />
 
       <main className="w-full flex flex-col">
-        {/* Sub-header Bar */}
-        <section className="w-full bg-surface-pure shadow-sm border-b border-border-bronze-light/50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <Link
-                href="/"
-                className="p-2 rounded-xl bg-paper-cream hover:bg-surface-container border border-border-bronze-light/60 text-text-warm-gray hover:text-text-charcoal transition-colors"
-                title="Quay lại Studio"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </Link>
-              <div>
-                <h1 className="font-serif font-bold text-xl sm:text-2xl text-text-charcoal tracking-tight">
-                  Bộ sưu tập Lookbook Di sản 9:16
-                </h1>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Link
-                href="/"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-vermilion-red hover:bg-primary text-white font-semibold text-xs shadow-sm transition-all active:scale-95"
-              >
-                <span className="material-symbols-outlined text-[18px]">tune</span>
-                <span>Chỉnh sửa trong Studio</span>
-              </Link>
-            </div>
+        {/* Header Title & Back Button */}
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pt-6 pb-2">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="p-2 rounded-xl bg-paper-cream hover:bg-surface-container border border-border-bronze-light/60 text-text-warm-gray hover:text-text-charcoal transition-colors"
+              title="Quay lại Studio"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </Link>
+            <h1 className="font-serif font-bold text-xl sm:text-2xl text-text-charcoal tracking-tight">
+              Bộ sưu tập Lookbook Di sản 9:16
+            </h1>
           </div>
-        </section>
+        </div>
 
         {/* Workspace: 2-Column Split */}
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-6">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-4">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Left Column (5 cols, sticky): Lookbook Card Editor */}
             <div className="lg:col-span-5 flex flex-col gap-5 sticky top-20">

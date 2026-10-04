@@ -47,8 +47,15 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({ outfit, frameId, ima
     }
   };
 
+  const [imageError, setImageError] = useState(false);
+
   // Resolved display image: props imageUrl takes precedence, then store resultImage, otherwise null ("để khung trống")
-  const displayImage = imageUrl !== undefined ? imageUrl : resultImage;
+  const rawDisplayImage = imageUrl !== undefined ? imageUrl : resultImage;
+  const displayImage = imageError ? null : rawDisplayImage;
+
+  React.useEffect(() => {
+    setImageError(false);
+  }, [rawDisplayImage]);
 
   const handleCopyShareLink = () => {
     const query = encodeOutfitToQuery(outfit, frameId, displayImage);
@@ -110,24 +117,38 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({ outfit, frameId, ima
                     src={displayImage}
                     alt={garment.name}
                     className="w-full h-full object-cover"
+                    onError={() => setImageError(true)}
                   />
                   <div className="absolute bottom-2 left-2 right-2 px-2 py-1 rounded bg-black/70 backdrop-blur-md text-[9px] text-bronze-gold text-center font-medium">
                     Ảnh AI Thực Tế • Cloudflare Worker
                   </div>
                 </>
               ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-[#181615] to-[#100f0e] border border-dashed border-bronze-gold/30 rounded-xl">
-                  <div className="w-14 h-14 rounded-full bg-white/5 border border-bronze-gold/30 flex items-center justify-center text-bronze-gold mb-3 shadow-inner">
-                    <Sparkles className="w-7 h-7 text-bronze-gold/70" />
+                <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-[#181615] to-[#100f0e] rounded-xl relative overflow-hidden select-none">
+                  {/* Subtle Ambient Color Glow */}
+                  <div
+                    className="absolute inset-0 opacity-20 blur-2xl pointer-events-none"
+                    style={{ backgroundColor: color.hex }}
+                  />
+
+                  {/* Corner accents */}
+                  <div className="absolute top-4 left-4 w-3 h-3 border-t border-l border-bronze-gold/30 pointer-events-none" />
+                  <div className="absolute top-4 right-4 w-3 h-3 border-t border-r border-bronze-gold/30 pointer-events-none" />
+                  <div className="absolute bottom-4 left-4 w-3 h-3 border-b border-l border-bronze-gold/30 pointer-events-none" />
+                  <div className="absolute bottom-4 right-4 w-3 h-3 border-b border-r border-bronze-gold/30 pointer-events-none" />
+
+                  {/* Minimalist Glowing Icon */}
+                  <div className="relative z-10 w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-md flex items-center justify-center text-bronze-gold mb-3 shadow-inner">
+                    <Sparkles className="w-6 h-6 text-bronze-gold/85" />
                   </div>
-                  <h4 className="font-serif text-sm font-bold text-paper-cream tracking-wide">
-                    Khung Ảnh Trống
+                  <h4 className="relative z-10 font-serif text-sm font-bold text-paper-cream tracking-wide">
+                    Khung Trưng Bày 9:16
                   </h4>
-                  <p className="text-xs text-white/50 mt-1 max-w-[200px] leading-relaxed">
+                  <p className="relative z-10 text-[11px] text-white/50 mt-1 max-w-[200px] leading-relaxed">
                     Chưa có ảnh phối đồ AI. Hãy tạo ảnh trong Studio để hoàn thiện thẻ Lookbook.
                   </p>
-                  <span className="mt-3 px-2.5 py-0.5 rounded-full bg-bronze-gold/10 text-bronze-gold text-[10px] font-mono border border-bronze-gold/25">
-                    WAITING FOR AI
+                  <span className="relative z-10 mt-3 px-2.5 py-0.5 rounded-full bg-white/[0.06] text-paper-cream/80 text-[9px] font-mono border border-white/10">
+                    HERITAGE READY
                   </span>
                 </div>
               )}
