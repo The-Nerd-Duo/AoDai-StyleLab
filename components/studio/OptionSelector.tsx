@@ -316,55 +316,100 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
         </div>
       )}
 
-      {/* SECTION 3: PHỤ KIỆN NEO-Y2K */}
-      {activeCategory === "accessory" && (
-        <div className="space-y-2.5">
-          <div className="flex items-center justify-between pb-1">
-            <span className="font-mono text-[11px] font-bold text-text-charcoal uppercase tracking-wider">
-              Phụ kiện Neo-Y2K
-            </span>
-            <span className="text-[11px] text-bronze-gold font-bold">
-              {mockupsData.accessories.length} Lựa Chọn
-            </span>
-          </div>
+      {/* SECTION 3: PHỤ KIỆN NEO-Y2K (MULTI-SELECT) */}
+      {activeCategory === "accessory" && (() => {
+        const selectedAccessoryIds = outfit.accessoryIds !== undefined
+          ? outfit.accessoryIds
+          : outfit.accessoryId && outfit.accessoryId !== "none"
+          ? [outfit.accessoryId]
+          : [];
 
-          <div className="grid grid-cols-1 gap-2 max-h-[380px] overflow-y-auto pr-1">
-            {mockupsData.accessories.map((a) => {
-              const isSelected = outfit.accessoryId === a.id;
-              return (
+        const handleToggleAccessory = (accId: string) => {
+          let nextIds: string[];
+          if (selectedAccessoryIds.includes(accId)) {
+            nextIds = selectedAccessoryIds.filter((id) => id !== accId);
+          } else {
+            nextIds = [...selectedAccessoryIds, accId];
+          }
+          onChange("accessoryIds", nextIds);
+          onChange("accessoryId", nextIds[0] || "none");
+        };
+
+        const handleClearAll = () => {
+          onChange("accessoryIds", []);
+          onChange("accessoryId", "none");
+        };
+
+        return (
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between pb-1">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[11px] font-bold text-text-charcoal uppercase tracking-wider">
+                  Phụ kiện Neo-Y2K
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-bronze-gold/15 text-stone-800 font-bold">
+                  Đã chọn {selectedAccessoryIds.length}/{mockupsData.accessories.length}
+                </span>
+              </div>
+              {selectedAccessoryIds.length > 0 && (
                 <button
-                  key={a.id}
                   type="button"
-                  onClick={() => onChange("accessoryId", a.id)}
-                  className={`p-2.5 rounded-xl text-left border transition-all flex items-center justify-between gap-2 ${
-                    isSelected
-                      ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs ring-1 ring-vermilion-red/20"
-                      : "bg-surface-pure hover:bg-paper-cream border-border-bronze-light/50"
-                  }`}
+                  onClick={handleClearAll}
+                  className="text-[10px] text-text-warm-gray hover:text-vermilion-red font-semibold transition-colors"
                 >
-                  <div className="min-w-0 flex items-center gap-2">
-                    <span className="text-xs font-bold text-text-charcoal truncate">{a.name}</span>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-paper-cream border border-border-bronze-light/50 text-text-warm-gray font-mono shrink-0">
-                      {a.type}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    {isSelected ? (
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-vermilion-red text-white font-bold">
-                        Đang chọn
-                      </span>
-                    ) : (
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-paper-cream border border-border-bronze-light text-text-warm-gray">
-                        + Thêm
-                      </span>
-                    )}
-                  </div>
+                  Bỏ chọn tất cả
                 </button>
-              );
-            })}
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 gap-2 max-h-[380px] overflow-y-auto pr-1">
+              {mockupsData.accessories.map((a) => {
+                const isSelected = selectedAccessoryIds.includes(a.id);
+                return (
+                  <button
+                    key={a.id}
+                    type="button"
+                    onClick={() => handleToggleAccessory(a.id)}
+                    className={`p-2.5 rounded-xl text-left border transition-all flex items-center justify-between gap-2 group ${
+                      isSelected
+                        ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs ring-1 ring-vermilion-red/20"
+                        : "bg-surface-pure hover:bg-paper-cream border-border-bronze-light/50 hover:border-border-bronze-light"
+                    }`}
+                  >
+                    <div className="min-w-0 flex items-center gap-2.5">
+                      <div
+                        className={`w-4 h-4 rounded flex items-center justify-center border transition-colors shrink-0 ${
+                          isSelected
+                            ? "bg-vermilion-red border-vermilion-red text-white"
+                            : "border-border-bronze-light/80 bg-surface-pure text-transparent group-hover:border-bronze-gold"
+                        }`}
+                      >
+                        <Check className="w-3 h-3 stroke-[3]" />
+                      </div>
+                      <span className="text-xs font-bold text-text-charcoal truncate">{a.name}</span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-paper-cream border border-border-bronze-light/50 text-text-warm-gray font-mono shrink-0">
+                        {a.type}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      {isSelected ? (
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-vermilion-red text-white font-bold flex items-center gap-1 shadow-2xs">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                          Đã chọn
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-paper-cream border border-border-bronze-light text-text-warm-gray group-hover:text-text-charcoal transition-colors">
+                          + Thêm
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* SECTION 4: BỐI CẢNH / DỊP */}
       {activeCategory === "occasion" && (
@@ -378,7 +423,7 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[380px] overflow-y-auto pr-1">
+          <div className="flex flex-col gap-2 max-h-[390px] overflow-y-auto pr-1">
             {mockupsData.occasions.map((o) => {
               const isSelected = outfit.occasionId === o.id;
               return (
@@ -386,22 +431,34 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
                   key={o.id}
                   type="button"
                   onClick={() => onChange("occasionId", o.id)}
-                  className={`p-2.5 rounded-xl text-left border transition-all flex items-center justify-between gap-1.5 ${
+                  className={`w-full p-2.5 sm:p-3 rounded-xl text-left border transition-all flex items-center justify-between gap-3 group ${
                     isSelected
                       ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs ring-1 ring-vermilion-red/20"
-                      : "bg-surface-pure hover:bg-paper-cream border-border-bronze-light/50"
+                      : "bg-surface-pure hover:bg-paper-cream border-border-bronze-light/50 hover:border-border-bronze-light"
                   }`}
                 >
-                  <span className="text-xs font-bold text-text-charcoal truncate">{o.name}</span>
-                  {isSelected ? (
-                    <span className="w-4 h-4 rounded-full bg-vermilion-red text-white flex items-center justify-center shrink-0">
-                      <Check className="w-3 h-3 stroke-[3]" />
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <span
+                      className={`w-2 h-2 rounded-full shrink-0 transition-colors ${
+                        isSelected
+                          ? "bg-vermilion-red ring-2 ring-vermilion-red/30"
+                          : "bg-border-bronze-light group-hover:bg-bronze-gold"
+                      }`}
+                    />
+                    <span className="text-xs sm:text-[13px] font-bold text-text-charcoal leading-snug break-words">
+                      {o.name}
                     </span>
-                  ) : (
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-paper-cream border border-border-bronze-light/50 text-text-warm-gray font-mono shrink-0">
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-[9px] px-2 py-0.5 rounded bg-paper-cream border border-border-bronze-light/50 text-text-warm-gray font-mono">
                       {o.formalityLevel}
                     </span>
-                  )}
+                    {isSelected && (
+                      <span className="w-4 h-4 rounded-full bg-vermilion-red text-white flex items-center justify-center shrink-0 shadow-xs">
+                        <Check className="w-3 h-3 stroke-[3]" />
+                      </span>
+                    )}
+                  </div>
                 </button>
               );
             })}

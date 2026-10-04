@@ -8,7 +8,8 @@ export interface CulturalAdvisorRequest {
   colorId: string;
   occasionId: string;
   styleId: string;
-  accessoryId: string;
+  accessoryId?: string;
+  accessoryIds?: string[];
   personaId: string;
 }
 
@@ -31,13 +32,20 @@ export interface CulturalAdvisorResponse {
 export async function POST(req: Request) {
   try {
     const body: CulturalAdvisorRequest = await req.json();
-    const { garmentId, colorId, occasionId, styleId, accessoryId } = body;
+    const { garmentId, colorId, occasionId, styleId } = body;
+
+    const accessoryIds = body.accessoryIds && body.accessoryIds.length > 0
+      ? body.accessoryIds
+      : body.accessoryId && body.accessoryId !== "none"
+      ? [body.accessoryId]
+      : [];
 
     const garment = mockupsData.garments.find((g) => g.id === garmentId) || mockupsData.garments[0];
     const color = mockupsData.colors.find((c) => c.id === colorId) || mockupsData.colors[0];
     const occasion = mockupsData.occasions.find((o) => o.id === occasionId) || mockupsData.occasions[0];
     const style = mockupsData.styles.find((s) => s.id === styleId) || mockupsData.styles[0];
-    const accessory = mockupsData.accessories.find((a) => a.id === accessoryId) || mockupsData.accessories[0];
+    const selectedAccessories = mockupsData.accessories.filter((a) => accessoryIds.includes(a.id));
+    const accessoryText = selectedAccessories.length > 0 ? selectedAccessories.map((a) => a.name).join(", ") : "Không có phụ kiện";
 
     // Check pre-configured cultural warnings
     const localWarnings: string[] = [];
@@ -45,7 +53,7 @@ export async function POST(req: Request) {
       const matchGarment = !rule.garmentId || rule.garmentId === garmentId;
       const matchOccasion = !rule.occasionId || rule.occasionId === occasionId;
       const matchStyle = !rule.styleId || rule.styleId === styleId;
-      const matchAccessory = !rule.accessoryId || rule.accessoryId === accessoryId;
+      const matchAccessory = !rule.accessoryId || accessoryIds.includes(rule.accessoryId);
 
       if (matchGarment && matchOccasion && matchStyle && matchAccessory) {
         localWarnings.push(rule.reason);
@@ -67,7 +75,7 @@ Thông tin phối đồ:
 - Màu sắc: ${color.name} (Ngũ hành: ${color.element})
 - Bối cảnh sự kiện: ${occasion.name} (${occasion.formalityLevel})
 - Phong cách Gen Z: ${style.name} (${style.description})
-- Phụ kiện: ${accessory.name}
+- Phụ kiện: ${accessoryText}
 
 HÃY PHẢN HỒI HOÀN TOÀN BẰNG ĐỊNH DẠNG JSON HỢP LỆ VỚI CÁC TRƯỜNG SAU (KHÔNG DÙNG BACKTICKS MARKDOWN):
 {
@@ -129,8 +137,8 @@ HÃY PHẢN HỒI HOÀN TOÀN BẰNG ĐỊNH DẠNG JSON HỢP LỆ VỚI CÁC T
       },
       colorHarmonyVerdict: `Sắc ${color.name} kết hợp cùng phong cách ${style.name} mang lại sự cân bằng giữa nét cổ kính và hơi thở đương đại.`,
       weatherAdvice: `${occasion.weatherHint} Nên ưu tiên chất liệu lụa tơ tằm, đũi hoặc gấm nhẹ thoáng khí để thoải mái vận động.`,
-      culturalNotes: `${garment.culturalSignificance} Khi kết hợp với ${accessory.name}, tổng thể vẫn giữ được nét tao nhã di sản.`,
-      genZStylingTip: `Thử tạo dáng khoanh tay cung kính truyền thống kết hợp góc máy cận cảnh để làm nổi bật chi tiết ${accessory.name}.`,
+      culturalNotes: `${garment.culturalSignificance} Khi kết hợp với ${accessoryText}, tổng thể vẫn giữ được nét tao nhã di sản.`,
+      genZStylingTip: `Thử tạo dáng khoanh tay cung kính truyền thống kết hợp góc máy cận cảnh để làm nổi bật chi tiết ${accessoryText}.`,
       warnings: localWarnings,
     };
 

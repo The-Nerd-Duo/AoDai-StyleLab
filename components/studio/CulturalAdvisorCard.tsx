@@ -42,7 +42,7 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
 
   useEffect(() => {
     fetchAdvice();
-  }, [outfit.garmentId, outfit.colorId, outfit.occasionId, outfit.styleId, outfit.accessoryId]);
+  }, [outfit.garmentId, outfit.colorId, outfit.occasionId, outfit.styleId, outfit.accessoryId, outfit.accessoryIds?.join(",")]);
 
   // Convert 100-point score to 5-star rating (e.g., 98 -> 4.9, 90 -> 4.5)
   const starRating = data ? (data.overallScore / 20).toFixed(1) : "4.9";

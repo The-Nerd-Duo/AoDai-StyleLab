@@ -83,13 +83,24 @@ export function getOutfitPromptBreakdown(outfit: OutfitState): PromptBreakdown {
   const colorObj = mockupsData.colors.find((c) => c.id === outfit.colorId) || mockupsData.colors[0];
   const occasionObj = mockupsData.occasions.find((o) => o.id === outfit.occasionId) || mockupsData.occasions[0];
   const styleObj = mockupsData.styles.find((s) => s.id === outfit.styleId) || mockupsData.styles[0];
-  const accessoryObj = mockupsData.accessories.find((a) => a.id === outfit.accessoryId) || mockupsData.accessories[0];
+
+  const accessoryIds = outfit.accessoryIds && outfit.accessoryIds.length > 0
+    ? outfit.accessoryIds
+    : outfit.accessoryId && outfit.accessoryId !== "none" ? [outfit.accessoryId] : [];
+
+  const selectedAccessories = mockupsData.accessories.filter((a) => accessoryIds.includes(a.id));
+  const accessoryName = selectedAccessories.length > 0
+    ? selectedAccessories.map((a) => a.name).join(", ")
+    : "Không có phụ kiện";
 
   const garmentPrompt = GARMENT_PROMPT_MAP[outfit.garmentId] || GARMENT_PROMPT_MAP[garmentObj.name] || "";
   const colorPrompt = COLOR_PROMPT_MAP[outfit.colorId] || "";
   const occasionPrompt = OCCASION_PROMPT_MAP[outfit.occasionId] || "";
   const stylePrompt = STYLE_PROMPT_MAP[outfit.styleId] || "";
-  const accessoryPrompt = ACCESSORY_PROMPT_MAP[outfit.accessoryId] || "";
+  const accessoryPrompt = accessoryIds
+    .map((id) => ACCESSORY_PROMPT_MAP[id])
+    .filter(Boolean)
+    .join(", ");
   const personaPrompt = PERSONA_MODEL_MAP[outfit.personaId] || "Vietnamese model";
 
   const fullPrompt = generateOutfitPrompt(outfit);
@@ -103,7 +114,7 @@ export function getOutfitPromptBreakdown(outfit: OutfitState): PromptBreakdown {
     occasionPrompt: occasionPrompt ? `Setting: ${occasionPrompt}` : "",
     styleName: styleObj.name,
     stylePrompt: stylePrompt ? `Aesthetics: ${stylePrompt}` : "",
-    accessoryName: accessoryObj.name,
+    accessoryName,
     accessoryPrompt: accessoryPrompt ? `Accessorized with ${accessoryPrompt}` : "",
     personaPrompt,
     fullPrompt,
@@ -116,11 +127,18 @@ export function generateOutfitPrompt(outfit: OutfitState): string {
   const garment = GARMENT_PROMPT_MAP[outfit.garmentId] || GARMENT_PROMPT_MAP["ao-dai-truyen-thong"];
   const occasion = OCCASION_PROMPT_MAP[outfit.occasionId] || "";
   const style = STYLE_PROMPT_MAP[outfit.styleId] || "";
-  const accessory = ACCESSORY_PROMPT_MAP[outfit.accessoryId] || "";
+
+  const accessoryIds = outfit.accessoryIds && outfit.accessoryIds.length > 0
+    ? outfit.accessoryIds
+    : outfit.accessoryId && outfit.accessoryId !== "none" ? [outfit.accessoryId] : [];
+
+  const accessoryPrompts = accessoryIds
+    .map((id) => ACCESSORY_PROMPT_MAP[id])
+    .filter(Boolean);
 
   let prompt = `${ANCHOR_PROMPT} ${model} wearing ${garment}, crafted from ${color}.`;
-  if (accessory) {
-    prompt += ` Accessorized with ${accessory}`;
+  if (accessoryPrompts.length > 0) {
+    prompt += ` Accessorized with ${accessoryPrompts.join(", ")}.`;
   }
   if (occasion) {
     prompt += ` Setting: ${occasion}`;

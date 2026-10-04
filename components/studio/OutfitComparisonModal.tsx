@@ -27,9 +27,11 @@ export const OutfitComparisonModal: React.FC<OutfitComparisonModalProps> = ({
     const color = mockupsData.colors.find((c) => c.id === outfit.colorId) || mockupsData.colors[0];
     const occasion = mockupsData.occasions.find((o) => o.id === outfit.occasionId) || mockupsData.occasions[0];
     const style = mockupsData.styles.find((s) => s.id === outfit.styleId) || mockupsData.styles[0];
-    const accessory = mockupsData.accessories.find((a) => a.id === outfit.accessoryId) || mockupsData.accessories[0];
+    const accIds = outfit.accessoryIds && outfit.accessoryIds.length > 0 ? outfit.accessoryIds : outfit.accessoryId ? [outfit.accessoryId] : [];
+    const selectedAccs = mockupsData.accessories.filter((a) => accIds.includes(a.id));
+    const accessoryText = selectedAccs.length > 0 ? selectedAccs.map((a) => a.name).join(", ") : "Không có";
 
-    return { garment, color, occasion, style, accessory };
+    return { garment, color, occasion, style, accessory: { name: accessoryText } };
   };
 
   const detailsB = getDetails(outfitB);

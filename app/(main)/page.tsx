@@ -42,7 +42,7 @@ export default function StudioPage() {
       <Header />
 
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 py-5 flex flex-col gap-5">
-        {/* MAIN THREE-COLUMN STUDIO DASHBOARD */}
+        {/* MAIN STUDIO DASHBOARD */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
           {/* LEFT COLUMN: Mix & Match Matrix (col-span-4) */}
           <div className="lg:col-span-4 flex flex-col gap-5 order-2 lg:order-1">
@@ -54,26 +54,36 @@ export default function StudioPage() {
             />
           </div>
 
-          {/* CENTER COLUMN: Showcase Canvas & Cultural Harmony AI (col-span-5) */}
-          <div className="lg:col-span-5 flex flex-col gap-5 order-1 lg:order-2">
-            <PreviewWorkspace
-              outfit={outfit}
-              resultImage={resultImage}
-              setResultImage={setResultImage}
-              loading={loading}
-              onGenerateOutfit={handleGenerateOutfit}
-            />
-            <CulturalAdvisorCard outfit={outfit} />
-          </div>
+          {/* RIGHT WORKSPACE AREA (col-span-8): Top Row (Preview & Lookbook) + Bottom Row (Cultural Harmony AI) */}
+          <div className="lg:col-span-8 flex flex-col gap-5 order-1 lg:order-2">
+            {/* TOP ROW: UI "Kết quả phối đồ" & UI "Thẻ lookbook" - Chiều cao bằng nhau và cố định song song */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch">
+              {/* Kết quả phối đồ (md:col-span-7) */}
+              <div className="md:col-span-7 flex flex-col">
+                <PreviewWorkspace
+                  outfit={outfit}
+                  resultImage={resultImage}
+                  setResultImage={setResultImage}
+                  loading={loading}
+                  onGenerateOutfit={handleGenerateOutfit}
+                />
+              </div>
 
-          {/* RIGHT COLUMN: Lookbook 9:16 Digital ID (col-span-3, sticky) */}
-          <div className="lg:col-span-3 flex flex-col gap-5 order-3 sticky top-20">
-            <StudioRightPanel
-              outfit={outfit}
-              resultImage={resultImage}
-              selectedFrame={selectedFrame}
-              onSelectFrame={setSelectedFrame}
-            />
+              {/* Thẻ Lookbook 9:16 (md:col-span-5) - Cố định cùng hàng, chiều cao bằng với UI Kết quả phối đồ */}
+              <div className="md:col-span-5 flex flex-col">
+                <StudioRightPanel
+                  outfit={outfit}
+                  resultImage={resultImage}
+                  selectedFrame={selectedFrame}
+                  onSelectFrame={setSelectedFrame}
+                />
+              </div>
+            </div>
+
+            {/* BOTTOM ROW: Cultural Harmony AI - Mở rộng toàn bộ sang bên phải đến mép của thẻ lookbook */}
+            <div className="w-full">
+              <CulturalAdvisorCard outfit={outfit} />
+            </div>
           </div>
         </div>
       </div>
