@@ -104,7 +104,7 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
                   if (onUploadCustomAvatar) onUploadCustomAvatar("");
                   onChange("personaId", p.id);
                 }}
-                className={`py-2 px-3 rounded-xl text-left border transition-all relative flex items-center justify-between ${
+                className={`py-2 px-3 rounded-xl text-left border transition-all duration-150 relative flex items-center justify-between active:scale-95 active:translate-y-0.5 ${
                   isSelected
                     ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs ring-1 ring-vermilion-red/30"
                     : "bg-surface-pure border-border-bronze-light/50 hover:bg-paper-cream text-text-charcoal"
@@ -137,7 +137,7 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className={`text-[11px] px-2.5 py-1 rounded-lg border font-semibold transition-colors shadow-2xs whitespace-nowrap ${
+            className={`text-[11px] px-2.5 py-1 rounded-lg border font-semibold transition-all duration-150 shadow-2xs whitespace-nowrap active:scale-95 active:translate-y-0.5 ${
               customAvatarUrl
                 ? "bg-guardrail-pass-surface border-guardrail-pass/40 text-guardrail-pass"
                 : "border-border-bronze-light/60 bg-surface-pure text-text-charcoal hover:bg-paper-cream"
@@ -158,7 +158,7 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
               key={cat.id}
               type="button"
               onClick={() => setActiveCategory(cat.id as any)}
-              className={`flex flex-col items-center justify-center py-2 px-0.5 sm:px-1 rounded-lg text-center transition-all ${
+              className={`flex flex-col items-center justify-center py-2 px-0.5 sm:px-1 rounded-lg text-center transition-all duration-150 active:scale-95 active:translate-y-0.5 ${
                 isActive
                   ? "bg-vermilion-red text-white shadow-xs font-bold"
                   : "text-text-warm-gray hover:text-text-charcoal hover:bg-surface-pure font-medium"

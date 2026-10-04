@@ -20,7 +20,7 @@ const COMMUNITY_ITEMS = [
     likes: 1420,
     shares: 320,
     category: "y2k",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAzpOAxeyNU-ueqoWFNbL-ZWkeNj_gjNNw_IH0R6MaLYnmA5lwgX6cDXSW3j2nSiB58n9a0gsUHBNPjncrqYfARAkBcleHlPlijMDaYSfMJCcwK5BMeETHgKz_cKCVcASjl7USFlAC3p14fmLGtjZRIcbft5H-dzD5dgJYslHPfXnSuoU_0vOPN2s_DXcI8A3OtvYxsOUVzjUIrUg-kHug1PIjmSt2B9PhhZ_6WHvphT6wH5aHMj7al",
+    img: "/garments/ao-giao-linh.jpg",
   },
   {
     id: "tu-than-hoian",
@@ -31,7 +31,7 @@ const COMMUNITY_ITEMS = [
     likes: 890,
     shares: 145,
     category: "pho-co",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuA6VZ1mEDu4WIwpq7n4I9Y-qy7aiZSLkyJl-YkPG7J6gcnKREN0PkETLg5NG7173JGb6CpEyfOYUM983ezKZj61GEc4dPb7H1c_QRwim7in9yGwWWWiCmxHFiCUeACSLSaaLDeWVD3_hAF5xOkWOC0Fs4dA9XdWWseHNekTgm9uBWPhEDrZYR36cgfXffS860D5ZQqyk0AHjhZbWd6fgdMaw0AwzRrlZxkxL0j_rrcVUW33txhd2nNI",
+    img: "/garments/ao-tu-than.jpg",
   },
   {
     id: "vien-linh-cyber",
@@ -42,7 +42,7 @@ const COMMUNITY_ITEMS = [
     likes: 2100,
     shares: 640,
     category: "y2k",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAqtloS8lWBgKJhemPxI9fMALOCcDHTW--rwkUpbl2AXqjxB808PiLxsfqEMo7faBVfCumkLRYKPQR4CHOVF0DGjG7t4rDqTJ0igvTmuLethE02zP_LNXNriN720o68BHRKgC4NPizgJ4wQPk5pVGDEQC5lLRJEt2djGRZ-ka02ReBOVlCMpS_PYYs9sa_9cqCXJbhqGIUixn7EV8WnLEVq3BfyYWCWuLPW3dYRFh-5BtWmbLkC-nPs",
+    img: "/garments/ao-lap-linh.jpg",
   },
   {
     id: "ngu-than-bach-hoa",
@@ -53,7 +53,7 @@ const COMMUNITY_ITEMS = [
     likes: 3400,
     shares: 812,
     category: "cung-dinh",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBfU1l0gSbPaLoTeo3tgEUecbSQacO9PmaHyrM_sRwombBm0vUFArSJLn3HOqMK6veCuwZyAYtXo6Kl3Em6Jp1PFuZ2F0eKkmWDkaFlRSjS4QoD1Wy6VdTOVLw4k4U6enNolycvm8GyzLBEHd2kLeC8spZgBBfnQy9hxl7Os3cduJmuI06bqx_ZnGv-SPqIQUrtiI9GXZpwM8RYUvx68onqr6gZMkGyYorHicAH4k0Aa0oQvnarHv0_",
+    img: "/garments/ao-ngu-than-tay-chen.jpg",
   },
   {
     id: "nhat-binh-hoang-gia",
@@ -64,7 +64,7 @@ const COMMUNITY_ITEMS = [
     likes: 5200,
     shares: 1100,
     category: "cung-dinh",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDSCMz45PF4ZIsUApnOtp6niwqv_EK_pT4hBY9SgkjmfNWH4T6FiiQw4_6R8zGjc5wnMVLooa5nTLoJ-XBp_4zpv6in9IU7VvLlDxUZ3vepkIetKVISxrPcoSEuVFTsPteJ4zpFLt8fqiviusKq2fMQsUHN6NCB0mmJRm6-kh1nnLXcCfLPhXw-9nNMkvRP89_cvdmfhHsP-Wh6tp77zdKzZ7Oi51J9mkA9lwVqoSUW8YHllXwHLa-G",
+    img: "/garments/ao-nhat-binh.jpg",
   },
   {
     id: "ao-dai-lemur",
@@ -75,7 +75,7 @@ const COMMUNITY_ITEMS = [
     likes: 1800,
     shares: 410,
     category: "da-tiec",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAzptqeiNiTrbpOFPHDtyChIEsDbduFujGuEa9mgJ3NMAaItGBIRVtwS8XHnGZgqFZ4MuuGTI9beznhEPjRLYxrMfOIhSeIXDdFNvvDfjoMYpMkjLmSHGL2agoWKnJnW2AgdzKqLvUQMYO7WCUs_shYP3noVwJTIb-WlYvqQthOHMFxezkDDQ2UAHEEd2zBe_LqJojdzKzD0P9rNgJvk_h8IMpzfJks1lX2kSZIDpKTFIfv-O7Pills",
+    img: "/garments/ao-dai-cach-tan.jpg",
   },
 ];
 
