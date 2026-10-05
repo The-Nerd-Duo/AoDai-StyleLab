@@ -9,28 +9,47 @@ interface D1Database {
   };
 }
 
-interface Env {
-  LOOKBOOK_KV?: KVNamespace;
-  KV?: KVNamespace;
-  LOOKBOOK_STORE?: KVNamespace;
-  DB?: D1Database;
-  LOOKBOOK_DB?: D1Database;
-}
-
 const CORS_HEADERS = {
   "Content-Type": "application/json",
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
+  "Cache-Control": "no-cache, no-store, must-revalidate",
 };
 
 export async function onRequestOptions() {
   return new Response(null, { status: 204, headers: CORS_HEADERS });
 }
 
+function findKV(env: any): KVNamespace | null {
+  if (!env || typeof env !== "object") return null;
+  const candidates = [env.LOOKBOOK_KV, env.lookbook_kv, env.KV, env.kv, env.LOOKBOOK_STORE];
+  for (const c of candidates) {
+    if (c && typeof c.get === "function" && typeof c.put === "function") return c;
+  }
+  for (const key of Object.keys(env)) {
+    const val = env[key];
+    if (val && typeof val === "object" && typeof val.get === "function" && typeof val.put === "function") return val;
+  }
+  return null;
+}
+
+function findD1(env: any): D1Database | null {
+  if (!env || typeof env !== "object") return null;
+  const candidates = [env.DB, env.db, env.LOOKBOOK_DB, env.lookbook_db];
+  for (const c of candidates) {
+    if (c && typeof c.prepare === "function") return c;
+  }
+  for (const key of Object.keys(env)) {
+    const val = env[key];
+    if (val && typeof val === "object" && typeof val.prepare === "function") return val;
+  }
+  return null;
+}
+
 export async function onRequestGet(context: {
   request: Request;
-  env: Env;
+  env: any;
   params: { id: string };
 }) {
   try {
@@ -43,7 +62,7 @@ export async function onRequestGet(context: {
     }
 
     // 1. Cloudflare D1
-    const d1 = context.env.DB || context.env.LOOKBOOK_DB;
+    const d1 = findD1(context.env);
     if (d1) {
       try {
         const item: any = await d1.prepare("SELECT * FROM lookbooks WHERE id = ?").bind(id).first();
@@ -54,7 +73,7 @@ export async function onRequestGet(context: {
               data: {
                 ...item,
                 isAnonymous: Boolean(item.isAnonymous),
-                outfit: item.outfit ? JSON.parse(item.outfit) : undefined,
+                outfit: item.outfit ? (typeof item.outfit === "string" ? JSON.parse(item.outfit) : item.outfit) : undefined,
               },
             }),
             { headers: CORS_HEADERS }
@@ -66,7 +85,7 @@ export async function onRequestGet(context: {
     }
 
     // 2. Cloudflare KV
-    const kv = context.env.LOOKBOOK_KV || context.env.KV || context.env.LOOKBOOK_STORE;
+    const kv = findKV(context.env);
     if (kv) {
       try {
         const direct = await kv.get(`lookbook:${id}`, "json");
@@ -75,9 +94,9 @@ export async function onRequestGet(context: {
             headers: CORS_HEADERS,
           });
         }
-        const raw = await kv.get("lookbooks_community_all");
+        const raw = await kv.get("lookbooks_community_all", "json");
         if (raw) {
-          const items = typeof raw === "string" ? JSON.parse(raw) : raw;
+          const items = Array.isArray(raw) ? raw : (typeof raw === "string" ? JSON.parse(raw) : []);
           const found = items.find((i: any) => i.id === id);
           if (found) {
             return new Response(JSON.stringify({ success: true, data: found }), {
