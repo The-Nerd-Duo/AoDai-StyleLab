@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Header } from "@/components/shared/Header";
 import { Footer } from "@/components/shared/Footer";
 import { OptionSelector } from "@/components/studio/OptionSelector";
@@ -9,6 +9,7 @@ import { CulturalAdvisorCard } from "@/components/studio/CulturalAdvisorCard";
 import { StudioRightPanel } from "@/components/studio/StudioRightPanel";
 import { useOutfitStore } from "@/lib/store";
 import { generateOutfitPrompt, callFluxWorkerAi } from "@/lib/ai-prompt";
+import mockupsData from "@/config/mockups.json";
 
 export default function StudioPage() {
   const {
@@ -22,6 +23,16 @@ export default function StudioPage() {
 
   const [customAvatar, setCustomAvatar] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const g = params.get("g");
+      if (g && mockupsData.garments.some((item) => item.id === g)) {
+        updateOutfitField("garmentId", g);
+      }
+    }
+  }, [updateOutfitField]);
 
   async function handleGenerateOutfit() {
     setLoading(true);

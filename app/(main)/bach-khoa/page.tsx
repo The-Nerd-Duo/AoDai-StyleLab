@@ -3,8 +3,17 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Header } from "@/components/shared/Header";
 import { Footer } from "@/components/shared/Footer";
-import genealogyData from "@/config/genealogy.json";
-import { Sparkles, Send, RefreshCw, CheckCircle2, AlertTriangle, Paperclip, X, Eye } from "lucide-react";
+import { GarmentGenealogy } from "@/components/bach-khoa/GarmentGenealogy";
+import {
+  Sparkles,
+  Send,
+  RefreshCw,
+  CheckCircle2,
+  AlertTriangle,
+  X,
+  MessageSquare,
+  Diamond,
+} from "lucide-react";
 import { answerHeritageQuestion } from "@/lib/assistant-engine";
 
 interface ChatMessage {
@@ -44,13 +53,22 @@ const INITIAL_MESSAGES: ChatMessage[] = [
 
 const HERITAGE_MOTIFS = [
   {
-    id: "thuy-ba",
-    name: "Thủy Ba Ba Đào (Sóng Nước Nổi Cồn)",
-    dynasty: "Triều Nguyễn",
-    tagColor: "bg-vermilion-red",
-    desc: "Những cột sóng dâng cao vỗ vào mỏm đá ngầm, tượng trưng cho sự chở che giang sơn thái bình, sự phồn thực và uy lực bền bỉ của bậc đế vương.",
-    position: "Vị trí: Gấu áo Cung bào",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDfu-tpuDfvaQ46mro3c5K7eq4OsUd5iIrVn9W1qq6UwQq-6hfu4am-9hiajPvtp36sjRpf30uS0jK8bntwg82cgAy9mdXGdWnVmNAo8mMMcOjl0tM2iakWTCqIF9fGIFFHlfFsXrv4uXxym_qkxnd8XeWBTS14daNkV34gEsk6dqhcBQViuRIFpPgGAAktHsIs_aW0b_3MsAQt27qMcTSIxZZBQMk2j_Y7VSu9aijdrVeYk4Ds6-nN",
+    id: "chim-lac",
+    name: "Chim Lạc Sải Cánh",
+    dynasty: "Thời Đông Sơn",
+    tagColor: "bg-text-charcoal",
+    desc: "Mẫu thức cổ sơ nhất của người Việt, sải cánh dài bay ngược chiều kim đồng hồ quanh mặt trời, tượng trưng cho khát vọng chinh phục vũ trụ và cội nguồn Bách Việt.",
+    position: "Vị trí: Cổ áo, viền dải lụa",
+    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAQ1vxuAux-cjVr7nKaQ3TtLVR2kOL8rbWJWyFBj8P3jLaN2vgLYIuqgf8hj80_ZPjA6GfE3mme5M0pmzmqgISzTAgoBv-mqialJ_tJWUQcsmq880tzPTWGeXGETk6mIWIscFz-jXN6wac7Jhlmm9NlWqEOg-lvxX_W42p7GzD4hftjlUozOYEJuP0J-U0ErHBNJbTGHXlIX3NEspsh9Za7Dd7NHDSmkJ-ybcoblnybyF7WgSmdf5za",
+  },
+  {
+    id: "hoa-sen",
+    name: "Hoa Sen Cổ Phong",
+    dynasty: "Thời Lý – Trần",
+    tagColor: "bg-guardrail-pass",
+    desc: "Biểu tượng thanh khiết của Phật giáo Đại Việt, vươn lên từ bùn lầy giữ trọn hương sắc, gắn liền với cốt cách thanh cao và từ bi.",
+    position: "Vị trí: Ngực áo, vạt áo Giao Lĩnh",
+    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAM2rEcIVKz5_H2cYNTCRo5Al1FQFstocHTvA8ou9INHSSAKO0JnzzD_3tmDPVQS4i8Hoo767WVsL8Pjd9Go26pFwv-qLhuHwCWG2wWrFNqzkWf_ffZ73mtJJzgoutTgjB_2xxgqZam0lDL9GPRmAkErbQZwOjoovMDkX_4URKP7QJ3MjsNKfYLU7mfIblguS1jmkN2B6PgaN00CSe1aXaOa9biu4XSapXmr6aQJpJ2Avc5xrUvRlnw",
   },
   {
     id: "may-tan",
@@ -58,45 +76,91 @@ const HERITAGE_MOTIFS = [
     dynasty: "Thời Hậu Lê",
     tagColor: "bg-bronze-gold",
     desc: "Dải mây dập dờn hình dải lụa mềm mại vươn cao, biểu trưng cho thiên khí cát tường, sự hanh thông của vương triều và cảnh giới tâm hồn thanh thoát.",
-    position: "Vị trí: Tay áo, ngực áo",
+    position: "Vị trí: Tay áo, ngực áo Lập Lĩnh",
     img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAAyn-r9F6DSZZ7S-D9Ro1_1xlPNOvFPZN5aB7AbD3-WXwHf2tU1Dk28LvY7Dh3xiHVxWEvcuGNS2RHP5AJqd15Y07M8fYw9tYtF8ncYtOTxY_lxZ8nUzdyqeQgvcTEwR7nz397RyskS5HHC8qYs0gMc5xRl9QBpLq23iFJh3m8GNDsGH__e_r-TGR3NuZJuz2RHJZ02R57OY-3JVvbgXzA-MC2mvi-rrF7cbUyxaTWfclQQv0Tb-Tt",
   },
   {
-    id: "chim-lac",
-    name: "Chim Lạc Sải Cánh",
-    dynasty: "Thời Tiền Sử / Đông Sơn",
-    tagColor: "bg-text-charcoal",
-    desc: "Mẫu thức cổ sơ nhất của người Việt, sải cánh dài bay ngược chiều kim đồng hồ quanh mặt trời, tượng trưng cho khát vọng chinh phục vũ trụ và nguồn gốc Bách Việt.",
-    position: "Vị trí: Cổ áo, viền khăn",
+    id: "may-rong",
+    name: "Mây Rồng Thời Hậu Lê",
+    dynasty: "Thời Lê Trung Hưng",
+    tagColor: "bg-vermilion-red",
+    desc: "Rồng ẩn hiện trong mây trời cuồn cuộn với bờm dài, móng vuốt uy phong, tượng trưng cho thiên mệnh chính trực và sự hưng thịnh của vương triều.",
+    position: "Vị trí: Bổ tử, ngực áo quan lại",
+    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDfu-tpuDfvaQ46mro3c5K7eq4OsUd5iIrVn9W1qq6UwQq-6hfu4am-9hiajPvtp36sjRpf30uS0jK8bntwg82cgAy9mdXGdWnVmNAo8mMMcOjl0tM2iakWTCqIF9fGIFFHlfFsXrv4uXxym_qkxnd8XeWBTS14daNkV34gEsk6dqhcBQViuRIFpPgGAAktHsIs_aW0b_3MsAQt27qMcTSIxZZBQMk2j_Y7VSu9aijdrVeYk4Ds6-nN",
+  },
+  {
+    id: "cuc-gam",
+    name: "Cúc Gấm Cung Đình",
+    dynasty: "Thời Lê – Nguyễn",
+    tagColor: "bg-bronze-gold",
+    desc: "Cúc gấm đại diện cho đức hạnh người quân tử, trường thọ viên mãn và sự điềm đạm thanh cao trong hệ giá trị lễ nghi Á Đông.",
+    position: "Vị trí: Gấu áo, cổ áo",
+    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAM2rEcIVKz5_H2cYNTCRo5Al1FQFstocHTvA8ou9INHSSAKO0JnzzD_3tmDPVQS4i8Hoo767WVsL8Pjd9Go26pFwv-qLhuHwCWG2wWrFNqzkWf_ffZ73mtJJzgoutTgjB_2xxgqZam0lDL9GPRmAkErbQZwOjoovMDkX_4URKP7QJ3MjsNKfYLU7mfIblguS1jmkN2B6PgaN00CSe1aXaOa9biu4XSapXmr6aQJpJ2Avc5xrUvRlnw",
+  },
+  {
+    id: "thuy-ba",
+    name: "Thủy Ba Ba Đào (Sóng Nước)",
+    dynasty: "Triều Nguyễn",
+    tagColor: "bg-vermilion-red",
+    desc: "Những cột sóng dâng cao vỗ vào mỏm đá ngầm, tượng trưng cho sự chở che giang sơn thái bình, sự phồn thực và uy lực bền bỉ của giang sơn xã tắc.",
+    position: "Vị trí: Gấu áo Ngũ Thân & Cung bào",
+    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDfu-tpuDfvaQ46mro3c5K7eq4OsUd5iIrVn9W1qq6UwQq-6hfu4am-9hiajPvtp36sjRpf30uS0jK8bntwg82cgAy9mdXGdWnVmNAo8mMMcOjl0tM2iakWTCqIF9fGIFFHlfFsXrv4uXxym_qkxnd8XeWBTS14daNkV34gEsk6dqhcBQViuRIFpPgGAAktHsIs_aW0b_3MsAQt27qMcTSIxZZBQMk2j_Y7VSu9aijdrVeYk4Ds6-nN",
+  },
+  {
+    id: "chuc-tho",
+    name: "Chữ Thọ Đồ Án",
+    dynasty: "Triều Nguyễn",
+    tagColor: "bg-bronze-gold",
+    desc: "Đồ án chữ Thọ cách điệu hình tròn hoặc vuông, phối kết cùng vân mây và dơi đỏ (ngũ phúc), biểu trưng cho phúc lộc và sự trường tồn miên viễn.",
+    position: "Vị trí: Thân áo Ngũ Thân, mặt vải gấm",
+    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAAyn-r9F6DSZZ7S-D9Ro1_1xlPNOvFPZN5aB7AbD3-WXwHf2tU1Dk28LvY7Dh3xiHVxWEvcuGNS2RHP5AJqd15Y07M8fYw9tYtF8ncYtOTxY_lxZ8nUzdyqeQgvcTEwR7nz397RyskS5HHC8qYs0gMc5xRl9QBpLq23iFJh3m8GNDsGH__e_r-TGR3NuZJuz2RHJZ02R57OY-3JVvbgXzA-MC2mvi-rrF7cbUyxaTWfclQQv0Tb-Tt",
+  },
+  {
+    id: "phuong-mua",
+    name: "Phượng Múa Hoàng Tộc",
+    dynasty: "Triều Nguyễn",
+    tagColor: "bg-vermilion-red",
+    desc: "Hình tượng chim phụng xòe cánh mềm mại ngậm hoa cúc, biểu trưng cho vẻ đẹp quý phái, đức hạnh và quyền uy của Hoàng hậu, Công chúa.",
+    position: "Vị trí: Ngực áo Nhật Bình, dải cổ",
     img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAQ1vxuAux-cjVr7nKaQ3TtLVR2kOL8rbWJWyFBj8P3jLaN2vgLYIuqgf8hj80_ZPjA6GfE3mme5M0pmzmqgISzTAgoBv-mqialJ_tJWUQcsmq880tzPTWGeXGETk6mIWIscFz-jXN6wac7Jhlmm9NlWqEOg-lvxX_W42p7GzD4hftjlUozOYEJuP0J-U0ErHBNJbTGHXlIX3NEspsh9Za7Dd7NHDSmkJ-ybcoblnybyF7WgSmdf5za",
   },
   {
-    id: "hoa-cuc-day",
-    name: "Hoa Cúc Dây Cung Đình",
-    dynasty: "Thời Lý – Trần",
-    tagColor: "bg-guardrail-pass",
-    desc: "Cúc dây liên hoàn biểu trưng cho lòng trung trinh, cốt cách thanh tao của kẻ sĩ và trường thọ viên mãn trong hệ giá trị nhân văn truyền thống.",
-    position: "Vị trí: Thân áo, đai lưng",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAM2rEcIVKz5_H2cYNTCRo5Al1FQFstocHTvA8ou9INHSSAKO0JnzzD_3tmDPVQS4i8Hoo767WVsL8Pjd9Go26pFwv-qLhuHwCWG2wWrFNqzkWf_ffZ73mtJJzgoutTgjB_2xxgqZam0lDL9GPRmAkErbQZwOjoovMDkX_4URKP7QJ3MjsNKfYLU7mfIblguS1jmkN2B6PgaN00CSe1aXaOa9biu4XSapXmr6aQJpJ2Avc5xrUvRlnw",
+    id: "ngu-sac",
+    name: "Dải Dệt Ngũ Sắc",
+    dynasty: "Triều Nguyễn",
+    tagColor: "bg-text-charcoal",
+    desc: "Năm dải lụa màu (xanh, vàng, trắng, đỏ, lục/đen) tương ứng với Ngũ hành (Kim, Mộc, Thủy, Hỏa, Thổ), biểu trưng cho trật tự vũ trụ và sự hài hòa thịnh vượng.",
+    position: "Vị trí: Tay áo Nhật Bình",
+    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDfu-tpuDfvaQ46mro3c5K7eq4OsUd5iIrVn9W1qq6UwQq-6hfu4am-9hiajPvtp36sjRpf30uS0jK8bntwg82cgAy9mdXGdWnVmNAo8mMMcOjl0tM2iakWTCqIF9fGIFFHlfFsXrv4uXxym_qkxnd8XeWBTS14daNkV34gEsk6dqhcBQViuRIFpPgGAAktHsIs_aW0b_3MsAQt27qMcTSIxZZBQMk2j_Y7VSu9aijdrVeYk4Ds6-nN",
+  },
+  {
+    id: "cyber-pattern",
+    name: "Cyber Đông Phương Matrix",
+    dynasty: "Gen Z Remix",
+    tagColor: "bg-primary",
+    desc: "Đường nét vi mạch neon kết hợp họa tiết kỷ hà truyền thống, thể hiện tinh thần cách tân thời thượng của thế hệ trẻ hướng tới tương lai.",
+    position: "Vị trí: Tà áo dài cách tân Gen Z",
+    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAAyn-r9F6DSZZ7S-D9Ro1_1xlPNOvFPZN5aB7AbD3-WXwHf2tU1Dk28LvY7Dh3xiHVxWEvcuGNS2RHP5AJqd15Y07M8fYw9tYtF8ncYtOTxY_lxZ8nUzdyqeQgvcTEwR7nz397RyskS5HHC8qYs0gMc5xRl9QBpLq23iFJh3m8GNDsGH__e_r-TGR3NuZJuz2RHJZ02R57OY-3JVvbgXzA-MC2mvi-rrF7cbUyxaTWfclQQv0Tb-Tt",
   },
 ];
 
 export default function BachKhoaPage() {
-  const [activeTab, setActiveTab] = useState<"timeline" | "motifs" | "weaving">("timeline");
-  const [searchTerm, setSearchTerm] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
   const [inputMsg, setInputMsg] = useState("");
   const [loadingAi, setLoadingAi] = useState(false);
   const [isCitationModalOpen, setIsCitationModalOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [highlightedMotifId, setHighlightedMotifId] = useState<string | null>(null);
+
   const chatScrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Auto scroll chat to bottom
+  // Auto scroll chat to bottom when messages or loading change
   useEffect(() => {
     if (chatScrollRef.current) {
       chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
     }
-  }, [messages, loadingAi]);
+  }, [messages, loadingAi, isChatOpen]);
 
   const handleSendQuery = async (queryText?: string) => {
     const text = queryText || inputMsg;
@@ -148,6 +212,25 @@ export default function BachKhoaPage() {
     }
   };
 
+  const handleAskAiFromGenealogy = (promptHint: string) => {
+    setIsChatOpen(true);
+    handleSendQuery(promptHint);
+  };
+
+  const handleSelectPattern = (patternId: string) => {
+    setHighlightedMotifId(patternId);
+    const element = document.getElementById(`motif-${patternId}`);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else {
+      const section = document.getElementById("motifs-section");
+      section?.scrollIntoView({ behavior: "smooth" });
+    }
+    setTimeout(() => {
+      setHighlightedMotifId(null);
+    }, 3500);
+  };
+
   const handleSimulateImageAudit = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !e.target.files[0]) return;
     const file = e.target.files[0];
@@ -155,7 +238,7 @@ export default function BachKhoaPage() {
     const uploadBubble: ChatMessage = {
       id: Date.now().toString(),
       sender: "user",
-      text: `[Gửi ảnh kiểm định: ${file.name}] Kiểm định giúp tôi bộ trang phục trong ảnh có đúng quy chuẩn Việt phục triều Nguyễn không?`,
+      text: `[Gửi ảnh kiểm định: ${file.name}] Kiểm định giúp tôi bộ trang phục trong ảnh có đúng quy chuẩn Việt phục không?`,
       time: "Vừa xong",
     };
 
@@ -170,9 +253,9 @@ export default function BachKhoaPage() {
         isAuditResult: true,
         auditPass: true,
         auditDetails: [
-          "Cổ áo: Dáng đứng cổ bọc lót tinh xảo, cao 3.5cm – Chuẩn quy chế Áo Ngũ Thân Triều Nguyễn.",
-          "Cài khuy: Khuy đồng đúc hình quả nhót cài sang phải (Cát khâm).",
-          "Gợi ý cách tân: Quần trắng ống thụng đi kèm đạt độ buông chuẩn mực, có thể phối hài cườm truyền thống để hoàn thiện.",
+          "Cổ áo: Dáng đứng bọc lót tinh xảo, tỷ lệ đạt chuẩn quy chế cổ phục.",
+          "Cài khuy: Cài sang nách phải (Cát khâm) đúng chuẩn phong tục Việt.",
+          "Gợi ý cách tân: Có thể phối thêm phụ kiện mấn nhẹ hoặc hài thêu để hoàn thiện tổng thể.",
         ],
       };
       setMessages((prev) => [...prev, auditResponse]);
@@ -191,506 +274,116 @@ export default function BachKhoaPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8F5F0]">
+    <div className="min-h-screen flex flex-col bg-[#FDFBF7]">
       <Header />
 
-      <main className="w-full flex flex-col">
-        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 md:px-8 py-6 space-y-6">
-          {/* Top Editorial Header & Global Search Bar */}
-          <div className="bg-surface-pure rounded-2xl p-5 sm:p-6 shadow-sm border border-border-bronze-light/60 space-y-4">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-              <div className="space-y-1.5 max-w-2xl">
+      <main className="w-full flex-1 flex flex-col">
+        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 md:px-8 py-6 space-y-10">
+          {/* Top Editorial Header */}
+          <div className="bg-[#FFFFFF] rounded-2xl p-5 sm:p-6 shadow-sm border border-border-bronze-light/60">
+            <div className="space-y-1.5 max-w-3xl">
+              <div className="inline-flex items-center gap-1.5 text-bronze-gold font-bold text-xs uppercase tracking-wider">
+                <span className="material-symbols-outlined text-[16px]">menu_book</span>
+                <span>Kho tàng Tri thức Di sản</span>
+              </div>
+              <h1 className="font-serif font-bold text-xl sm:text-2xl lg:text-3xl text-text-charcoal tracking-tight">
+                Bách khoa Toàn thư Việt phục
+              </h1>
+              <p className="text-xs sm:text-sm text-text-warm-gray leading-relaxed">
+                Khám phá tiến trình nghìn năm y phục dân tộc, tìm hiểu nguồn gốc và giải mã mật ngữ hoa văn di sản qua các thời kỳ lịch sử.
+              </p>
+            </div>
+          </div>
+
+          {/* 1. Component GarmentGenealogy: Nằm ở vị trí đầu tiên của trang */}
+          <GarmentGenealogy
+            onAskAi={handleAskAiFromGenealogy}
+            onSelectPattern={handleSelectPattern}
+          />
+
+          {/* 2. Bảng Giải mã Hoa Văn Di sản: Nằm ngay bên dưới */}
+          <section id="motifs-section" className="w-full space-y-5 pt-4 border-t border-border-bronze-light/50">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 px-1">
+              <div>
                 <div className="inline-flex items-center gap-1.5 text-bronze-gold font-bold text-xs uppercase tracking-wider">
-                  <span className="material-symbols-outlined text-[16px]">menu_book</span>
-                  <span>Kho tàng Tri thức Di sản • Ban Thẩm định Cổ phục VNU</span>
+                  <span className="material-symbols-outlined text-[18px]">diamond</span>
+                  <span>Giải mã Đồ án Di sản</span>
                 </div>
-                <h1 className="font-serif font-bold text-xl sm:text-2xl lg:text-3xl text-text-charcoal tracking-tight">
-                  Bách khoa Toàn thư Việt phục &amp; Trợ lý Di sản AI
-                </h1>
-                <p className="text-xs sm:text-sm text-text-warm-gray leading-relaxed">
-                  Hệ thống cứu chuẩn tra cứu niên biểu 1000 năm y phục dân tộc, giải mã mật ngữ hoa văn và đối thoại trực tiếp cùng Trợ lý Cố Vấn Văn Hóa AI.
+                <h2 className="font-serif font-bold text-xl sm:text-2xl text-text-charcoal tracking-tight mt-0.5">
+                  Hoa Văn & Mật Ngữ Cổ Phong
+                </h2>
+                <p className="text-xs text-text-warm-gray leading-relaxed">
+                  Ý nghĩa biểu tượng, vị trí thêu may và minh triết văn hóa qua từng nét vẽ cổ truyền.
                 </p>
               </div>
+
+              <span className="text-[11px] font-mono text-bronze-gold bg-paper-cream px-3 py-1 rounded-full border border-border-bronze-light/60 self-start sm:self-auto">
+                {HERITAGE_MOTIFS.length} Đồ án Di sản
+              </span>
             </div>
 
-            {/* Search Input Container */}
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-bronze-gold">
-                <span className="material-symbols-outlined text-[22px]">search</span>
-              </div>
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSendQuery(`Tra cứu thông tin về: ${searchTerm}`)}
-                placeholder="Tìm kiếm quy chế cổ phục, triều đại, hoa văn di sản, quy tắc cài khuy..."
-                className="w-full pl-12 pr-32 py-3.5 bg-paper-cream rounded-xl text-text-charcoal text-sm placeholder:text-text-warm-gray focus:outline-none focus:bg-surface-pure border border-border-bronze-light/50 transition-all shadow-inner"
-              />
-              <div className="absolute inset-y-0 right-0 pr-2 flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => alert("Hệ thống lọc theo Triều Đại, Hoa Văn, Chất Liệu Dệt.")}
-                  className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 bg-surface-pure rounded-lg text-xs font-semibold text-text-warm-gray shadow-xs hover:text-text-charcoal transition-colors border border-border-bronze-light/50"
-                >
-                  <span className="material-symbols-outlined text-[14px]">tune</span>
-                  <span>Bộ lọc</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleSendQuery(`Tra cứu thông tin về: ${searchTerm}`)}
-                  className="bg-vermilion-red hover:bg-primary text-white px-4 py-2 rounded-lg font-semibold text-xs transition-opacity shadow-xs"
-                >
-                  Tra cứu
-                </button>
-              </div>
-            </div>
+            {/* Grid Đồ Án Hoa Văn */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {HERITAGE_MOTIFS.map((motif) => {
+                const isHighlighted = highlightedMotifId === motif.id;
 
-            {/* Quick Exploration Filter Chips */}
-            <div className="flex items-center gap-1.5 flex-wrap pt-1 text-xs">
-              <span className="text-text-warm-gray font-medium mr-1">Chủ đề nổi bật:</span>
-              {[
-                "Áo Ngũ Thân",
-                "Áo Giao Lĩnh",
-                "Màu sắc phẩm phục triều Nguyễn",
-                "Quy tắc cài khuy bên phải",
-                "Họa tiết Thủy Ba",
-              ].map((chip) => (
-                <button
-                  key={chip}
-                  type="button"
-                  onClick={() => {
-                    setSearchTerm(chip);
-                    handleSendQuery(`Hãy giải thích chi tiết về: ${chip}`);
-                  }}
-                  className="px-3 py-1 rounded-full bg-surface-container-low hover:bg-[#F2EDE7] text-text-charcoal font-medium transition-colors border border-border-bronze-light/40"
-                >
-                  {chip}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Main 2-Column Split Workspace (7 cols left : 5 cols right) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            {/* LEFT WORKSPACE: Cổ phục Archive & Timeline (7 cols) */}
-            <div className="lg:col-span-7 flex flex-col space-y-5">
-              {/* View Mode Segment Control */}
-              <div className="bg-surface-pure rounded-xl p-1.5 shadow-sm border border-border-bronze-light/60 flex items-center justify-between gap-1 overflow-x-auto">
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("timeline")}
-                  className={`flex-1 py-2 px-3 rounded-lg font-semibold text-xs transition-all flex items-center justify-center gap-1.5 ${
-                    activeTab === "timeline"
-                      ? "bg-vermilion-red text-white shadow-xs"
-                      : "text-text-warm-gray hover:text-text-charcoal hover:bg-paper-cream"
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-[18px]">history_edu</span>
-                  <span>Niên biểu Lịch sử</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("motifs")}
-                  className={`flex-1 py-2 px-3 rounded-lg font-semibold text-xs transition-all flex items-center justify-center gap-1.5 ${
-                    activeTab === "motifs"
-                      ? "bg-vermilion-red text-white shadow-xs"
-                      : "text-text-warm-gray hover:text-text-charcoal hover:bg-paper-cream"
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-[18px]">texture</span>
-                  <span>Giải mã Hoa văn Cổ</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("weaving")}
-                  className={`flex-1 py-2 px-3 rounded-lg font-semibold text-xs transition-all flex items-center justify-center gap-1.5 ${
-                    activeTab === "weaving"
-                      ? "bg-vermilion-red text-white shadow-xs"
-                      : "text-text-warm-gray hover:text-text-charcoal hover:bg-paper-cream"
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-[18px]">palette</span>
-                  <span>Dệt &amp; Phẩm chất</span>
-                </button>
-              </div>
-
-              {/* SECTION 1: Chronological Timeline Container */}
-              {activeTab === "timeline" && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between px-1">
-                    <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-vermilion-red text-[20px]">
-                        account_tree
-                      </span>
-                      <h2 className="font-serif font-bold text-base sm:text-lg text-text-charcoal">
-                        Tiến trình Y phục Việt Nam
-                      </h2>
-                    </div>
-                    <span className="text-[11px] font-mono text-bronze-gold bg-paper-cream px-2.5 py-1 rounded-full border border-border-bronze-light/50">
-                      TK XI — TK XX
-                    </span>
-                  </div>
-
-                  <div className="space-y-3">
-                    {genealogyData.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="p-4 rounded-xl bg-surface-pure border border-border-bronze-light/60 shadow-xs hover:border-bronze-gold transition-all flex flex-col gap-2"
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <span className="text-[10px] font-mono font-bold text-bronze-gold uppercase tracking-wider">
-                              {item.period} • {item.dynasty}
-                            </span>
-                            <h3 className="font-serif font-bold text-sm sm:text-base text-text-charcoal">
-                              {item.title}
-                            </h3>
-                          </div>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-vermilion-red/10 text-vermilion-red border border-vermilion-red/20 whitespace-nowrap">
-                            {item.keyGarment}
-                          </span>
-                        </div>
-                        <p className="text-xs text-text-warm-gray leading-relaxed">
-                          {item.description}
-                        </p>
-                        <div className="pt-2 border-t border-border-bronze-light/30 flex items-center justify-between text-xs">
-                          <span className="text-text-warm-gray italic text-[11px]">
-                            {item.highlight}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => handleSendQuery(`Hãy phân tích chi tiết bối cảnh y phục triều đại ${item.dynasty} (${item.title})?`)}
-                            className="text-vermilion-red font-semibold hover:underline flex items-center gap-0.5 text-[11px]"
-                          >
-                            Hỏi AI triều đại này →
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* SECTION 2: Cultural Motifs Archive Grid */}
-              {(activeTab === "timeline" || activeTab === "motifs") && (
-                <div className="space-y-4 pt-2">
-                  <div className="flex items-center justify-between px-1">
-                    <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-bronze-gold text-[20px]">
-                        diamond
-                      </span>
-                      <h2 className="font-serif font-bold text-base sm:text-lg text-text-charcoal">
-                        Hoa Văn &amp; Đồ Án Di Sản
-                      </h2>
-                    </div>
-                    <span className="text-[11px] text-text-warm-gray font-medium">
-                      Ký hiệu học &amp; Minh triết
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {HERITAGE_MOTIFS.map((motif) => (
-                      <div
-                        key={motif.id}
-                        className="bg-surface-pure rounded-xl p-4 shadow-xs border border-border-bronze-light/60 space-y-3 hover:translate-y-[-2px] transition-transform"
-                      >
-                        <div className="relative h-44 rounded-lg overflow-hidden bg-paper-cream border border-border-bronze-light/40">
-                          <img
-                            src={motif.img}
-                            alt={motif.name}
-                            className="w-full h-full object-cover"
-                          />
-                          <div
-                            className={`absolute top-2 left-2 px-2 py-0.5 ${motif.tagColor} text-white rounded font-mono text-[10px] font-bold shadow-xs`}
-                          >
-                            {motif.dynasty}
-                          </div>
-                        </div>
-
-                        <div className="space-y-1">
-                          <h4 className="font-serif text-[14px] font-bold text-text-charcoal">
-                            {motif.name}
-                          </h4>
-                          <p className="text-xs text-text-warm-gray leading-relaxed line-clamp-3">
-                            {motif.desc}
-                          </p>
-                          <div className="pt-2 flex items-center justify-between text-xs">
-                            <span className="text-bronze-gold text-[11px] font-semibold">
-                              {motif.position}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleSendQuery(
-                                  `Đồ án hoa văn '${motif.name}' có ý nghĩa biểu tượng gì trong văn hóa cổ phục Việt và cách ứng dụng đúng vào thiết kế hiện đại?`
-                                )
-                              }
-                              className="text-vermilion-red font-semibold hover:underline text-[11px]"
-                            >
-                              Hỏi AI ý nghĩa →
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* SECTION 3: Weaving & Material Insights */}
-              {activeTab === "weaving" && (
-                <div className="bg-surface-pure rounded-xl p-5 shadow-sm border border-border-bronze-light/60 space-y-4 animate-fadeIn">
-                  <h3 className="font-serif font-bold text-base sm:text-lg text-text-charcoal">
-                    Chất liệu Dệt truyền thống &amp; Phẩm chất
-                  </h3>
-                  <p className="text-xs sm:text-sm text-text-warm-gray leading-relaxed">
-                    Hệ thống gấm lụa truyền thống Việt Nam: Lụa Vạn Phúc (Hà Đông), Gấm Mã Châu (Quảng Nam), Lãnh Mỹ A (Tân Châu - An Giang nhuộm mặc nưa). Mỗi dòng dệt gắn liền với các phẩm cấp và công năng khí hậu nhiệt đới riêng biệt.
-                  </p>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-                    <div className="p-3.5 bg-paper-cream rounded-xl border border-border-bronze-light/50 text-center space-y-1">
-                      <div className="font-serif text-sm font-bold text-vermilion-red">
-                        Lãnh Mỹ A
-                      </div>
-                      <div className="text-xs text-text-warm-gray">
-                        Đen tuyền óng ả từ trái mặc nưa, mát lạnh mùa hè, ấm áp mùa đông.
-                      </div>
-                    </div>
-
-                    <div className="p-3.5 bg-paper-cream rounded-xl border border-border-bronze-light/50 text-center space-y-1">
-                      <div className="font-serif text-sm font-bold text-bronze-gold">
-                        Sa Đoạn Vạn Phúc
-                      </div>
-                      <div className="text-xs text-text-warm-gray">
-                        Dệt hoa chìm tinh xảo, mỏng nhẹ thông thoáng thích hợp may lót áo Ngũ thân.
-                      </div>
-                    </div>
-
-                    <div className="p-3.5 bg-paper-cream rounded-xl border border-border-bronze-light/50 text-center space-y-1">
-                      <div className="font-serif text-sm font-bold text-text-charcoal">
-                        Gấm Thêu Kim Tuyến
-                      </div>
-                      <div className="text-xs text-text-warm-gray">
-                        Dành cho lễ phục Đại triều, sợi tơ phủ đồng lấp lánh bền vững hàng trăm năm.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* RIGHT WORKSPACE: Interactive Cultural AI Assistant (5 cols, sticky) */}
-            <div className="lg:col-span-5 flex flex-col space-y-4 sticky top-20">
-              <div className="bg-surface-pure rounded-2xl shadow-md border border-border-bronze-light/60 overflow-hidden flex flex-col h-[740px]">
-                {/* Chat Header */}
-                <div className="p-4 bg-paper-cream border-b border-border-bronze-light/50 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-vermilion-red/10 flex items-center justify-center text-vermilion-red">
-                      <span className="material-symbols-outlined text-[22px]">smart_toy</span>
-                    </div>
-                    <div>
-                      <h3 className="font-serif font-bold text-sm sm:text-base text-text-charcoal">
-                        Trợ lý Cố vấn Di sản
-                      </h3>
-                      <div className="flex items-center gap-1 text-guardrail-pass text-[11px] font-semibold">
-                        <span className="material-symbols-outlined text-[14px]">verified</span>
-                        <span>Verified Cultural Guardrail (VNU &amp; Viện VH)</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={handleResetChat}
-                    className="p-1.5 text-text-warm-gray hover:text-text-charcoal rounded-lg hover:bg-surface-pure transition-colors"
-                    title="Làm mới cuộc trò chuyện"
+                return (
+                  <div
+                    key={motif.id}
+                    id={`motif-${motif.id}`}
+                    className={`bg-[#FFFFFF] rounded-2xl p-4 shadow-sm border space-y-3 transition-all duration-500 flex flex-col justify-between ${
+                      isHighlighted
+                        ? "border-vermilion-red ring-2 ring-vermilion-red/50 shadow-lg scale-[1.02] bg-vermilion-red/5"
+                        : "border-border-bronze-light/60 hover:translate-y-[-2px] hover:shadow-md hover:border-bronze-gold/70"
+                    }`}
                   >
-                    <span className="material-symbols-outlined text-[20px]">refresh</span>
-                  </button>
-                </div>
-
-                {/* Chat Conversation Log */}
-                <div
-                  ref={chatScrollRef}
-                  className="flex-1 overflow-y-auto p-4 space-y-3.5 bg-surface-pure"
-                >
-                  {messages.map((m) => {
-                    if (m.sender === "ai") {
-                      return (
-                        <div key={m.id} className="flex items-start gap-2 max-w-[95%]">
-                          <div className="w-7 h-7 rounded-full bg-vermilion-red flex items-center justify-center text-white shrink-0 mt-0.5 text-xs font-bold">
-                            AI
-                          </div>
-                          <div className="bg-paper-cream p-3.5 rounded-xl rounded-tl-xs space-y-2 text-text-charcoal text-xs border border-border-bronze-light/40 shadow-xs">
-                            {m.isCitation && (
-                              <div className="flex items-center gap-1 text-guardrail-pass font-bold text-[11px]">
-                                <span className="material-symbols-outlined text-[14px]">task_alt</span>
-                                <span>Đã thẩm định theo Quy chuẩn Điển lễ</span>
-                              </div>
-                            )}
-
-                            {m.isAuditResult && (
-                              <div className="flex items-center gap-1.5 text-guardrail-pass font-bold text-xs">
-                                <span className="material-symbols-outlined text-[15px]">
-                                  check_circle
-                                </span>
-                                <span>KẾT QUẢ THẨM ĐỊNH HÌNH ẢNH: ĐẠT CHUẨN (PASS 94%)</span>
-                              </div>
-                            )}
-
-                            <div className="leading-relaxed whitespace-pre-line">{m.text}</div>
-
-                            {m.auditDetails && (
-                              <ul className="space-y-1 pl-1 text-[11px]">
-                                {m.auditDetails.map((det, i) => (
-                                  <li key={i} className="flex items-start gap-1">
-                                    <span className="text-vermilion-red">•</span>
-                                    <span>{det}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
-
-                            {/* Thư Tịch Cổ Citation Badge */}
-                            {m.isCitation && (
-                              <div className="bg-surface-pure p-2 rounded-lg flex items-center justify-between gap-2 border border-border-bronze-light/40 mt-1">
-                                <div className="flex items-center gap-1.5 min-w-0">
-                                  <span className="material-symbols-outlined text-bronze-gold text-[18px]">
-                                    auto_stories
-                                  </span>
-                                  <div className="min-w-0">
-                                    <div className="font-bold text-text-charcoal truncate">
-                                      {m.citationTitle}
-                                    </div>
-                                    <div className="text-[10px] text-text-warm-gray truncate">
-                                      {m.citationBook}
-                                    </div>
-                                  </div>
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={() => setIsCitationModalOpen(true)}
-                                  className="px-2 py-0.5 bg-paper-cream hover:bg-secondary-fixed rounded text-vermilion-red font-bold text-[10px] whitespace-nowrap transition-colors border border-border-bronze-light/50"
-                                >
-                                  Xem trích lục
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    } else {
-                      return (
+                    <div className="space-y-3">
+                      <div className="relative h-44 rounded-xl overflow-hidden bg-paper-cream border border-border-bronze-light/40 group">
+                        <img
+                          src={motif.img}
+                          alt={motif.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
                         <div
-                          key={m.id}
-                          className="flex items-start justify-end gap-2 ml-auto max-w-[88%]"
+                          className={`absolute top-2 left-2 px-2.5 py-0.5 ${motif.tagColor} text-white rounded font-mono text-[10px] font-bold shadow-xs`}
                         >
-                          <div className="bg-vermilion-red text-white p-3 rounded-xl rounded-tr-xs space-y-1 text-xs shadow-xs">
-                            <p className="leading-relaxed">{m.text}</p>
-                            {m.time && (
-                              <div className="text-right text-[9px] text-white/75 font-mono">
-                                {m.time}
-                              </div>
-                            )}
-                          </div>
-                          <div className="w-7 h-7 rounded-full bg-bronze-gold flex items-center justify-center text-white shrink-0 mt-0.5">
-                            <span className="material-symbols-outlined text-[14px]">person</span>
-                          </div>
+                          {motif.dynasty}
                         </div>
-                      );
-                    }
-                  })}
-
-                  {loadingAi && (
-                    <div className="flex items-start gap-2 max-w-[90%]">
-                      <div className="w-7 h-7 rounded-full bg-vermilion-red flex items-center justify-center text-white shrink-0 mt-0.5 text-xs font-bold">
-                        AI
                       </div>
-                      <div className="bg-paper-cream p-3 rounded-xl text-xs text-text-warm-gray flex items-center gap-2">
-                        <div className="w-3.5 h-3.5 border-2 border-vermilion-red border-t-transparent rounded-full animate-spin" />
-                        <span>Trợ lý AI đang khảo chứng điển lễ lịch sử...</span>
+
+                      <div className="space-y-1.5">
+                        <h4 className="font-serif text-[14px] font-bold text-text-charcoal leading-snug">
+                          {motif.name}
+                        </h4>
+                        <p className="text-xs text-text-warm-gray leading-relaxed line-clamp-3">
+                          {motif.desc}
+                        </p>
                       </div>
                     </div>
-                  )}
-                </div>
 
-                {/* Quick Prompts */}
-                <div className="px-3 py-1.5 bg-surface-pure border-t border-border-bronze-light/40 flex items-center gap-1.5 overflow-x-auto whitespace-nowrap text-xs text-text-warm-gray scrollbar-none">
-                  <span className="text-[11px] text-bronze-gold font-semibold">Gợi ý:</span>
-                  <button
-                    type="button"
-                    onClick={() => handleSendQuery("Mặc Áo Ngũ Thân đi lễ chùa cần lưu ý gì?")}
-                    className="px-2 py-0.5 bg-paper-cream hover:bg-surface-container-high rounded text-text-charcoal text-[11px] border border-border-bronze-light/50 transition-colors"
-                  >
-                    Lưu ý khi mặc đi lễ chùa?
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleSendQuery("Tại sao cổ phục Việt Nam cài khuy bên phải?")}
-                    className="px-2 py-0.5 bg-paper-cream hover:bg-surface-container-high rounded text-text-charcoal text-[11px] border border-border-bronze-light/50 transition-colors"
-                  >
-                    Tại sao cài khuy bên phải?
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleSendQuery("Ý nghĩa 5 chiếc khuy trên áo ngũ thân?")}
-                    className="px-2 py-0.5 bg-paper-cream hover:bg-surface-container-high rounded text-text-charcoal text-[11px] border border-border-bronze-light/50 transition-colors"
-                  >
-                    Ý nghĩa 5 khuy cài?
-                  </button>
-                </div>
-
-                {/* Chat Input Bar */}
-                <div className="p-3 bg-paper-cream border-t border-border-bronze-light/50 space-y-1">
-                  <div className="relative flex items-center">
-                    <input
-                      type="text"
-                      value={inputMsg}
-                      onChange={(e) => setInputMsg(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && handleSendQuery()}
-                      placeholder="Hỏi AI về lịch sử phục chế, quy chế, hoa văn hoặc vải dệt..."
-                      className="w-full pl-3.5 pr-20 py-2.5 bg-surface-pure rounded-lg text-text-charcoal text-xs placeholder:text-text-warm-gray focus:outline-none border border-border-bronze-light/60 shadow-xs"
-                    />
-                    <div className="absolute right-1.5 flex items-center gap-1">
+                    <div className="pt-2 border-t border-border-bronze-light/30 flex items-center justify-between text-xs">
+                      <span className="text-bronze-gold text-[11px] font-semibold">
+                        {motif.position}
+                      </span>
                       <button
                         type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="p-1.5 text-text-warm-gray hover:text-bronze-gold rounded transition-colors"
-                        title="Tải ảnh Việt phục lên để AI thẩm định đúng sai"
+                        onClick={() => {
+                          setIsChatOpen(true);
+                          handleSendQuery(
+                            `Đồ án hoa văn '${motif.name}' có ý nghĩa biểu tượng gì trong văn hóa cổ phục Việt và cách ứng dụng đúng vào thiết kế hiện đại?`
+                          );
+                        }}
+                        className="text-vermilion-red font-semibold hover:underline text-[11px] flex items-center gap-0.5"
                       >
-                        <span className="material-symbols-outlined text-[18px]">
-                          add_photo_alternate
-                        </span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleSendQuery()}
-                        disabled={loadingAi || !inputMsg.trim()}
-                        className="p-1.5 bg-vermilion-red hover:bg-primary text-white rounded transition-colors disabled:opacity-50 shadow-xs flex items-center justify-center"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">send</span>
+                        <Sparkles className="w-3 h-3 text-bronze-gold" />
+                        <span>Hỏi AI ý nghĩa →</span>
                       </button>
                     </div>
                   </div>
-                </div>
-              </div>
-
-              {/* Cultural Integrity Guardrail Notice Box */}
-              <div className="bg-guardrail-warning-surface p-4 rounded-xl flex items-start gap-3 shadow-xs border border-guardrail-warning/30">
-                <span className="material-symbols-outlined text-guardrail-warning text-[22px] shrink-0 mt-0.5">
-                  policy
-                </span>
-                <div className="space-y-1">
-                  <h4 className="text-xs font-bold text-guardrail-warning">
-                    Cam kết Giữ gìn Tính Xác thực Di sản
-                  </h4>
-                  <p className="text-[11px] text-text-charcoal leading-relaxed">
-                    Dự án <em>AoDai StyleLab</em> khuyến khích Gen Z cách tân và ứng dụng trang phục trong đời sống đương đại, nhưng luôn đề cao nguyên tắc <strong>bảo toàn cấu trúc văn hóa nguyên bản</strong> (khuy cát khâm, tỷ lệ cổ áo, thần thái y quan). Mọi hành vi xuyên tạc biểu tượng lịch sử đều được cảnh báo bởi Cultural Guardrail AI.
-                  </p>
-                </div>
-              </div>
+                );
+              })}
             </div>
-          </div>
+          </section>
         </div>
       </main>
 
@@ -705,10 +398,232 @@ export default function BachKhoaPage() {
         className="hidden"
       />
 
-      {/* Heritage Citation Modal Overlay */}
+      {/* Floating Action Button (FAB) - Bottom Right Corner */}
+      {!isChatOpen && (
+        <button
+          type="button"
+          onClick={() => setIsChatOpen(true)}
+          className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-vermilion-red via-primary to-bronze-gold text-white shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center border-2 border-paper-cream group"
+          title="Mở Trợ lý Cố vấn Di sản AI"
+        >
+          <div className="relative flex items-center justify-center">
+            <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 text-paper-cream group-hover:rotate-12 transition-transform" />
+            <span className="absolute -top-1 -right-1 w-3 h-3 bg-guardrail-pass border-2 border-white rounded-full animate-pulse" />
+          </div>
+          {/* Tooltip on hover for desktop */}
+          <span className="hidden sm:block absolute right-full mr-3 px-3 py-1.5 bg-text-charcoal/90 backdrop-blur-md text-white text-xs font-semibold rounded-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg border border-white/10">
+            Hỏi Trợ lý Di sản AI 💬
+          </span>
+        </button>
+      )}
+
+      {/* Floating Chat Modal / Bottom Sheet (~60% Viewport Height) */}
+      {isChatOpen && (
+        <div className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-[440px] md:w-[460px] h-[60vh] max-h-[620px] min-h-[440px] bg-surface-pure rounded-3xl shadow-2xl border border-bronze-gold/50 flex flex-col overflow-hidden animate-in slide-in-from-bottom-6 fade-in duration-300">
+          {/* Chat Header */}
+          <div className="p-3.5 sm:p-4 bg-gradient-to-r from-vermilion-red/10 via-bronze-gold/10 to-paper-cream border-b border-border-bronze-light/60 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full bg-vermilion-red flex items-center justify-center text-white shadow-sm">
+                <Sparkles className="w-4 h-4 text-paper-cream" />
+              </div>
+              <div>
+                <h3 className="font-serif font-bold text-xs sm:text-sm text-text-charcoal leading-tight">
+                  Trợ lý Cố vấn Di sản
+                </h3>
+                <div className="flex items-center gap-1 text-guardrail-pass text-[10px] font-semibold">
+                  <span className="material-symbols-outlined text-[12px]">verified</span>
+                  <span>Gemini Cultural AI</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={handleResetChat}
+                className="p-1.5 text-text-warm-gray hover:text-text-charcoal rounded-lg hover:bg-white/60 transition-colors"
+                title="Làm mới cuộc trò chuyện"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsChatOpen(false)}
+                className="w-7 h-7 rounded-full bg-white/80 hover:bg-white border border-border-bronze-light flex items-center justify-center text-text-warm-gray hover:text-text-charcoal transition-colors shadow-2xs"
+                title="Thu nhỏ cửa sổ chat (X)"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Chat Conversation Log */}
+          <div
+            ref={chatScrollRef}
+            className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-3 bg-[#FAF7F2]/60"
+          >
+            {messages.map((m) => {
+              if (m.sender === "ai") {
+                return (
+                  <div key={m.id} className="flex items-start gap-2 max-w-[95%]">
+                    <div className="w-7 h-7 rounded-full bg-vermilion-red flex items-center justify-center text-white shrink-0 mt-0.5 text-xs font-bold shadow-xs">
+                      AI
+                    </div>
+                    <div className="bg-paper-cream p-3 sm:p-3.5 rounded-2xl rounded-tl-xs space-y-2 text-text-charcoal text-xs border border-border-bronze-light/40 shadow-xs">
+                      {m.isCitation && (
+                        <div className="flex items-center gap-1 text-guardrail-pass font-bold text-[11px]">
+                          <span className="material-symbols-outlined text-[14px]">task_alt</span>
+                          <span>Đã thẩm định theo Quy chuẩn Điển lễ</span>
+                        </div>
+                      )}
+
+                      {m.isAuditResult && (
+                        <div className="flex items-center gap-1.5 text-guardrail-pass font-bold text-xs">
+                          <span className="material-symbols-outlined text-[15px]">
+                            check_circle
+                          </span>
+                          <span>KẾT QUẢ THẨM ĐỊNH HÌNH ẢNH: ĐẠT CHUẨN (PASS 94%)</span>
+                        </div>
+                      )}
+
+                      <div className="leading-relaxed whitespace-pre-line">{m.text}</div>
+
+                      {m.auditDetails && (
+                        <ul className="space-y-1 pl-1 text-[11px]">
+                          {m.auditDetails.map((det, i) => (
+                            <li key={i} className="flex items-start gap-1">
+                              <span className="text-vermilion-red">•</span>
+                              <span>{det}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+
+                      {/* Thư Tịch Cổ Citation Badge */}
+                      {m.isCitation && (
+                        <div className="bg-surface-pure p-2 rounded-lg flex items-center justify-between gap-2 border border-border-bronze-light/40 mt-1">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <span className="material-symbols-outlined text-bronze-gold text-[18px]">
+                              auto_stories
+                            </span>
+                            <div className="min-w-0">
+                              <div className="font-bold text-text-charcoal truncate">
+                                {m.citationTitle}
+                              </div>
+                              <div className="text-[10px] text-text-warm-gray truncate">
+                                {m.citationBook}
+                              </div>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setIsCitationModalOpen(true)}
+                            className="px-2 py-0.5 bg-paper-cream hover:bg-secondary-fixed rounded text-vermilion-red font-bold text-[10px] whitespace-nowrap transition-colors border border-border-bronze-light/50"
+                          >
+                            Xem trích lục
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              } else {
+                return (
+                  <div
+                    key={m.id}
+                    className="flex items-start justify-end gap-2 ml-auto max-w-[88%]"
+                  >
+                    <div className="bg-vermilion-red text-white p-3 rounded-2xl rounded-tr-xs space-y-1 text-xs shadow-xs">
+                      <p className="leading-relaxed">{m.text}</p>
+                      {m.time && (
+                        <div className="text-right text-[9px] text-white/75 font-mono">
+                          {m.time}
+                        </div>
+                      )}
+                    </div>
+                    <div className="w-7 h-7 rounded-full bg-bronze-gold flex items-center justify-center text-white shrink-0 mt-0.5 shadow-xs">
+                      <span className="material-symbols-outlined text-[14px]">person</span>
+                    </div>
+                  </div>
+                );
+              }
+            })}
+
+            {loadingAi && (
+              <div className="flex items-start gap-2 max-w-[90%]">
+                <div className="w-7 h-7 rounded-full bg-vermilion-red flex items-center justify-center text-white shrink-0 mt-0.5 text-xs font-bold">
+                  AI
+                </div>
+                <div className="bg-paper-cream p-3 rounded-xl text-xs text-text-warm-gray flex items-center gap-2 border border-border-bronze-light/40">
+                  <div className="w-3.5 h-3.5 border-2 border-vermilion-red border-t-transparent rounded-full animate-spin" />
+                  <span>Trợ lý AI đang khảo chứng điển lễ lịch sử...</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Quick Prompt Chips */}
+          <div className="px-3 py-2 bg-surface-pure border-t border-border-bronze-light/40 flex items-center gap-1.5 overflow-x-auto whitespace-nowrap text-xs scrollbar-none">
+            <span className="text-[10px] text-bronze-gold font-bold uppercase tracking-wider shrink-0">
+              Gợi ý:
+            </span>
+            {[
+              "Tại sao Áo ngũ thân có 5 cúc?",
+              "Mặc gì đi lễ chùa trang trọng?",
+              "Áo Tấc khác Áo Ngũ Thân tay chẽn ở điểm nào?",
+              "Quy tắc phối đồ chuẩn văn hóa cho Gen Z?",
+            ].map((chip, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => handleSendQuery(chip)}
+                className="px-2.5 py-1 bg-paper-cream hover:bg-vermilion-red/10 text-text-charcoal hover:text-vermilion-red rounded-full text-[11px] font-medium border border-border-bronze-light/60 transition-colors shrink-0 shadow-2xs"
+              >
+                {chip}
+              </button>
+            ))}
+          </div>
+
+          {/* Chat Input Bar */}
+          <div className="p-2.5 sm:p-3 bg-paper-cream border-t border-border-bronze-light/50">
+            <div className="relative flex items-center">
+              <input
+                type="text"
+                value={inputMsg}
+                onChange={(e) => setInputMsg(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSendQuery()}
+                placeholder="Hỏi AI về cổ phục, điển lễ, hoa văn..."
+                className="w-full pl-3 pr-20 py-2 sm:py-2.5 bg-surface-pure rounded-xl text-text-charcoal text-xs placeholder:text-text-warm-gray focus:outline-none border border-border-bronze-light/60 shadow-inner"
+              />
+              <div className="absolute right-1.5 flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="p-1.5 text-text-warm-gray hover:text-bronze-gold rounded-lg transition-colors"
+                  title="Tải ảnh Việt phục lên để AI thẩm định đúng sai"
+                >
+                  <span className="material-symbols-outlined text-[18px]">
+                    add_photo_alternate
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSendQuery()}
+                  disabled={loadingAi || !inputMsg.trim()}
+                  className="p-1.5 bg-vermilion-red hover:bg-primary text-white rounded-lg transition-colors disabled:opacity-50 shadow-xs flex items-center justify-center"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Heritage Citation Modal Overlay (Higher z-index) */}
       {isCitationModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-text-charcoal/50 backdrop-blur-sm">
-          <div className="bg-paper-cream max-w-lg w-full rounded-2xl p-6 shadow-xl space-y-4 border border-border-bronze-light">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-text-charcoal/50 backdrop-blur-sm">
+          <div className="bg-paper-cream max-w-lg w-full rounded-2xl p-6 shadow-xl space-y-4 border border-border-bronze-light animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-vermilion-red">
                 <span className="material-symbols-outlined text-[22px]">menu_book</span>
