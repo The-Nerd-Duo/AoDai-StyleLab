@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { MessageSquare, Send, Sparkles, User, Bot, Loader2 } from "lucide-react";
 import { answerHeritageQuestion } from "@/lib/assistant-engine";
+import { FormattedMarkdown } from "@/components/shared/FormattedMarkdown";
 
 interface Message {
   role: "user" | "assistant";
@@ -116,7 +117,11 @@ export const GeminiChatAssistant: React.FC = () => {
                   : "bg-heritage-dark-card border border-heritage-dark-border text-gray-200"
               }`}
             >
-              {m.content}
+              {m.role === "assistant" ? (
+                <FormattedMarkdown content={m.content} />
+              ) : (
+                m.content
+              )}
             </div>
 
             {m.role === "user" && (

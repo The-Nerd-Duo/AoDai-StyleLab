@@ -1,58 +1,72 @@
 [
   {
-    "period": "Thế kỷ 11 - 14",
+    "id": "giao-linh",
+    "era": "Thế kỷ XI - XV",
     "dynasty": "Thời Lý - Trần",
-    "title": "Hào Khí Đông A & Phật Giáo Hưng Thịnh",
-    "keyGarment": "Áo Giao Lĩnh Cổ Chéo & Y phục Thường dân",
-    "description": "Thời kỳ Phật giáo là quốc giáo, trang phục mang tính khoáng đạt, tao nhã. Áo cổ chéo (Giao lĩnh) vạt trái đè vạt phải rất thịnh hành từ thường dân đến hoàng tộc.",
-    "highlight": "Bắt nguồn cho phom dáng tay rộng thanh thoát và tinh thần tự chủ dân tộc sau nghìn năm Bắc thuộc."
+    "name": "Áo Giao Lĩnh",
+    "category": "Cổ phục • Lễ phục & Thường phục",
+    "image": "/mockups/giao-linh_heritage.webp",
+    "summary": "Mẫu áo cổ rủ chéo vắt sang bên phải, mang kiểu dáng phóng khoáng và lâu đời bậc nhất trong lịch sử trang phục Việt Nam.",
+    "origin": "Xuất hiện từ thời Lý - Trần, Áo Giao Lĩnh đại diện cho tinh thần cởi mở, tự nhiên và bề dày di sản văn hóa Đại Việt cổ đại.",
+    "symbolism": "Thắt lưng dải lụa buông rủ tạo nét mềm mại thanh thoát; cấu trúc giao cổ tượng trưng cho sự hòa hợp giữa Âm Dương và Đất Trời.",
+    "related_patterns": ["chim-lac", "hoa-sen"],
+    "studio_garment_id": "giao-linh",
+    "ai_prompt_hint": "Tại sao Áo Giao Lĩnh thời Lý - Trần lại có phần cổ áo rủ chéo bộc lộ nét phóng khoáng?"
   },
   {
-    "period": "Thế kỷ 15 - 18",
-    "dynasty": "Thời Hậu Lê",
-    "title": "Quy Chế Triều Điển & Điêu Khắc Văn Minh",
-    "keyGarment": "Áo Giao Lĩnh, Viên Lĩnh (Cổ Tròn), Bổ Phục",
-    "description": "Nho giáo thịnh hành, phân định thứ bậc trang phục thông qua Bổ phục (miếng vải thêu chim muông hoặc thú dữ trước ngực quan lại). Thường phục có phom dáng áo dài cổ tròn hoặc cổ chéo.",
-    "highlight": "Quy chuẩn hóa màu sắc và chất liệu lụa tơ tằm theo phẩm hàm triều đình."
+    "id": "lap-linh",
+    "era": "Thế kỷ XV - XVII",
+    "dynasty": "Thời Lê Sơ & Lê Trung Hưng",
+    "name": "Áo Lập Lĩnh",
+    "category": "Lễ phục Quý tộc & Quan lại",
+    "image": "/mockups/lap-linh_heritage.webp",
+    "summary": "Dáng áo cổ đứng trần kín đáo với đường cài cúc tinh xảo, đánh dấu bước phát triển quan trọng về chuẩn mực lễ nghi cổ xưa.",
+    "origin": "Phát triển mạnh mẽ dưới thời nhà Lê, Áo Lập Lĩnh được định hình để đáp ứng các quy chuẩn trang trọng trong triều đình và giới sĩ phu.",
+    "symbolism": "Cổ áo đứng thẳng tượng trưng cho khí tiết chính trực, nghiêm cẩn của người quân tử và sự tôn nghiêm trong nghi lễ.",
+    "related_patterns": ["may-rong", "cuc-gam"],
+    "studio_garment_id": "lap-linh",
+    "ai_prompt_hint": "Khí tiết chính trực của tri thức thời Lê được thể hiện qua dáng Áo Lập Lĩnh như thế nào?"
   },
   {
-    "period": "Năm 1744",
-    "dynasty": "Chúa Nguyễn Phúc Khoát (Đàng Trong)",
-    "title": "Khai Sinh Phom Dáng Áo Ngũ Thân",
-    "keyGarment": "Áo Ngũ Thân Cổ Đứng 5 Thân 5 Cúc",
-    "description": "Để tạo sự khác biệt về văn hóa và thể chế với Đàng Ngoài, Võ Vương Nguyễn Phúc Khoát ban hành lệnh cải cách trang phục, quy định toàn dân mặc áo cài cúc bên hữu (phải), cổ đứng, xẻ tà.",
-    "highlight": "Đây chính là 'cụ tổ' trực tiếp của chiếc Áo Dài Việt Nam hiện đại."
+    "id": "ngu-than",
+    "era": "Thế kỷ XIX",
+    "dynasty": "Thời Nguyễn (Triều Nguyễn)",
+    "name": "Áo Ngũ Thân",
+    "category": "Trang phục Chuẩn mực • Nam & Nữ",
+    "image": "/mockups/ngu-than_heritage.webp",
+    "summary": "Kiệt tác trang phục với 5 vạt áo và 5 chiếc cúc gài, đại diện cho đỉnh cao chuẩn mực đạo đức và văn hóa ứng xử Việt Nam.",
+    "origin": "Được Chúa Nguyễn Phúc Khoát định hình và Minh Mạng hoàn thiện thành quốc phục toàn dân nhằm thống nhất văn hóa hai miền Nam - Bắc.",
+    "symbolism": "4 vạt ngoài tượng trưng cho Ngũ phụ mẫu (Tứ thân phụ mẫu), 1 vạt con bên trong đại diện cho người mặc. 5 chiếc cúc gài tượng trưng cho Ngũ thường (Nhân, Lễ, Nghĩa, Trí, Tín).",
+    "related_patterns": ["may-rong", "chuc-tho"],
+    "studio_garment_id": "ngu-than",
+    "ai_prompt_hint": "Giải thích ý nghĩa Ngũ phụ mẫu và Ngũ thường ẩn sau 5 vạt áo và 5 chiếc cúc của Áo Ngũ Thân?"
   },
   {
-    "period": "1827 - 1837",
-    "dynasty": "Thời Vua Minh Mạng (Triều Nguyễn)",
-    "title": "Đại Thống Nhất Y Phục Toàn Quốc",
-    "keyGarment": "Áo Ngũ Thân Nam/Nữ & Lễ Phục Áo Tấc",
-    "description": "Vua Minh Mạng ban chiếu chuẩn hóa trang phục trên cả hai miền Nam - Bắc, đưa áo ngũ thân và quần hai ống trở thành trang phục chính thống toàn quốc.",
-    "highlight": "Xác lập triết lý nhân sinh: 5 thân áo tượng trưng tứ thân phụ mẫu và đứa con, 5 cúc tượng trưng Ngũ Thường (Nhân - Lễ - Nghĩa - Trí - Tín)."
+    "id": "nhat-binh",
+    "era": "Thế kỷ XIX",
+    "dynasty": "Thời Nguyễn (Triều Nguyễn)",
+    "name": "Áo Nhật Bình",
+    "category": "Lễ phục Hoàng tộc • Công chúa & Mệnh phụ",
+    "image": "/mockups/nhat-binh_heritage.webp",
+    "summary": "Lễ phục quý phái dành cho nữ giới hậu cung với dải cổ áo hình chữ nhật đính dệt hoa văn thêu chỉ ngũ sắc lộng lẫy.",
+    "origin": "Tên gọi 'Nhật Bình' xuất phát từ dải cổ áo xẻ trước ngực ghép lại thành hình chữ Nhật. Đây là thường lễ phục của Mệnh phụ và Công chúa triều Nguyễn.",
+    "symbolism": "Họa tiết vảy rồng, phượng múa và dải dệt ngũ sắc ở tay áo thể hiện thứ bậc tôn nghiêm, sự quyền quý và ước vọng thái bình.",
+    "related_patterns": ["phuong-mua", "ngu-sac"],
+    "studio_garment_id": "nhat-binh",
+    "ai_prompt_hint": "Nguồn gốc tên gọi và ý nghĩa dải cổ áo hình chữ nhật trên Áo Nhật Bình triều Nguyễn?"
   },
   {
-    "period": "Thập niên 1930",
-    "dynasty": "Phong trào Tân Thời",
-    "title": "Áo Dài Lemur & Cuộc Cách Mạng Mỹ Thuật",
-    "keyGarment": "Áo Dài Cát Tường (Lemur) & Lê Phổ",
-    "description": "Họa sĩ Cát Tường (Lemur) tốt nghiệp Cao đẳng Mỹ thuật Đông Dương đã mạnh dạn cách tân: ôm sát đường cong cơ thể, cổ viền ren, tay bồng lượn sóng theo phong cách Paris.",
-    "highlight": "Bước ngoặt từ trang phục thùng thình che giấu cơ thể sang tôn vinh đường nét duyên dáng của người phụ nữ Việt."
-  },
-  {
-    "period": "Thập niên 1960",
-    "dynasty": "Sài Gòn Phồn Hoa",
-    "title": "Áo Dài Raglan & Áo Dài Cổ Thuyền",
-    "keyGarment": "Áo Dài Tay Raglan & Mini Áo Dài",
-    "description": "Nhà may Dung ở Đakao đưa kỹ thuật ráp tay Raglan vào áo dài, giúp tà áo ôm trọn vai ngực mà không nhăn nách. Cùng lúc, kiểu áo cổ thuyền phóng khoáng nở rộ.",
-    "highlight": "Định hình cấu trúc kỹ thuật cắt may áo dài chuẩn xác nhất vẫn còn sử dụng đến ngày nay."
-  },
-  {
-    "period": "Thế kỷ 21 (Hiện đại)",
-    "dynasty": "Thế Hệ Gen Z & Neo-Heritage",
-    "title": "Cuộc Phục Hưng Di Sản Đương Đại",
-    "keyGarment": "Việt Phục Remix & Phục Dựng Cổ Phục",
-    "description": "Người trẻ Gen Z không chỉ mặc áo dài vào dịp lễ tết mà còn tự tin diện Áo Tấc, Ngũ Thân, Nhật Bình dạo phố, đi học, biểu diễn nghệ thuật và hòa nhịp cùng Streetwear thế giới.",
-    "highlight": "Biến cổ phục từ bảo tàng trở thành nguồn cảm hứng thời trang sống động hàng ngày."
+    "id": "ao-dai",
+    "era": "Thế kỷ XX - XXI",
+    "dynasty": "Thời kỳ Hiện đại & Gen Z Remix",
+    "name": "Áo Dài Tân Thời & Remix",
+    "category": "Quốc phục Việt Nam • Đa dạng phong cách",
+    "image": "/mockups/ao-dai_heritage.webp",
+    "summary": "Biểu tượng quốc phục vượt thời gian, liên tục biến chuyển từ phong cách Lemur, Lê Phổ đến các bản Remix Gen Z năng động.",
+    "origin": "Cải tiến từ Áo Ngũ Thân vào thập niên 1930, Áo Dài tôn vinh trọn vẹn đường nét thanh lịch của phụ nữ và tri thức Việt Nam.",
+    "symbolism": "Tinh thần dung hòa giữa truyền thống di sản và hơi thở thời đại, khẳng định bản sắc văn hóa Việt Nam trên bản đồ thời trang thế giới.",
+    "related_patterns": ["hoa-sen", "cyber-pattern"],
+    "studio_garment_id": "ao-dai",
+    "ai_prompt_hint": "Hành trình tiến hóa từ Áo Ngũ Thân truyền thống sang Áo Dài hiện đại diễn ra như thế nào?"
   }
 ]
