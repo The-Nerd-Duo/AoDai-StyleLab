@@ -62,12 +62,13 @@ export default function LookbookPage() {
   // Fetch initial lookbooks from API or local storage
   const fetchLookbooks = useCallback(async () => {
     try {
-      const res = await fetch("/api/lookbook");
+      const res = await fetch("/api/lookbook", { cache: "no-store" });
       if (res.ok) {
         const json = await res.json();
         if (json.success && Array.isArray(json.data)) {
           setItems(json.data);
           setLoading(false);
+          setIsLiveConnected(true);
           return;
         }
       }
@@ -83,80 +84,11 @@ export default function LookbookPage() {
     fetchLookbooks();
   }, [fetchLookbooks]);
 
-  // Setup Real-time Server-Sent Events (SSE) and BroadcastChannel
+  // Real-time synchronization across different devices and tabs (Cloudflare Polling + BroadcastChannel)
   useEffect(() => {
-    let eventSource: EventSource | null = null;
-    let reconnectTimeout: NodeJS.Timeout | null = null;
+    let isSubscribed = true;
 
-    const connectSSE = () => {
-      try {
-        eventSource = new EventSource("/api/lookbook/stream");
-
-        eventSource.onopen = () => {
-          setIsLiveConnected(true);
-        };
-
-        eventSource.onmessage = (event) => {
-          try {
-            const parsed = JSON.parse(event.data);
-            if (!parsed || !parsed.type) return;
-
-            if (parsed.type === "NEW_LOOKBOOK" && parsed.data) {
-              const newCard: LookbookItem = parsed.data;
-              setItems((prev) => {
-                if (prev.some((item) => item.id === newCard.id)) return prev;
-                return [newCard, ...prev];
-              });
-
-              // Mark as newly added for pulse animation
-              setNewlyAddedIds((prev) => {
-                const next = new Set(prev);
-                next.add(newCard.id);
-                return next;
-              });
-              showToast(`🔔 ${newCard.author} vừa chia sẻ: "${newCard.title}"!`);
-
-              // Remove highlight after 8 seconds
-              setTimeout(() => {
-                setNewlyAddedIds((prev) => {
-                  const updated = new Set(prev);
-                  updated.delete(newCard.id);
-                  return updated;
-                });
-              }, 8000);
-            } else if (parsed.type === "UPDATE_LIKES" && parsed.data) {
-              const { id, likes } = parsed.data;
-              setItems((prev) =>
-                prev.map((item) => (item.id === id ? { ...item, likes } : item))
-              );
-            } else if (parsed.type === "UPDATE_SHARES" && parsed.data) {
-              const { id, shares } = parsed.data;
-              setItems((prev) =>
-                prev.map((item) => (item.id === id ? { ...item, shares } : item))
-              );
-            }
-          } catch (err) {
-            console.error("Error parsing SSE event:", err);
-          }
-        };
-
-        eventSource.onerror = () => {
-          setIsLiveConnected(false);
-          if (eventSource) {
-            eventSource.close();
-            eventSource = null;
-          }
-          // Try reconnecting in 5s
-          reconnectTimeout = setTimeout(connectSSE, 5000);
-        };
-      } catch (err) {
-        console.warn("SSE connection error:", err);
-      }
-    };
-
-    connectSSE();
-
-    // Cross-tab immediate BroadcastChannel listener
+    // Cross-tab immediate BroadcastChannel listener (same device)
     let broadcastChannel: BroadcastChannel | null = null;
     try {
       if (typeof window !== "undefined" && "BroadcastChannel" in window) {
@@ -190,11 +122,52 @@ export default function LookbookPage() {
           }
         };
       }
-    } catch { }
+    } catch {}
+
+    // Multi-device Cloudflare sync polling (every 4 seconds)
+    const pollInterval = setInterval(async () => {
+      if (typeof document !== "undefined" && document.hidden) return;
+
+      try {
+        const res = await fetch("/api/lookbook", { cache: "no-store" });
+        if (res.ok) {
+          const json = await res.json();
+          if (isSubscribed && json.success && Array.isArray(json.data)) {
+            setIsLiveConnected(true);
+            setItems((prev) => {
+              const prevIds = new Set(prev.map((i) => i.id));
+              const newlyReceived = json.data.filter((i: LookbookItem) => !prevIds.has(i.id));
+
+              if (newlyReceived.length > 0) {
+                newlyReceived.forEach((newCard: LookbookItem) => {
+                  showToast(`🔔 ${newCard.author} vừa chia sẻ: "${newCard.title}"!`);
+                });
+                setNewlyAddedIds((old) => {
+                  const next = new Set(old);
+                  newlyReceived.forEach((i: LookbookItem) => next.add(i.id));
+                  return next;
+                });
+                setTimeout(() => {
+                  setNewlyAddedIds((old) => {
+                    const next = new Set(old);
+                    newlyReceived.forEach((i: LookbookItem) => next.delete(i.id));
+                    return next;
+                  });
+                }, 8000);
+              }
+
+              return json.data;
+            });
+          }
+        }
+      } catch {
+        // network issue
+      }
+    }, 4000);
 
     return () => {
-      if (eventSource) eventSource.close();
-      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+      isSubscribed = false;
+      clearInterval(pollInterval);
       if (broadcastChannel) broadcastChannel.close();
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     };

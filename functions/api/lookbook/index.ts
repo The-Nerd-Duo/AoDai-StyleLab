@@ -14,19 +14,12 @@ interface D1Database {
   };
 }
 
-interface Env {
-  LOOKBOOK_KV?: KVNamespace;
-  KV?: KVNamespace;
-  LOOKBOOK_STORE?: KVNamespace;
-  DB?: D1Database;
-  LOOKBOOK_DB?: D1Database;
-}
-
 const CORS_HEADERS = {
   "Content-Type": "application/json",
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
+  "Cache-Control": "no-cache, no-store, must-revalidate",
 };
 
 export async function onRequestOptions() {
@@ -36,18 +29,61 @@ export async function onRequestOptions() {
   });
 }
 
-function getKV(env: Env): KVNamespace | null {
-  return env.LOOKBOOK_KV || env.KV || env.LOOKBOOK_STORE || null;
+// Automatically detect any KV binding regardless of exact case or name
+function findKV(env: any): KVNamespace | null {
+  if (!env || typeof env !== "object") return null;
+  const candidates = [
+    env.LOOKBOOK_KV,
+    env.lookbook_kv,
+    env.KV,
+    env.kv,
+    env.LOOKBOOK_STORE,
+    env.lookbook_store,
+    env.LOOKBOOK,
+    env.lookbook,
+  ];
+  for (const c of candidates) {
+    if (c && typeof c.get === "function" && typeof c.put === "function") {
+      return c;
+    }
+  }
+  for (const key of Object.keys(env)) {
+    const val = env[key];
+    if (val && typeof val === "object" && typeof val.get === "function" && typeof val.put === "function") {
+      return val;
+    }
+  }
+  return null;
 }
 
-function getD1(env: Env): D1Database | null {
-  return env.DB || env.LOOKBOOK_DB || null;
+// Automatically detect any D1 binding regardless of exact case or name
+function findD1(env: any): D1Database | null {
+  if (!env || typeof env !== "object") return null;
+  const candidates = [
+    env.DB,
+    env.db,
+    env.LOOKBOOK_DB,
+    env.lookbook_db,
+    env.DATABASE,
+  ];
+  for (const c of candidates) {
+    if (c && typeof c.prepare === "function") {
+      return c;
+    }
+  }
+  for (const key of Object.keys(env)) {
+    const val = env[key];
+    if (val && typeof val === "object" && typeof val.prepare === "function") {
+      return val;
+    }
+  }
+  return null;
 }
 
-// GET /api/lookbook - Load community lookbook list from Cloudflare KV or D1
-export async function onRequestGet(context: { request: Request; env: Env }) {
+// GET /api/lookbook - Load community lookbooks from Cloudflare KV or D1
+export async function onRequestGet(context: { request: Request; env: any }) {
   try {
-    const d1 = getD1(context.env);
+    const d1 = findD1(context.env);
     if (d1) {
       try {
         await d1.prepare(`
@@ -77,7 +113,7 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
         const items = (results || []).map((row: any) => ({
           ...row,
           isAnonymous: Boolean(row.isAnonymous),
-          outfit: row.outfit ? JSON.parse(row.outfit) : undefined,
+          outfit: row.outfit ? (typeof row.outfit === "string" ? JSON.parse(row.outfit) : row.outfit) : undefined,
         }));
 
         return new Response(
@@ -93,15 +129,17 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
       }
     }
 
-    const kv = getKV(context.env);
+    const kv = findKV(context.env);
     if (kv) {
       try {
-        const raw = await kv.get("lookbooks_community_all");
+        const raw = await kv.get("lookbooks_community_all", "json");
         let items: any[] = [];
-        if (raw) {
-          items = typeof raw === "string" ? JSON.parse(raw) : raw;
+        if (Array.isArray(raw)) {
+          items = raw;
+        } else if (typeof raw === "string") {
+          items = JSON.parse(raw);
         }
-        // Purge any legacy sample cards
+        // Purge legacy sample cards
         items = (items || []).filter(
           (item) => item && !String(item.id).startsWith("sample-")
         );
@@ -119,13 +157,13 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
       }
     }
 
-    // Default empty array if no Cloudflare database binding is attached yet
+    // Default if no storage binding configured on Cloudflare Pages yet
     return new Response(
       JSON.stringify({
         success: true,
         data: [],
         storage: "none",
-        message: "Chưa cấu hình Cloudflare KV (LOOKBOOK_KV) hoặc D1 (DB) trong Pages Settings.",
+        warning: "LOOKBOOK_KV is not bound in Cloudflare Pages Settings -> Functions -> KV namespace bindings",
       }),
       { headers: CORS_HEADERS }
     );
@@ -138,7 +176,7 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
 }
 
 // POST /api/lookbook - Save community lookbook into Cloudflare KV or D1
-export async function onRequestPost(context: { request: Request; env: Env }) {
+export async function onRequestPost(context: { request: Request; env: any }) {
   try {
     const body: any = await context.request.json();
     const isAnon = !!body.isAnonymous;
@@ -164,8 +202,8 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
 
     let storageUsed = "none";
 
-    // 1. Try Cloudflare D1
-    const d1 = getD1(context.env);
+    // 1. Save to Cloudflare D1 if available
+    const d1 = findD1(context.env);
     if (d1) {
       try {
         await d1.prepare(`
@@ -215,16 +253,18 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
       }
     }
 
-    // 2. Try Cloudflare KV
-    const kv = getKV(context.env);
+    // 2. Save to Cloudflare KV if available
+    const kv = findKV(context.env);
     if (kv) {
       try {
-        const raw = await kv.get("lookbooks_community_all");
+        const raw = await kv.get("lookbooks_community_all", "json");
         let items: any[] = [];
-        if (raw) {
-          items = typeof raw === "string" ? JSON.parse(raw) : raw;
+        if (Array.isArray(raw)) {
+          items = raw;
+        } else if (typeof raw === "string") {
+          items = JSON.parse(raw);
         }
-        items = [newItem, ...items.filter((i) => i.id !== newItem.id)].slice(0, 200);
+        items = [newItem, ...items.filter((i: any) => i.id !== newItem.id)].slice(0, 150);
         await kv.put("lookbooks_community_all", JSON.stringify(items));
         await kv.put(`lookbook:${newItem.id}`, JSON.stringify(newItem));
         storageUsed = storageUsed === "none" ? "cloudflare-kv" : `${storageUsed}+kv`;
@@ -238,6 +278,9 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
         success: true,
         data: newItem,
         storage: storageUsed,
+        warning: storageUsed === "none"
+          ? "LOOKBOOK_KV is not bound in Cloudflare Pages Settings -> Functions -> KV namespace bindings. Card is only saved on local browser until binding is added."
+          : null,
       }),
       { status: 201, headers: CORS_HEADERS }
     );
