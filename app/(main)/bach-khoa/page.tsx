@@ -411,15 +411,6 @@ export default function BachKhoaPage() {
 
       <Footer />
 
-      {/* Hidden File Input for Image Audit */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleSimulateImageAudit}
-        className="hidden"
-      />
-
       {/* Floating Action Button (FAB) - Bottom Right Corner */}
       {!isChatOpen && (
         <button
