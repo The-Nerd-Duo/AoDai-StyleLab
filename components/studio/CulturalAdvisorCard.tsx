@@ -3,13 +3,15 @@
 import React, { useEffect, useState } from "react";
 import { OutfitState } from "@/lib/utils";
 import mockupsData from "@/config/mockups.json";
-import { CulturalAdvisorResponse } from "@/app/api/cultural-advisor/route";
+import { CulturalAdvisorResponse } from "@/lib/types";
 import {
   Sparkles,
   ShieldAlert,
   RefreshCw,
   Lightbulb,
 } from "lucide-react";
+
+import { evaluateCulturalHarmony } from "@/lib/cultural-engine";
 
 interface CulturalAdvisorCardProps {
   outfit: OutfitState;
@@ -32,12 +34,24 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
       if (res.ok) {
         const json = await res.json();
         setData(json);
+        setLoading(false);
+        return;
       }
-    } catch (err) {
-      console.error("Failed to load cultural advice:", err);
-    } finally {
-      setLoading(false);
+    } catch {
+      // API call failed, fall back to rule engine below
     }
+    // Instant fallback rule engine (<0.01s response)
+    const local = evaluateCulturalHarmony({
+      garmentId: outfit.garmentId,
+      colorId: outfit.colorId,
+      occasionId: outfit.occasionId,
+      styleId: outfit.styleId,
+      accessoryId: outfit.accessoryId,
+      accessoryIds: outfit.accessoryIds,
+      personaId: outfit.personaId,
+    });
+    setData(local);
+    setLoading(false);
   };
 
   useEffect(() => {

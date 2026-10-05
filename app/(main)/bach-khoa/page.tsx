@@ -5,6 +5,7 @@ import { Header } from "@/components/shared/Header";
 import { Footer } from "@/components/shared/Footer";
 import genealogyData from "@/config/genealogy.json";
 import { Sparkles, Send, RefreshCw, CheckCircle2, AlertTriangle, Paperclip, X, Eye } from "lucide-react";
+import { answerHeritageQuestion } from "@/lib/assistant-engine";
 
 interface ChatMessage {
   id: string;
@@ -133,12 +134,13 @@ export default function BachKhoaPage() {
         throw new Error("Lỗi khi kết nối API");
       }
     } catch {
+      const local = answerHeritageQuestion(text);
       setMessages((prev) => [
         ...prev,
         {
           id: (Date.now() + 1).toString(),
           sender: "ai",
-          text: `Theo quy chuẩn di sản của Ban Thẩm Định VNU về vấn đề "${text}": Trang phục cần giữ trọn vẹn đường trung phùng sống áo, khuy gài cúc ngũ thường ngay ngắn và phom dáng kín đáo tôn vinh phong thái Đông phương.`,
+          text: local.answer,
         },
       ]);
     } finally {
