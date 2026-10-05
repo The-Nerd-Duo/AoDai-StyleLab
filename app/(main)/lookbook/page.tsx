@@ -11,6 +11,11 @@ import { LookbookItem } from "@/lib/types";
 import { encodeOutfitToQuery } from "@/lib/utils";
 import mockupsData from "@/config/mockups.json";
 import {
+  getLocalLookbooks,
+  toggleLocalLike,
+  incrementLocalShare,
+} from "@/lib/lookbook-storage";
+import {
   Sparkles,
   ArrowLeft,
   Share2,
@@ -54,20 +59,24 @@ export default function LookbookPage() {
     } catch { }
   }, []);
 
-  // Fetch initial lookbooks from API
+  // Fetch initial lookbooks from API or local storage
   const fetchLookbooks = useCallback(async () => {
     try {
       const res = await fetch("/api/lookbook");
-      if (!res.ok) throw new Error("Failed to load lookbooks");
-      const json = await res.json();
-      if (json.success && Array.isArray(json.data)) {
-        setItems(json.data);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          setItems(json.data);
+          setLoading(false);
+          return;
+        }
       }
-    } catch (err) {
-      console.warn("Could not fetch lookbooks from API, using cached data:", err);
-    } finally {
-      setLoading(false);
+    } catch {
+      // Local fallback
     }
+    const localData = getLocalLookbooks();
+    setItems(localData);
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -234,7 +243,10 @@ export default function LookbookPage() {
       }
     } catch { }
 
-    // Send to backend API
+    // Sync to local storage
+    toggleLocalLike(id, action);
+
+    // Send to backend API if available
     try {
       const res = await fetch(`/api/lookbook/${id}/like`, {
         method: "POST",
@@ -310,7 +322,10 @@ export default function LookbookPage() {
       }
     } catch { }
 
-    // Send to backend API
+    // Sync share count to local storage
+    incrementLocalShare(item.id);
+
+    // Send to backend API if available
     try {
       fetch(`/api/lookbook/${item.id}/share`, {
         method: "POST",

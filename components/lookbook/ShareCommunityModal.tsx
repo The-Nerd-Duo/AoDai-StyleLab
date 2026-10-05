@@ -6,6 +6,7 @@ import { OutfitState } from "@/lib/utils";
 import mockupsData from "@/config/mockups.json";
 import framesData from "@/config/frames.json";
 import { X, Sparkles, User, UserX, Check, AlertCircle, Share2, Layers } from "lucide-react";
+import { saveLocalLookbook } from "@/lib/lookbook-storage";
 
 interface ShareCommunityModalProps {
   isOpen: boolean;
@@ -118,32 +119,30 @@ export const ShareCommunityModal: React.FC<ShareCommunityModalProps> = ({
         culturalNote: garment.culturalSignificance,
       };
 
-      const res = await fetch("/api/lookbook", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const json = await res.json();
-
-      if (!res.ok || !json.success) {
-        throw new Error(json.error || "Không thể đăng Lookbook. Vui lòng thử lại!");
+      let newItem: any = null;
+      try {
+        const res = await fetch("/api/lookbook", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data) {
+            newItem = json.data;
+          }
+        }
+      } catch {
+        // Fallback to local storage
       }
 
-      // Also notify local BroadcastChannel for zero-latency multi-tab sync
-      try {
-        if (typeof window !== "undefined" && "BroadcastChannel" in window) {
-          const bc = new BroadcastChannel("vietphuc_lookbook_channel");
-          bc.postMessage({ type: "NEW_LOOKBOOK", data: json.data });
-          bc.close();
-        }
-      } catch (bcErr) {
-        console.warn("BroadcastChannel error:", bcErr);
+      if (!newItem) {
+        newItem = saveLocalLookbook(payload);
       }
 
       setSuccessDone(true);
       if (onSuccess) {
-        onSuccess(json.data);
+        onSuccess(newItem);
       }
 
       // Auto close after 1.2s

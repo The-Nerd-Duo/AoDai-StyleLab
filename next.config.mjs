@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Standalone output for Cloud Run Docker container & dynamic API routes
+  output: "export",
   images: {
     unoptimized: true,
   },

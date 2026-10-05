@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { MessageSquare, Send, Sparkles, User, Bot, Loader2 } from "lucide-react";
+import { answerHeritageQuestion } from "@/lib/assistant-engine";
 
 interface Message {
   role: "user" | "assistant";
@@ -47,19 +48,19 @@ export const GeminiChatAssistant: React.FC = () => {
           ...prev,
           { role: "assistant", content: data.answer || "Đã xảy ra lỗi khi tìm câu trả lời." },
         ]);
+        setLoading(false);
+        return;
       }
-    } catch (err) {
-      console.error("Chat error:", err);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: "Rất tiếc, đã có lỗi kết nối đến Trợ lý AI. Vui lòng thử lại sau.",
-        },
-      ]);
-    } finally {
-      setLoading(false);
+    } catch {
+      // API unavailable, use knowledge vault fallback below
     }
+
+    const localAnswer = answerHeritageQuestion(text);
+    setMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: localAnswer.answer },
+    ]);
+    setLoading(false);
   };
 
   return (

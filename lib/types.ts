@@ -29,3 +29,29 @@ export interface CreateLookbookInput {
   era?: string;
   culturalNote?: string;
 }
+
+export interface CulturalAdvisorRequest {
+  garmentId?: string;
+  colorId?: string;
+  occasionId?: string;
+  styleId?: string;
+  accessoryId?: string;
+  accessoryIds?: string[];
+  personaId?: string;
+}
+
+export interface CulturalAdvisorResponse {
+  colorHarmonyScore: number;
+  weatherFitScore: number;
+  culturalRespectScore: number;
+  overallScore: number;
+  elementAnalysis: {
+    element: string;
+    description: string;
+  };
+  colorHarmonyVerdict: string;
+  weatherAdvice: string;
+  culturalNotes: string;
+  genZStylingTip: string;
+  warnings: string[];
+}
