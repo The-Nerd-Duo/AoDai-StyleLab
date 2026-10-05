@@ -6,7 +6,7 @@ import { OutfitState } from "@/lib/utils";
 import mockupsData from "@/config/mockups.json";
 import framesData from "@/config/frames.json";
 import { X, Sparkles, User, UserX, Check, AlertCircle, Share2, Layers } from "lucide-react";
-import { saveLocalLookbook } from "@/lib/lookbook-storage";
+import { saveLocalLookbook, getLocalLookbooks } from "@/lib/lookbook-storage";
 
 interface ShareCommunityModalProps {
   isOpen: boolean;
