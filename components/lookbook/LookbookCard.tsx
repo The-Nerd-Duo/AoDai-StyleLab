@@ -267,7 +267,6 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
         frameId={frameId}
         imageUrl={displayImage}
         onSuccess={(item) => {
-          setCommunityModalOpen(false);
           if (onShareSuccess && item) {
             onShareSuccess(item);
           }
