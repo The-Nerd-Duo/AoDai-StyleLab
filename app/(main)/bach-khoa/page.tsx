@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Header } from "@/components/shared/Header";
 import { Footer } from "@/components/shared/Footer";
 import { GarmentGenealogy } from "@/components/bach-khoa/GarmentGenealogy";
+import { FormattedMarkdown } from "@/components/shared/FormattedMarkdown";
 import {
   Sparkles,
   Send,
@@ -486,7 +487,7 @@ export default function BachKhoaPage() {
                         </div>
                       )}
 
-                      <div className="leading-relaxed whitespace-pre-line">{m.text}</div>
+                      <FormattedMarkdown content={m.text} />
 
                       {m.auditDetails && (
                         <ul className="space-y-1 pl-1 text-[11px]">

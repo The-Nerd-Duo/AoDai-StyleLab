@@ -11,7 +11,7 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
 
     if (apiKey) {
       try {
-        const model = context.env.GEMINI_FLASH_MODEL || "gemini-2.0-flash";
+        const model = context.env.GEMINI_FLASH_MODEL || "gemini-3.8-flash";
         const prompt = `Bạn là "Cố Vấn Di Sản & Thời Trang Việt Phục" trong dự án Việt Phục Remix (AI Arena Vietnam 2026).
 Hãy phân tích bộ phối trang phục:
 - Trang phục ID: ${garmentId}

@@ -17,7 +17,7 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
 
     if (apiKey) {
       try {
-        const model = context.env.GEMINI_PRO_MODEL || "gemini-2.0-flash";
+        const model = context.env.GEMINI_PRO_MODEL || "gemini-3.8-flash";
         const systemInstruction = `Bạn là "Bách Khoa Toàn Thư Di Sản Việt Phục", trợ lý AI chuyên sâu thuộc dự án Việt Phục Remix (AI Arena Vietnam 2026).
 Nhiệm vụ: Giải đáp chính xác, tự hào và cuốn hút về các trang phục truyền thống Việt Nam (Áo dài, Áo ngũ thân, Áo tấc, Áo tứ thân, Áo giao lĩnh, Áo nhật bình...) qua các triều đại Lý, Trần, Lê, Nguyễn. Giữ giọng văn thân thiện, tri thức và truyền cảm hứng cho Gen Z.`;
 
