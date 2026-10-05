@@ -31,26 +31,36 @@ export async function onRequestOptions() {
 
 // Automatically detect any KV binding regardless of exact case or name
 function findKV(env: any): KVNamespace | null {
-  if (!env || typeof env !== "object") return null;
-  const candidates = [
-    env.LOOKBOOK_KV,
-    env.lookbook_kv,
-    env.KV,
-    env.kv,
-    env.LOOKBOOK_STORE,
-    env.lookbook_store,
-    env.LOOKBOOK,
-    env.lookbook,
+  const sources = [
+    env,
+    typeof globalThis !== "undefined" ? (globalThis as any) : null,
+    typeof process !== "undefined" ? (process as any)?.env : null,
   ];
-  for (const c of candidates) {
-    if (c && typeof c.get === "function" && typeof c.put === "function") {
-      return c;
+
+  const candidateNames = [
+    "LOOKBOOK_KV",
+    "lookbook_kv",
+    "KV",
+    "kv",
+    "LOOKBOOK_STORE",
+    "lookbook_store",
+    "LOOKBOOK",
+    "lookbook",
+  ];
+
+  for (const src of sources) {
+    if (!src || typeof src !== "object") continue;
+    for (const name of candidateNames) {
+      const c = src[name];
+      if (c && typeof c.get === "function" && typeof c.put === "function") {
+        return c;
+      }
     }
-  }
-  for (const key of Object.keys(env)) {
-    const val = env[key];
-    if (val && typeof val === "object" && typeof val.get === "function" && typeof val.put === "function") {
-      return val;
+    for (const key of Object.keys(src)) {
+      const val = src[key];
+      if (val && typeof val === "object" && typeof val.get === "function" && typeof val.put === "function") {
+        return val;
+      }
     }
   }
   return null;
