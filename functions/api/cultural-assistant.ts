@@ -233,10 +233,6 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
         answer,
         reply: answer,
         source: "heritage-vault-local",
-        _debug: {
-          hasKey: !!apiKey,
-          logs: debugLogs,
-        },
       }),
       { headers: CORS_HEADERS }
     );
