@@ -1,0 +1,15 @@
+name = "aodai-stylelab"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "out"
+
+# Cloudflare KV Binding for Lookbook Database (Lưu trữ lookbook cộng đồng)
+[[kv_namespaces]]
+binding = "LOOKBOOK_KV"
+id = "lookbook_kv"
+
+# Cloudflare D1 SQL Database Binding (Tùy chọn nếu bạn dùng D1)
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "lookbook-db"
+# database_id = "your-d1-database-id"

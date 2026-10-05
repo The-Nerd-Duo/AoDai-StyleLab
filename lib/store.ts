@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useSyncExternalStore, useEffect, useCallback } from "react";
 import { OutfitState } from "./utils";
 
 export const DEFAULT_OUTFIT: OutfitState = {
@@ -18,108 +18,231 @@ const COMPARE_KEY = "vietphuc_compare_outfit";
 const FRAME_KEY = "vietphuc_selected_frame";
 const RESULT_IMAGE_KEY = "vietphuc_result_image";
 
-export function useOutfitStore() {
-  const [outfit, setOutfitState] = useState<OutfitState>(DEFAULT_OUTFIT);
-  const [compareOutfit, setCompareOutfitState] = useState<OutfitState | null>(null);
-  const [selectedFrame, setSelectedFrameState] = useState<string>("frame-heritage-vermilion");
-  const [resultImage, setResultImageState] = useState<string | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+interface StoreState {
+  outfit: OutfitState;
+  compareOutfit: OutfitState | null;
+  selectedFrame: string;
+  resultImage: string | null;
+  isLoaded: boolean;
+}
 
-  useEffect(() => {
+const SERVER_SNAPSHOT: StoreState = {
+  outfit: DEFAULT_OUTFIT,
+  compareOutfit: null,
+  selectedFrame: "frame-heritage-vermilion",
+  resultImage: null,
+  isLoaded: false,
+};
+
+let currentStoreState: StoreState = {
+  ...SERVER_SNAPSHOT,
+};
+
+const listeners = new Set<() => void>();
+
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+function notify() {
+  listeners.forEach((listener) => listener());
+}
+
+function persistState(state: StoreState) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.outfit));
+    if (state.compareOutfit) {
+      localStorage.setItem(COMPARE_KEY, JSON.stringify(state.compareOutfit));
+    } else {
+      localStorage.removeItem(COMPARE_KEY);
+    }
+    localStorage.setItem(FRAME_KEY, state.selectedFrame);
+
+    if (state.resultImage && state.resultImage.trim()) {
+      // Store in sessionStorage (high capacity for base64 images per tab)
+      try {
+        sessionStorage.setItem(RESULT_IMAGE_KEY, state.resultImage);
+      } catch {}
+
+      // Also store in localStorage (cross-tab/reboot persistence)
+      try {
+        localStorage.setItem(RESULT_IMAGE_KEY, state.resultImage);
+      } catch (quotaErr) {
+        console.warn("localStorage quota exceeded for image, saved in sessionStorage:", quotaErr);
+      }
+    } else {
+      try {
+        sessionStorage.removeItem(RESULT_IMAGE_KEY);
+        localStorage.removeItem(RESULT_IMAGE_KEY);
+      } catch {}
+    }
+  } catch (err) {
+    console.warn("Storage sync error:", err);
+  }
+}
+
+let hasInitializedFromStorage = false;
+
+function initFromStorage() {
+  if (typeof window === "undefined" || hasInitializedFromStorage) return;
+  hasInitializedFromStorage = true;
+
+  try {
+    let savedOutfit = currentStoreState.outfit;
+    const rawOutfit = localStorage.getItem(STORAGE_KEY);
+    if (rawOutfit) {
+      const parsed = JSON.parse(rawOutfit);
+      if (!Array.isArray(parsed.accessoryIds)) {
+        parsed.accessoryIds = parsed.accessoryId ? [parsed.accessoryId] : [];
+      }
+      savedOutfit = parsed;
+    }
+
+    let savedCompare = currentStoreState.compareOutfit;
+    const rawCompare = localStorage.getItem(COMPARE_KEY);
+    if (rawCompare) {
+      savedCompare = JSON.parse(rawCompare);
+    }
+
+    let savedFrame = currentStoreState.selectedFrame;
+    const rawFrame = localStorage.getItem(FRAME_KEY);
+    if (rawFrame) {
+      savedFrame = rawFrame;
+    }
+
+    // Try reading resultImage from sessionStorage first, then localStorage
+    let savedImage = currentStoreState.resultImage;
     try {
-      const savedOutfit = localStorage.getItem(STORAGE_KEY);
-      if (savedOutfit) {
-        const parsed = JSON.parse(savedOutfit);
-        if (!Array.isArray(parsed.accessoryIds)) {
-          parsed.accessoryIds = parsed.accessoryId ? [parsed.accessoryId] : [];
-        }
-        setOutfitState(parsed);
-      }
-      const savedCompare = localStorage.getItem(COMPARE_KEY);
-      if (savedCompare) {
-        setCompareOutfitState(JSON.parse(savedCompare));
-      }
-      const savedFrame = localStorage.getItem(FRAME_KEY);
-      if (savedFrame) {
-        setSelectedFrameState(savedFrame);
-      }
-      const savedImage = localStorage.getItem(RESULT_IMAGE_KEY);
-      if (savedImage) {
-        // Blob URLs expire upon page reload/session end. Discard them to ensure empty state works cleanly.
-        if (savedImage.startsWith("blob:") || !savedImage.trim()) {
-          localStorage.removeItem(RESULT_IMAGE_KEY);
-          setResultImageState(null);
-        } else {
-          setResultImageState(savedImage);
+      const fromSession = sessionStorage.getItem(RESULT_IMAGE_KEY);
+      if (fromSession && fromSession.trim()) {
+        savedImage = fromSession;
+      } else {
+        const fromLocal = localStorage.getItem(RESULT_IMAGE_KEY);
+        if (fromLocal && fromLocal.trim()) {
+          savedImage = fromLocal;
         }
       }
-    } catch {
-      // Ignore localStorage errors (e.g. incognito)
-    } finally {
-      setIsLoaded(true);
+    } catch {}
+
+    currentStoreState = {
+      outfit: savedOutfit,
+      compareOutfit: savedCompare,
+      selectedFrame: savedFrame,
+      resultImage: savedImage,
+      isLoaded: true,
+    };
+    notify();
+  } catch {
+    currentStoreState = { ...currentStoreState, isLoaded: true };
+    notify();
+  }
+}
+
+export function useOutfitStore() {
+  useEffect(() => {
+    initFromStorage();
+  }, []);
+
+  const store = useSyncExternalStore(
+    subscribe,
+    () => currentStoreState,
+    () => SERVER_SNAPSHOT
+  );
+
+  const setOutfit = useCallback((newOutfit: OutfitState) => {
+    currentStoreState = {
+      ...currentStoreState,
+      outfit: newOutfit,
+    };
+    persistState(currentStoreState);
+    notify();
+  }, []);
+
+  const updateOutfitField = useCallback(
+    <K extends keyof OutfitState>(key: K, value: OutfitState[K]) => {
+      const updatedOutfit = { ...currentStoreState.outfit, [key]: value };
+      currentStoreState = {
+        ...currentStoreState,
+        outfit: updatedOutfit,
+      };
+      persistState(currentStoreState);
+      notify();
+    },
+    []
+  );
+
+  const saveToCompare = useCallback(() => {
+    currentStoreState = {
+      ...currentStoreState,
+      compareOutfit: currentStoreState.outfit,
+    };
+    persistState(currentStoreState);
+    notify();
+  }, []);
+
+  const clearCompare = useCallback(() => {
+    currentStoreState = {
+      ...currentStoreState,
+      compareOutfit: null,
+    };
+    persistState(currentStoreState);
+    notify();
+  }, []);
+
+  const setSelectedFrame = useCallback((frameId: string) => {
+    currentStoreState = {
+      ...currentStoreState,
+      selectedFrame: frameId,
+    };
+    persistState(currentStoreState);
+    notify();
+  }, []);
+
+  const setResultImage = useCallback((url: string | null) => {
+    currentStoreState = {
+      ...currentStoreState,
+      resultImage: url,
+    };
+    persistState(currentStoreState);
+    notify();
+
+    // If it is a blob URL, asynchronously convert to base64 Data URL so it permanently survives
+    if (url && url.startsWith("blob:")) {
+      fetch(url)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            if (typeof reader.result === "string") {
+              currentStoreState = {
+                ...currentStoreState,
+                resultImage: reader.result,
+              };
+              persistState(currentStoreState);
+              notify();
+            }
+          };
+          reader.readAsDataURL(blob);
+        })
+        .catch(() => {});
     }
   }, []);
 
-  const setOutfit = (newOutfit: OutfitState) => {
-    setOutfitState(newOutfit);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newOutfit));
-    } catch {}
-  };
-
-  const updateOutfitField = <K extends keyof OutfitState>(key: K, value: OutfitState[K]) => {
-    setOutfitState((prev) => {
-      const updated = { ...prev, [key]: value };
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      } catch {}
-      return updated;
-    });
-  };
-
-  const saveToCompare = () => {
-    setCompareOutfitState(outfit);
-    try {
-      localStorage.setItem(COMPARE_KEY, JSON.stringify(outfit));
-    } catch {}
-  };
-
-  const clearCompare = () => {
-    setCompareOutfitState(null);
-    try {
-      localStorage.removeItem(COMPARE_KEY);
-    } catch {}
-  };
-
-  const setSelectedFrame = (frameId: string) => {
-    setSelectedFrameState(frameId);
-    try {
-      localStorage.setItem(FRAME_KEY, frameId);
-    } catch {}
-  };
-
-  const setResultImage = (url: string | null) => {
-    setResultImageState(url);
-    try {
-      if (url && !url.startsWith("blob:")) {
-        localStorage.setItem(RESULT_IMAGE_KEY, url);
-      } else {
-        localStorage.removeItem(RESULT_IMAGE_KEY);
-      }
-    } catch {}
-  };
-
   return {
-    outfit,
+    outfit: store.outfit,
     setOutfit,
     updateOutfitField,
-    compareOutfit,
+    compareOutfit: store.compareOutfit,
     saveToCompare,
     clearCompare,
-    selectedFrame,
+    selectedFrame: store.selectedFrame,
     setSelectedFrame,
-    resultImage,
+    resultImage: store.resultImage,
     setResultImage,
-    isLoaded,
+    isLoaded: store.isLoaded,
   };
 }

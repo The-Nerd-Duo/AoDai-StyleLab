@@ -229,6 +229,14 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
           {/* Link to Lookbook */}
           <Link
             href="/lookbook"
+            onClick={() => {
+              if (resultImage) {
+                try {
+                  sessionStorage.setItem("vietphuc_result_image", resultImage);
+                  localStorage.setItem("vietphuc_result_image", resultImage);
+                } catch {}
+              }
+            }}
             className="py-2.5 px-3 rounded-xl bg-paper-cream hover:bg-surface-container text-text-charcoal border border-border-bronze-light/60 font-semibold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs"
           >
             <span>Tạo Lookbook 9:16</span>

@@ -197,5 +197,39 @@ export async function callFluxWorkerAi(prompt: string, workerUrl = WORKER_AI_DEF
     throw new Error("Cloudflare Worker trả về [object Object]. Hãy cập nhật Worker để decode base64 sang nhị phân.");
   }
 
-  return URL.createObjectURL(blob);
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+      } else {
+        resolve(URL.createObjectURL(blob));
+      }
+    };
+    reader.onerror = () => reject(new Error("Lỗi đọc dữ liệu ảnh AI từ máy chủ"));
+    reader.readAsDataURL(blob);
+  });
+}
+
+export async function ensureDataUrl(url: string | null): Promise<string | null> {
+  if (!url) return null;
+  if (!url.startsWith("blob:")) return url;
+  try {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === "string") {
+          resolve(reader.result);
+        } else {
+          resolve(url);
+        }
+      };
+      reader.onerror = () => resolve(url);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return url;
+  }
 }

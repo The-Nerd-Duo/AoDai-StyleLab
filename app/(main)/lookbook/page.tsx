@@ -65,7 +65,7 @@ export default function LookbookPage() {
       const res = await fetch("/api/lookbook");
       if (res.ok) {
         const json = await res.json();
-        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        if (json.success && Array.isArray(json.data)) {
           setItems(json.data);
           setLoading(false);
           return;
@@ -430,7 +430,30 @@ export default function LookbookPage() {
               </div>
 
               {/* Dynamic Lookbook Card with Community Share & PNG Download */}
-              <LookbookCard outfit={outfit} frameId={selectedFrame} imageUrl={resultImage} />
+              <LookbookCard
+                outfit={outfit}
+                frameId={selectedFrame}
+                imageUrl={resultImage}
+                onShareSuccess={(newCard) => {
+                  setItems((prev) => {
+                    if (prev.some((item) => item.id === newCard.id)) return prev;
+                    return [newCard, ...prev];
+                  });
+                  setNewlyAddedIds((prev) => {
+                    const next = new Set(prev);
+                    next.add(newCard.id);
+                    return next;
+                  });
+                  showToast(`✨ Đã chia sẻ "${newCard.title}" lên Thư viện Cộng đồng!`);
+                  setTimeout(() => {
+                    setNewlyAddedIds((prev) => {
+                      const updated = new Set(prev);
+                      updated.delete(newCard.id);
+                      return updated;
+                    });
+                  }, 8000);
+                }}
+              />
 
               {/* Dynamic Frame Selector */}
               <FrameSelector
