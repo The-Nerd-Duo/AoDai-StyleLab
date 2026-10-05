@@ -228,6 +228,22 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
         "Bạn muốn tư vấn set đồ Việt phục đi dạo phố hay đi chụp ảnh kỷ yếu?";
     }
 
+    // Nếu server Cloudflare bị Google chặn địa lý (User location is not supported) nhưng có apiKey,
+    // Trả về tín hiệu clientFallback để trình duyệt tại Việt Nam trực tiếp gọi Gemini
+    if (apiKey) {
+      return new Response(
+        JSON.stringify({
+          clientFallback: true,
+          apiKey,
+          model: "gemini-3.5-flash-lite",
+          systemInstruction: CULTURAL_ASSISTANT_SYSTEM_INSTRUCTION,
+          fallbackAnswer: answer,
+          answer,
+        }),
+        { headers: CORS_HEADERS }
+      );
+    }
+
     return new Response(
       JSON.stringify({
         answer,

@@ -30,13 +30,10 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
     if (apiKey) {
       const candidateModels = Array.from(
         new Set([
-          context.env?.GEMINI_FLASH_MODEL || "gemini-3.8-flash",
-          "gemini-3.8-flash",
           "gemini-3.5-flash-lite",
+          context.env?.GEMINI_FLASH_MODEL || "gemini-3.5-flash-lite",
+          "gemini-3.8-flash",
           "gemini-2.5-flash",
-          "gemini-2.5-flash-lite",
-          "gemini-2.0-flash",
-          "gemini-1.5-flash",
         ])
       );
 
@@ -110,6 +107,38 @@ HÃY PHẢN HỒI HOÀN TOÀN BẰNG ĐỊNH DẠNG JSON HỢP LỆ (KHÔNG DÙN
       genZStylingTip: "Tạo dáng trang nghiêm với góc máy cận cảnh để làm nổi bật chi tiết cổ phục.",
       warnings: [],
     };
+
+    if (apiKey) {
+      return new Response(
+        JSON.stringify({
+          clientFallback: true,
+          apiKey,
+          model: "gemini-3.5-flash-lite",
+          prompt: `Bạn là "Cố Vấn Di Sản & Thời Trang Việt Phục" trong dự án Việt Phục Remix (AI Arena Vietnam 2026).
+Hãy phân tích bộ phối trang phục:
+- Trang phục ID: ${garmentId || "mặc định"}
+- Màu sắc ID: ${colorId || "mặc định"}
+- Bối cảnh ID: ${occasionId || "mặc định"}
+- Phong cách ID: ${styleId || "mặc định"}
+
+HÃY PHẢN HỒI HOÀN TOÀN BẰNG ĐỊNH DẠNG JSON HỢP LỆ (KHÔNG DÙNG BACKTICKS MARKDOWN):
+{
+  "colorHarmonyScore": 88,
+  "weatherFitScore": 92,
+  "culturalRespectScore": 95,
+  "overallScore": 92,
+  "elementAnalysis": { "element": "Kim/Mộc/Thủy/Hỏa/Thổ", "description": "Ý nghĩa ngũ hành" },
+  "colorHarmonyVerdict": "Nhận xét 1-2 câu",
+  "weatherAdvice": "Lời khuyên 1-2 câu",
+  "culturalNotes": "Đánh giá 1-2 câu",
+  "genZStylingTip": "Mẹo phối Gen Z",
+  "warnings": []
+}`,
+          fallback,
+        }),
+        { headers: CORS_HEADERS }
+      );
+    }
 
     return new Response(JSON.stringify(fallback), {
       headers: CORS_HEADERS,

@@ -187,6 +187,60 @@ export default function BachKhoaPage() {
 
       if (res.ok) {
         const data = await res.json();
+
+        // Nếu máy chủ Cloudflare bị Google chặn IP khu vực (location not supported),
+        // trình duyệt người dùng tại Việt Nam sẽ trực tiếp gửi prompt đến Gemini
+        if (data.clientFallback && (data.apiKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY)) {
+          const directKey = data.apiKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+          try {
+            const directRes = await fetch(
+              `https://generativelanguage.googleapis.com/v1beta/models/${data.model || "gemini-3.5-flash-lite"}:generateContent?key=${encodeURIComponent(directKey)}`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  systemInstruction: {
+                    parts: [{ text: data.systemInstruction }],
+                  },
+                  contents: [
+                    {
+                      role: "user",
+                      parts: [{ text }],
+                    },
+                  ],
+                  generationConfig: {
+                    temperature: 0.3,
+                  },
+                }),
+              }
+            );
+
+            if (directRes.ok) {
+              const directData = await directRes.json();
+              const parts = directData?.candidates?.[0]?.content?.parts || [];
+              const directAnswer = parts
+                .map((p: any) => p.text || "")
+                .filter(Boolean)
+                .join("\n\n")
+                .trim();
+
+              if (directAnswer) {
+                setMessages((prev) => [
+                  ...prev,
+                  {
+                    id: (Date.now() + 1).toString(),
+                    sender: "ai",
+                    text: directAnswer,
+                  },
+                ]);
+                return;
+              }
+            }
+          } catch (clientErr) {
+            console.warn("Client direct Gemini call failed:", clientErr);
+          }
+        }
+
         setMessages((prev) => [
           ...prev,
           {
@@ -195,6 +249,7 @@ export default function BachKhoaPage() {
             text: data.answer || "Đã giải mã tư liệu.",
           },
         ]);
+        return;
       } else {
         throw new Error("Lỗi khi kết nối API");
       }

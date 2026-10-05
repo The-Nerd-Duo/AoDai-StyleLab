@@ -33,7 +33,33 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
       });
       if (res.ok) {
         const json = await res.json();
-        setData(json);
+        if (json.clientFallback && (json.apiKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY)) {
+          const directKey = json.apiKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+          try {
+            const directRes = await fetch(
+              `https://generativelanguage.googleapis.com/v1beta/models/${json.model || "gemini-3.5-flash-lite"}:generateContent?key=${encodeURIComponent(directKey)}`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  contents: [{ role: "user", parts: [{ text: json.prompt }] }],
+                }),
+              }
+            );
+            if (directRes.ok) {
+              const directData = await directRes.json();
+              const rawText = directData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+              const cleanedText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+              const parsed = JSON.parse(cleanedText);
+              setData(parsed);
+              setLoading(false);
+              return;
+            }
+          } catch (directErr) {
+            console.warn("Direct client advisor call failed:", directErr);
+          }
+        }
+        setData(json.fallback || json);
         setLoading(false);
         return;
       }
