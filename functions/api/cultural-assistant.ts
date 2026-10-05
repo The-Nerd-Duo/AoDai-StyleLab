@@ -79,7 +79,8 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
 
       for (const model of candidateModels) {
         try {
-          const geminiRes = await fetch(
+          // Attempt 1: Standard REST call with camelCase systemInstruction
+          let geminiRes = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
             {
               method: "POST",
@@ -88,7 +89,7 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
                 "x-goog-api-key": apiKey,
               },
               body: JSON.stringify({
-                system_instruction: {
+                systemInstruction: {
                   parts: [{ text: CULTURAL_ASSISTANT_SYSTEM_INSTRUCTION }],
                 },
                 contents: [
@@ -103,6 +104,35 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
               }),
             }
           );
+
+          // Attempt 2: If model rejected systemInstruction (HTTP 400), prepend instruction to contents
+          if (!geminiRes.ok && geminiRes.status === 400) {
+            geminiRes = await fetch(
+              `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "x-goog-api-key": apiKey,
+                },
+                body: JSON.stringify({
+                  contents: [
+                    {
+                      role: "user",
+                      parts: [
+                        {
+                          text: `${CULTURAL_ASSISTANT_SYSTEM_INSTRUCTION}\n\n[CÂU HỎI NGƯỜI DÙNG]:\n${question}`,
+                        },
+                      ],
+                    },
+                  ],
+                  generationConfig: {
+                    temperature: 0.3,
+                  },
+                }),
+              }
+            );
+          }
 
           if (geminiRes.ok) {
             const geminiData: any = await geminiRes.json();
