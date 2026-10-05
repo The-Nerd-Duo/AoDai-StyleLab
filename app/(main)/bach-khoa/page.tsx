@@ -154,7 +154,6 @@ export default function BachKhoaPage() {
   const [highlightedMotifId, setHighlightedMotifId] = useState<string | null>(null);
 
   const chatScrollRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Auto scroll chat to bottom when messages or loading change
   useEffect(() => {
@@ -287,44 +286,12 @@ export default function BachKhoaPage() {
     }, 3500);
   };
 
-  const handleSimulateImageAudit = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || !e.target.files[0]) return;
-    const file = e.target.files[0];
-
-    const uploadBubble: ChatMessage = {
-      id: Date.now().toString(),
-      sender: "user",
-      text: `[Gửi ảnh kiểm định: ${file.name}] Kiểm định giúp tôi bộ trang phục trong ảnh có đúng quy chuẩn Việt phục không?`,
-      time: "Vừa xong",
-    };
-
-    setMessages((prev) => [...prev, uploadBubble]);
-    setLoadingAi(true);
-
-    setTimeout(() => {
-      const auditResponse: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        sender: "ai",
-        text: "Hệ thống AI Vision đã quét các đặc trưng của bức ảnh và đối chiếu cơ sở dữ liệu VNU Heritage:",
-        isAuditResult: true,
-        auditPass: true,
-        auditDetails: [
-          "Cổ áo: Dáng đứng bọc lót tinh xảo, tỷ lệ đạt chuẩn quy chế cổ phục.",
-          "Cài khuy: Cài sang nách phải (Cát khâm) đúng chuẩn phong tục Việt.",
-          "Gợi ý cách tân: Có thể phối thêm phụ kiện mấn nhẹ hoặc hài thêu để hoàn thiện tổng thể.",
-        ],
-      };
-      setMessages((prev) => [...prev, auditResponse]);
-      setLoadingAi(false);
-    }, 1200);
-  };
-
   const handleResetChat = () => {
     setMessages([
       {
         id: "reset",
         sender: "ai",
-        text: "Phiên vấn đáp di sản đã được làm mới. Mời bạn đặt câu hỏi hoặc gửi hình ảnh cần khảo chứng!",
+        text: "Phiên vấn đáp di sản đã được làm mới. Mời bạn đặt câu hỏi về lịch sử, triều điển hoặc cách phối đồ Việt phục!",
       },
     ]);
   };
@@ -387,11 +354,10 @@ export default function BachKhoaPage() {
                   <div
                     key={motif.id}
                     id={`motif-${motif.id}`}
-                    className={`bg-[#FFFFFF] rounded-2xl p-4 shadow-sm border space-y-3 transition-all duration-500 flex flex-col justify-between ${
-                      isHighlighted
+                    className={`bg-[#FFFFFF] rounded-2xl p-4 shadow-sm border space-y-3 transition-all duration-500 flex flex-col justify-between ${isHighlighted
                         ? "border-vermilion-red ring-2 ring-vermilion-red/50 shadow-lg scale-[1.02] bg-vermilion-red/5"
                         : "border-border-bronze-light/60 hover:translate-y-[-2px] hover:shadow-md hover:border-bronze-gold/70"
-                    }`}
+                      }`}
                   >
                     <div className="space-y-3">
                       <div className="relative h-44 rounded-xl overflow-hidden bg-paper-cream border border-border-bronze-light/40 group">
@@ -649,19 +615,9 @@ export default function BachKhoaPage() {
                 onChange={(e) => setInputMsg(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSendQuery()}
                 placeholder="Hỏi AI về cổ phục, điển lễ, hoa văn..."
-                className="w-full pl-3 pr-20 py-2 sm:py-2.5 bg-surface-pure rounded-xl text-text-charcoal text-xs placeholder:text-text-warm-gray focus:outline-none border border-border-bronze-light/60 shadow-inner"
+                className="w-full pl-3 pr-10 py-2 sm:py-2.5 bg-surface-pure rounded-xl text-text-charcoal text-xs placeholder:text-text-warm-gray focus:outline-none border border-border-bronze-light/60 shadow-inner"
               />
               <div className="absolute right-1.5 flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="p-1.5 text-text-warm-gray hover:text-bronze-gold rounded-lg transition-colors"
-                  title="Tải ảnh Việt phục lên để AI thẩm định đúng sai"
-                >
-                  <span className="material-symbols-outlined text-[18px]">
-                    add_photo_alternate
-                  </span>
-                </button>
                 <button
                   type="button"
                   onClick={() => handleSendQuery()}
