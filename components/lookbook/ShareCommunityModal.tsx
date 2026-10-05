@@ -235,11 +235,10 @@ export const ShareCommunityModal: React.FC<ShareCommunityModalProps> = ({
               <button
                 type="button"
                 onClick={() => setIsAnonymous(false)}
-                className={`py-2.5 px-3 rounded-xl border flex items-center justify-center gap-2 text-xs font-semibold transition-all ${
-                  !isAnonymous
+                className={`py-2.5 px-3 rounded-xl border flex items-center justify-center gap-2 text-xs font-semibold transition-all ${!isAnonymous
                     ? "bg-surface-pure border-vermilion-red text-vermilion-red shadow-xs font-bold ring-1 ring-vermilion-red/30"
                     : "bg-paper-cream border-border-bronze-light/60 text-text-warm-gray hover:text-text-charcoal"
-                }`}
+                  }`}
               >
                 <User className="w-3.5 h-3.5" />
                 <span>Công khai tên</span>
@@ -248,11 +247,10 @@ export const ShareCommunityModal: React.FC<ShareCommunityModalProps> = ({
               <button
                 type="button"
                 onClick={() => setIsAnonymous(true)}
-                className={`py-2.5 px-3 rounded-xl border flex items-center justify-center gap-2 text-xs font-semibold transition-all ${
-                  isAnonymous
+                className={`py-2.5 px-3 rounded-xl border flex items-center justify-center gap-2 text-xs font-semibold transition-all ${isAnonymous
                     ? "bg-surface-pure border-bronze-gold text-bronze-gold shadow-xs font-bold ring-1 ring-bronze-gold/30"
                     : "bg-paper-cream border-border-bronze-light/60 text-text-warm-gray hover:text-text-charcoal"
-                }`}
+                  }`}
               >
                 <UserX className="w-3.5 h-3.5" />
                 <span>Đăng ẩn danh</span>
@@ -318,11 +316,10 @@ export const ShareCommunityModal: React.FC<ShareCommunityModalProps> = ({
                   key={cat.id}
                   type="button"
                   onClick={() => setCategory(cat.id)}
-                  className={`py-2 px-2.5 rounded-xl text-[11px] font-semibold transition-all border text-center truncate ${
-                    category === cat.id
+                  className={`py-2 px-2.5 rounded-xl text-[11px] font-semibold transition-all border text-center truncate ${category === cat.id
                       ? "bg-vermilion-red text-white border-vermilion-red shadow-xs"
                       : "bg-surface-pure text-text-warm-gray hover:text-text-charcoal border-border-bronze-light/60 hover:bg-paper-cream"
-                  }`}
+                    }`}
                 >
                   {cat.label}
                 </button>

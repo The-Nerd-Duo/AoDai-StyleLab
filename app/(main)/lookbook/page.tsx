@@ -51,7 +51,7 @@ export default function LookbookPage() {
       if (savedLikes) {
         setUserLikedIds(new Set(JSON.parse(savedLikes)));
       }
-    } catch {}
+    } catch { }
   }, []);
 
   // Fetch initial lookbooks from API
@@ -181,7 +181,7 @@ export default function LookbookPage() {
           }
         };
       }
-    } catch {}
+    } catch { }
 
     return () => {
       if (eventSource) eventSource.close();
@@ -210,7 +210,7 @@ export default function LookbookPage() {
         "vietphuc_liked_lookbook_ids",
         JSON.stringify(Array.from(updatedLikes))
       );
-    } catch {}
+    } catch { }
 
     setItems((prev) =>
       prev.map((item) => {
@@ -232,7 +232,7 @@ export default function LookbookPage() {
         bc.postMessage({ type: "UPDATE_LIKES", data: { id, likes: newLikes } });
         bc.close();
       }
-    } catch {}
+    } catch { }
 
     // Send to backend API
     try {
@@ -308,14 +308,14 @@ export default function LookbookPage() {
         });
         bc.close();
       }
-    } catch {}
+    } catch { }
 
     // Send to backend API
     try {
       fetch(`/api/lookbook/${item.id}/share`, {
         method: "POST",
-      }).catch(() => {});
-    } catch {}
+      }).catch(() => { });
+    } catch { }
   };
 
   // Remix an outfit from community into Studio
@@ -386,9 +386,8 @@ export default function LookbookPage() {
             {/* Real-time Live Status Badge */}
             <div className="flex items-center gap-2 self-start sm:self-auto bg-surface-pure border border-border-bronze-light/60 px-3 py-1.5 rounded-xl shadow-2xs">
               <span
-                className={`w-2 h-2 rounded-full ${
-                  isLiveConnected ? "bg-emerald-500 animate-pulse" : "bg-amber-400"
-                }`}
+                className={`w-2 h-2 rounded-full ${isLiveConnected ? "bg-emerald-500 animate-pulse" : "bg-amber-400"
+                  }`}
               />
               <span className="text-[11px] font-medium text-text-charcoal flex items-center gap-1">
                 <span>{isLiveConnected ? "Đồng bộ trực tiếp" : "Đang kết nối live..."}</span>
@@ -455,51 +454,46 @@ export default function LookbookPage() {
               <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none text-nowrap">
                 <button
                   onClick={() => setActiveCategory("all")}
-                  className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all ${
-                    activeCategory === "all"
+                  className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all ${activeCategory === "all"
                       ? "bg-vermilion-red text-white shadow-xs"
                       : "bg-surface-pure hover:bg-paper-cream text-text-warm-gray border border-border-bronze-light/50"
-                  }`}
+                    }`}
                 >
                   Tất cả ({categoryCounts.all})
                 </button>
                 <button
                   onClick={() => setActiveCategory("pho-co")}
-                  className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all ${
-                    activeCategory === "pho-co"
+                  className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all ${activeCategory === "pho-co"
                       ? "bg-vermilion-red text-white shadow-xs"
                       : "bg-surface-pure hover:bg-paper-cream text-text-warm-gray border border-border-bronze-light/50"
-                  }`}
+                    }`}
                 >
                   🏮 Đêm Phố Cổ ({categoryCounts["pho-co"]})
                 </button>
                 <button
                   onClick={() => setActiveCategory("cung-dinh")}
-                  className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all ${
-                    activeCategory === "cung-dinh"
+                  className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all ${activeCategory === "cung-dinh"
                       ? "bg-vermilion-red text-white shadow-xs"
                       : "bg-surface-pure hover:bg-paper-cream text-text-warm-gray border border-border-bronze-light/50"
-                  }`}
+                    }`}
                 >
                   👑 Cung Đình ({categoryCounts["cung-dinh"]})
                 </button>
                 <button
                   onClick={() => setActiveCategory("y2k")}
-                  className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all ${
-                    activeCategory === "y2k"
+                  className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all ${activeCategory === "y2k"
                       ? "bg-vermilion-red text-white shadow-xs"
                       : "bg-surface-pure hover:bg-paper-cream text-text-warm-gray border border-border-bronze-light/50"
-                  }`}
+                    }`}
                 >
                   ⚡ Gen Z Y2K ({categoryCounts.y2k})
                 </button>
                 <button
                   onClick={() => setActiveCategory("da-tiec")}
-                  className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all ${
-                    activeCategory === "da-tiec"
+                  className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all ${activeCategory === "da-tiec"
                       ? "bg-vermilion-red text-white shadow-xs"
                       : "bg-surface-pure hover:bg-paper-cream text-text-warm-gray border border-border-bronze-light/50"
-                  }`}
+                    }`}
                 >
                   🪷 Dạ tiệc ({categoryCounts["da-tiec"]})
                 </button>
@@ -548,11 +542,10 @@ export default function LookbookPage() {
                     return (
                       <div
                         key={item.id}
-                        className={`bg-surface-pure rounded-xl overflow-hidden shadow-xs hover:shadow-lg transition-all flex flex-col group border relative ${
-                          isNewlyAdded
+                        className={`bg-surface-pure rounded-xl overflow-hidden shadow-xs hover:shadow-lg transition-all flex flex-col group border relative ${isNewlyAdded
                             ? "border-vermilion-red ring-2 ring-vermilion-red/40 animate-in zoom-in-95 duration-500"
                             : "border-border-bronze-light/50 hover:border-bronze-gold/50"
-                        }`}
+                          }`}
                       >
                         {/* Top Indicator for Newly Shared Item */}
                         {isNewlyAdded && (
@@ -622,18 +615,16 @@ export default function LookbookPage() {
                               e.stopPropagation();
                               handleToggleLike(item.id);
                             }}
-                            className={`absolute top-2.5 right-2.5 w-7 h-7 rounded-full flex items-center justify-center transition-all shadow-md z-10 active:scale-90 ${
-                              isLiked
+                            className={`absolute top-2.5 right-2.5 w-7 h-7 rounded-full flex items-center justify-center transition-all shadow-md z-10 active:scale-90 ${isLiked
                                 ? "bg-vermilion-red text-white scale-105 ring-2 ring-white/50"
                                 : "bg-text-charcoal/70 hover:bg-vermilion-red text-white"
-                            }`}
+                              }`}
                             type="button"
                             title={isLiked ? "Bỏ thích" : "Thả tim Lookbook"}
                           >
                             <Heart
-                              className={`w-3.5 h-3.5 ${
-                                isLiked ? "fill-white text-white" : "text-white"
-                              }`}
+                              className={`w-3.5 h-3.5 ${isLiked ? "fill-white text-white" : "text-white"
+                                }`}
                             />
                           </button>
 
@@ -663,11 +654,10 @@ export default function LookbookPage() {
                           {/* Author Info */}
                           <div className="flex items-center gap-1.5 min-w-0 flex-1 mr-2">
                             <div
-                              className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${
-                                item.isAnonymous
+                              className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${item.isAnonymous
                                   ? "bg-text-warm-gray/70 text-white"
                                   : "bg-bronze-gold text-white"
-                              }`}
+                                }`}
                               title={item.isAnonymous ? "Khách Ẩn Danh" : item.author}
                             >
                               {item.authorInitial}
@@ -686,15 +676,13 @@ export default function LookbookPage() {
                             <button
                               type="button"
                               onClick={() => handleToggleLike(item.id)}
-                              className={`flex items-center gap-1 px-1.5 py-0.5 rounded-lg transition-colors hover:bg-red-50 text-[11px] font-semibold ${
-                                isLiked ? "text-vermilion-red font-bold" : "text-text-warm-gray hover:text-vermilion-red"
-                              }`}
+                              className={`flex items-center gap-1 px-1.5 py-0.5 rounded-lg transition-colors hover:bg-red-50 text-[11px] font-semibold ${isLiked ? "text-vermilion-red font-bold" : "text-text-warm-gray hover:text-vermilion-red"
+                                }`}
                               title={isLiked ? "Bỏ thích" : "Thả tim"}
                             >
                               <Heart
-                                className={`w-3.5 h-3.5 transition-transform active:scale-125 ${
-                                  isLiked ? "fill-vermilion-red text-vermilion-red" : ""
-                                }`}
+                                className={`w-3.5 h-3.5 transition-transform active:scale-125 ${isLiked ? "fill-vermilion-red text-vermilion-red" : ""
+                                  }`}
                               />
                               <span>{(item.likes || 0).toLocaleString()}</span>
                             </button>
