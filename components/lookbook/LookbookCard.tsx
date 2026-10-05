@@ -3,6 +3,7 @@
 import React, { useRef, useState } from "react";
 import Link from "next/link";
 import { OutfitState, encodeOutfitToQuery } from "@/lib/utils";
+import { LookbookItem } from "@/lib/types";
 import mockupsData from "@/config/mockups.json";
 import framesData from "@/config/frames.json";
 import { useOutfitStore } from "@/lib/store";
@@ -14,9 +15,15 @@ interface LookbookCardProps {
   outfit: OutfitState;
   frameId: string;
   imageUrl?: string | null;
+  onShareSuccess?: (item: LookbookItem) => void;
 }
 
-export const LookbookCard: React.FC<LookbookCardProps> = ({ outfit, frameId, imageUrl }) => {
+export const LookbookCard: React.FC<LookbookCardProps> = ({
+  outfit,
+  frameId,
+  imageUrl,
+  onShareSuccess,
+}) => {
   const { resultImage } = useOutfitStore();
   const cardRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
@@ -259,8 +266,11 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({ outfit, frameId, ima
         outfit={outfit}
         frameId={frameId}
         imageUrl={displayImage}
-        onSuccess={() => {
+        onSuccess={(item) => {
           setCommunityModalOpen(false);
+          if (onShareSuccess && item) {
+            onShareSuccess(item);
+          }
         }}
       />
     </div>

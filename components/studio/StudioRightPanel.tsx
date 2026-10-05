@@ -171,6 +171,14 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
         <div className="flex flex-col gap-2 pt-1">
           <Link
             href="/lookbook"
+            onClick={() => {
+              if (resultImage) {
+                try {
+                  sessionStorage.setItem("vietphuc_result_image", resultImage);
+                  localStorage.setItem("vietphuc_result_image", resultImage);
+                } catch {}
+              }
+            }}
             className="w-full py-3 px-4 bg-gradient-to-r from-vermilion-red to-primary text-white rounded-xl font-sans text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm hover:opacity-95 active:scale-[0.99] transition-all"
           >
             <Download className="w-4 h-4" />

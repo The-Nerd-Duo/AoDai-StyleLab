@@ -6,7 +6,7 @@ import { OutfitState } from "@/lib/utils";
 import mockupsData from "@/config/mockups.json";
 import framesData from "@/config/frames.json";
 import { X, Sparkles, User, UserX, Check, AlertCircle, Share2, Layers } from "lucide-react";
-import { saveLocalLookbook } from "@/lib/lookbook-storage";
+import { saveLocalLookbook, getLocalLookbooks } from "@/lib/lookbook-storage";
 
 interface ShareCommunityModalProps {
   isOpen: boolean;
@@ -136,7 +136,18 @@ export const ShareCommunityModal: React.FC<ShareCommunityModalProps> = ({
         // Fallback to local storage
       }
 
-      if (!newItem) {
+      if (newItem) {
+        try {
+          const current = getLocalLookbooks();
+          const clean = [newItem, ...current.filter((c) => c.id !== newItem.id)];
+          localStorage.setItem("vietphuc_community_lookbooks", JSON.stringify(clean));
+          if ("BroadcastChannel" in window) {
+            const bc = new BroadcastChannel("vietphuc_lookbook_channel");
+            bc.postMessage({ type: "NEW_LOOKBOOK", data: newItem });
+            bc.close();
+          }
+        } catch {}
+      } else {
         newItem = saveLocalLookbook(payload);
       }
 
