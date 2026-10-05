@@ -4,17 +4,16 @@ const apiKey = process.env.GEMINI_API_KEY || "";
 
 export const genAI = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
-export const DEFAULT_FLASH_MODEL = process.env.GEMINI_FLASH_MODEL || "gemini-3.8-flash";
-export const DEFAULT_PRO_MODEL = process.env.GEMINI_PRO_MODEL || "gemini-3.8-flash";
+export const DEFAULT_FLASH_MODEL = process.env.GEMINI_FLASH_MODEL || "gemini-3.5-flash-lite";
+export const DEFAULT_PRO_MODEL = process.env.GEMINI_PRO_MODEL || "gemini-3.5-flash-lite";
 
 // Danh sách model dự phòng theo đúng thứ tự ưu tiên:
-// 1. gemini-3.8-flash
-// 2. gemini-3.5-flash-lite
+// 1. gemini-3.5-flash-lite (tốc độ cao, hạn mức request lớn)
+// 2. gemini-3.8-flash
 // 3. gemini-2.5-flash
-// 4. gemini-2.5-flash-lite
 export const FALLBACK_MODELS: string[] = [
-  "gemini-3.8-flash",
   "gemini-3.5-flash-lite",
+  "gemini-3.8-flash",
   "gemini-2.5-flash",
   "gemini-2.5-flash-lite",
   "gemini-2.0-flash",

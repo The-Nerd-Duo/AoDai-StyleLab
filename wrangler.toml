@@ -9,6 +9,6 @@ id = "479de94c36924ad9aea38a2a73ee19c6"
 preview_id = "479de94c36924ad9aea38a2a73ee19c6"
 
 [vars]
-GEMINI_FLASH_MODEL = "gemini-3.8-flash"
-GEMINI_PRO_MODEL = "gemini-3.8-flash"
+GEMINI_FLASH_MODEL = "gemini-3.5-flash-lite"
+GEMINI_PRO_MODEL = "gemini-3.5-flash-lite"
 
