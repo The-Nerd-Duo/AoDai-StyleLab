@@ -59,24 +59,54 @@ export default function LookbookPage() {
     } catch { }
   }, []);
 
-  // Fetch initial lookbooks from API or local storage
+  // Fetch initial lookbooks from API or local storage (never wipes local cards)
   const fetchLookbooks = useCallback(async () => {
+    // 1. Immediately hydrate from local storage so cards are visible right on page load
+    const localData = getLocalLookbooks();
+    if (localData.length > 0) {
+      setItems(localData);
+      setLoading(false);
+    }
+
+    // 2. Sync with Cloudflare backend
     try {
       const res = await fetch("/api/lookbook", { cache: "no-store" });
       if (res.ok) {
         const json = await res.json();
         if (json.success && Array.isArray(json.data)) {
-          setItems(json.data);
+          if (json.storage !== "none") {
+            setIsLiveConnected(true);
+            const serverItems: LookbookItem[] = json.data;
+            const serverIds = new Set(serverItems.map((i) => i.id));
+
+            // Merge server items with any locally created items not yet synced
+            const recentLocal = localData.filter(
+              (l) => !serverIds.has(l.id) && Date.now() - new Date(l.createdAt).getTime() < 30 * 60 * 1000
+            );
+            const merged = [...recentLocal, ...serverItems];
+            setItems(merged);
+
+            try {
+              localStorage.setItem("vietphuc_community_lookbooks", JSON.stringify(merged));
+            } catch {}
+          } else {
+            // Storage is "none" (KV not bound yet on deployment): keep local items intact!
+            setIsLiveConnected(false);
+            if (localData.length > 0) {
+              setItems(localData);
+            }
+          }
           setLoading(false);
-          setIsLiveConnected(true);
           return;
         }
       }
-    } catch {
-      // Local fallback
+    } catch (err) {
+      console.warn("Fetch lookbooks error, using local fallback:", err);
     }
-    const localData = getLocalLookbooks();
-    setItems(localData);
+
+    if (localData.length > 0) {
+      setItems(localData);
+    }
     setLoading(false);
   }, []);
 
@@ -133,8 +163,17 @@ export default function LookbookPage() {
         if (res.ok) {
           const json = await res.json();
           if (isSubscribed && json.success && Array.isArray(json.data)) {
-            setIsLiveConnected(true);
+            if (json.storage !== "none") {
+              setIsLiveConnected(true);
+            }
+
             setItems((prev) => {
+              // 1. If server returned empty array: NEVER wipe out items that exist locally!
+              if (json.data.length === 0) {
+                return prev;
+              }
+
+              // 2. Identify newly received items from other devices
               const prevIds = new Set(prev.map((i) => i.id));
               const newlyReceived = json.data.filter((i: LookbookItem) => !prevIds.has(i.id));
 
@@ -156,7 +195,16 @@ export default function LookbookPage() {
                 }, 8000);
               }
 
-              return json.data;
+              // 3. Merge: keep any local cards not yet indexed on server
+              const serverIdSet = new Set(json.data.map((i: LookbookItem) => i.id));
+              const localPending = prev.filter((p) => !serverIdSet.has(p.id));
+              const merged = [...localPending, ...json.data];
+
+              try {
+                localStorage.setItem("vietphuc_community_lookbooks", JSON.stringify(merged));
+              } catch {}
+
+              return merged;
             });
           }
         }
@@ -408,9 +456,13 @@ export default function LookbookPage() {
                 frameId={selectedFrame}
                 imageUrl={resultImage}
                 onShareSuccess={(newCard) => {
+                  setActiveCategory("all");
                   setItems((prev) => {
-                    if (prev.some((item) => item.id === newCard.id)) return prev;
-                    return [newCard, ...prev];
+                    const clean = [newCard, ...prev.filter((item) => item.id !== newCard.id)];
+                    try {
+                      localStorage.setItem("vietphuc_community_lookbooks", JSON.stringify(clean));
+                    } catch {}
+                    return clean;
                   });
                   setNewlyAddedIds((prev) => {
                     const next = new Set(prev);

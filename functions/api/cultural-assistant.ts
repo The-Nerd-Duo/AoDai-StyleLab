@@ -4,6 +4,21 @@ interface Env {
   GEMINI_FLASH_MODEL?: string;
 }
 
+const CORS_HEADERS = {
+  "Content-Type": "application/json",
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, x-goog-api-key",
+  "Cache-Control": "no-cache, no-store, must-revalidate",
+};
+
+export async function onRequestOptions() {
+  return new Response(null, {
+    status: 204,
+    headers: CORS_HEADERS,
+  });
+}
+
 const CULTURAL_ASSISTANT_SYSTEM_INSTRUCTION = `
 Bạn là "Cố Vấn Di Sản & Bách Khoa Toàn Thư Văn Hóa Việt Phục" chuyên sâu trong dự án "Việt Phục Remix" (AI Arena Vietnam 2026).
 Giọng văn: Sắc sảo, súc tích, tự hào dân tộc, thân thiện và năng động cho giới trẻ Gen Z.
@@ -34,39 +49,51 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
   try {
     const body: any = await context.request.json();
     const question = (body.question || body.message || "").trim();
-    const apiKey = context.env.GEMINI_API_KEY || "";
+    
+    // Hỗ trợ cả context.env và process.env (khi bật nodejs_compat)
+    const apiKey =
+      context.env?.GEMINI_API_KEY ||
+      (typeof process !== "undefined" && process?.env?.GEMINI_API_KEY) ||
+      "";
 
     if (!question) {
       return new Response(JSON.stringify({ error: "Câu hỏi không hợp lệ hoặc đang trống." }), {
         status: 400,
-        headers: { "Content-Type": "application/json" },
+        headers: CORS_HEADERS,
       });
     }
 
     if (apiKey) {
       const candidateModels = Array.from(
         new Set([
-          context.env.GEMINI_PRO_MODEL || "gemini-3.8-flash",
+          context.env?.GEMINI_PRO_MODEL || "gemini-3.8-flash",
+          context.env?.GEMINI_FLASH_MODEL || "gemini-3.8-flash",
           "gemini-3.8-flash",
           "gemini-3.5-flash-lite",
           "gemini-2.5-flash",
           "gemini-2.5-flash-lite",
+          "gemini-2.0-flash",
+          "gemini-1.5-flash",
         ])
       );
 
       for (const model of candidateModels) {
         try {
           const geminiRes = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
             {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: {
+                "Content-Type": "application/json",
+                "x-goog-api-key": apiKey,
+              },
               body: JSON.stringify({
                 system_instruction: {
                   parts: [{ text: CULTURAL_ASSISTANT_SYSTEM_INSTRUCTION }],
                 },
                 contents: [
                   {
+                    role: "user",
                     parts: [{ text: question }],
                   },
                 ],
@@ -87,20 +114,25 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
                   reply: answer,
                   source: `gemini-ai (${model})`,
                 }),
-                { headers: { "Content-Type": "application/json" } }
+                { headers: CORS_HEADERS }
               );
             }
+          } else {
+            const errText = await geminiRes.text();
+            console.warn(`Cloudflare assistant Gemini call error on ${model} (HTTP ${geminiRes.status}):`, errText);
           }
         } catch (err) {
-          console.warn(`Cloudflare assistant Gemini call error on ${model}:`, err);
+          console.warn(`Cloudflare assistant Gemini call exception on ${model}:`, err);
         }
       }
+    } else {
+      console.warn("Cloudflare Pages: GEMINI_API_KEY is not defined in environment variables. Falling back to local vault.");
     }
 
     // Heritage Vault Fallback khi offline hoặc mất kết nối
     const qLower = question.toLowerCase();
     let answer =
-      "Cảm ơn bạn đã quan tâm đến cổ phục Việt Nam! Việt phục là kho tàng vô giá kết tinh tinh hoa văn hóa hàng nghìn năm của cha ông. Bạn có thể hỏi cụ thể hơn về Áo Ngũ Thân, Áo Dài, Áo Tấc hoặc quy tắc phối màu ngũ hành nhé!";
+      "Cảm ơn bạn đã quan tâm đến cổ phục Việt Nam! Việt phục là kho tàng vô giá kết tinh tinh hoa văn hóa hàng nghìn năm của cha ông. Bạn có thể hỏi cụ thể hơn về Áo Ngũ Thân, Áo Dài, Áo Tấc, Áo Nhật Bình hoặc quy tắc phối màu ngũ hành nhé!";
 
     if (qLower.includes("ngũ thân") || qLower.includes("5 thân")) {
       answer =
@@ -117,6 +149,9 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
     } else if (qLower.includes("giao lĩnh")) {
       answer =
         "Áo Giao Lĩnh (tràng vạt) là dạng áo cổ chéo xuất hiện từ thời Lý, Trần, Lê. Khi mặc, vạt bên trái đè lên vạt bên phải, mang đậm tinh thần phóng khoáng, cổ phong của người Việt thời trung đại.";
+    } else if (qLower.includes("lemur")) {
+      answer =
+        "Áo dài Lemur do họa sĩ Cát Tường sáng tạo vào thập niên 1930 tại Hà Nội, đánh dấu bước cách tân hiện đại đầu tiên của áo dài với phom dáng ôm sát, cổ khoét và tay bồng tinh tế.";
     } else if (qLower.includes("phối") || qLower.includes("gen z") || qLower.includes("sneaker")) {
       answer =
         "Gen Z hoàn toàn có thể phối Việt phục cùng sneaker trắng, kính râm retro hay túi vải canvas để dạo phố! Điều cốt lõi là giữ cho phom áo thẳng thớm, cài cúc chỉnh tề và không mặc hở hang hoặc cắt xẻ làm sai lệch cấu trúc cổ truyền.";
@@ -128,14 +163,14 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
         reply: answer,
         source: "heritage-vault-local",
       }),
-      { headers: { "Content-Type": "application/json" } }
+      { headers: CORS_HEADERS }
     );
   } catch (error: any) {
     return new Response(
       JSON.stringify({ error: error?.message || "Lỗi xử lý trợ lý văn hóa" }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: CORS_HEADERS,
       }
     );
   }
