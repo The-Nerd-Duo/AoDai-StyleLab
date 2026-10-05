@@ -3,7 +3,7 @@ compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = "out"
 
-# Lưu ý: Đối với Cloudflare Pages, bạn liên kết KV namespace trực tiếp trên Cloudflare Dashboard:
-# Settings -> Functions -> KV namespace bindings:
-# - Variable name: LOOKBOOK_KV
-# - KV namespace: chọn namespace của bạn (không cần nhập ID thủ công)
+[[kv_namespaces]]
+binding = "LOOKBOOK_KV"
+id = "479de94c36924ad9aea38a2a73ee19c6"
+preview_id = "479de94c36924ad9aea38a2a73ee19c6"

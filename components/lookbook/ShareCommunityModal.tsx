@@ -86,6 +86,51 @@ export const ShareCommunityModal: React.FC<ShareCommunityModalProps> = ({
 
   if (!isOpen || !mounted) return null;
 
+  const compressImageForUpload = async (imgUrl: string | null): Promise<string | null> => {
+    if (!imgUrl) return null;
+    if (!imgUrl.startsWith("data:image")) return imgUrl;
+
+    return new Promise((resolve) => {
+      try {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+          try {
+            const MAX_SIZE = 800;
+            let w = img.width;
+            let h = img.height;
+            if (w > MAX_SIZE || h > MAX_SIZE) {
+              if (w > h) {
+                h = Math.round((h * MAX_SIZE) / w);
+                w = MAX_SIZE;
+              } else {
+                w = Math.round((w * MAX_SIZE) / h);
+                h = MAX_SIZE;
+              }
+            }
+            const canvas = document.createElement("canvas");
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext("2d");
+            if (!ctx) {
+              resolve(imgUrl);
+              return;
+            }
+            ctx.drawImage(img, 0, 0, w, h);
+            const compressed = canvas.toDataURL("image/jpeg", 0.82);
+            resolve(compressed);
+          } catch {
+            resolve(imgUrl);
+          }
+        };
+        img.onerror = () => resolve(imgUrl);
+        img.src = imgUrl;
+      } catch {
+        resolve(imgUrl);
+      }
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
@@ -107,12 +152,15 @@ export const ShareCommunityModal: React.FC<ShareCommunityModalProps> = ({
         localStorage.setItem("vietphuc_is_anonymous", isAnonymous ? "true" : "false");
       }
 
+      // Compress heavy base64 images so KV and localStorage don't hit size quotas
+      const optimizedImage = await compressImageForUpload(imageUrl || null);
+
       const payload = {
         title: title.trim() || `${garment.name} Di Sản`,
         author: finalAuthor,
         isAnonymous,
         category,
-        img: imageUrl || null,
+        img: optimizedImage,
         outfit,
         frameId,
         era: garment.dynasty || "Việt Phục",
@@ -126,17 +174,21 @@ export const ShareCommunityModal: React.FC<ShareCommunityModalProps> = ({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
-        if (res.ok) {
-          const json = await res.json();
-          if (json.success && json.data) {
-            newItem = json.data;
-          }
+        const json = await res.json().catch(() => null);
+        if (res.ok && json?.success && json?.data) {
+          newItem = json.data;
+        } else if (json?.error) {
+          console.warn("Backend lookbook notice:", json.error);
         }
-      } catch {
-        // Fallback to local storage
+      } catch (networkErr) {
+        console.warn("Network error saving to cloud:", networkErr);
       }
 
-      if (newItem) {
+      // If server could not save yet, save locally to ensure it is NEVER lost
+      if (!newItem) {
+        newItem = saveLocalLookbook(payload);
+      } else {
+        // Also save to local storage for instant offline cache and sync
         try {
           const current = getLocalLookbooks();
           const clean = [newItem, ...current.filter((c) => c.id !== newItem.id)];
@@ -146,9 +198,9 @@ export const ShareCommunityModal: React.FC<ShareCommunityModalProps> = ({
             bc.postMessage({ type: "NEW_LOOKBOOK", data: newItem });
             bc.close();
           }
-        } catch {}
-      } else {
-        newItem = saveLocalLookbook(payload);
+        } catch (storageErr) {
+          console.warn("Local storage cache warning:", storageErr);
+        }
       }
 
       setSuccessDone(true);

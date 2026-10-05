@@ -98,6 +98,11 @@ export async function onRequestPost(context: {
             await kv.put("lookbooks_community_all", JSON.stringify(items));
           }
         }
+        const singleRaw = await kv.get(`lookbook:${id}`, "json");
+        if (singleRaw) {
+          singleRaw.likes = newLikes;
+          await kv.put(`lookbook:${id}`, JSON.stringify(singleRaw));
+        }
       } catch (err) {
         console.warn("KV like update error:", err);
       }

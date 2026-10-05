@@ -149,21 +149,32 @@ export async function onRequestGet(context: { request: Request; env: any }) {
             success: true,
             data: items,
             storage: "cloudflare-kv",
+            count: items.length,
           }),
           { headers: CORS_HEADERS }
         );
       } catch (err: any) {
-        console.warn("KV read error:", err);
+        console.error("KV read error:", err);
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: "KV read error: " + (err?.message || "Unknown error"),
+            storage: "cloudflare-kv-error",
+          }),
+          { status: 500, headers: CORS_HEADERS }
+        );
       }
     }
 
     // Default if no storage binding configured on Cloudflare Pages yet
+    const envKeys = context.env ? Object.keys(context.env) : [];
     return new Response(
       JSON.stringify({
         success: true,
         data: [],
         storage: "none",
-        warning: "LOOKBOOK_KV is not bound in Cloudflare Pages Settings -> Functions -> KV namespace bindings",
+        warning: "LOOKBOOK_KV chưa có trong context.env. Biến hiện có: " + (envKeys.length ? envKeys.join(", ") : "không có biến nào"),
+        envKeys,
       }),
       { headers: CORS_HEADERS }
     );
@@ -201,6 +212,7 @@ export async function onRequestPost(context: { request: Request; env: any }) {
     };
 
     let storageUsed = "none";
+    let kvError: string | null = null;
 
     // 1. Save to Cloudflare D1 if available
     const d1 = findD1(context.env);
@@ -264,13 +276,34 @@ export async function onRequestPost(context: { request: Request; env: any }) {
         } else if (typeof raw === "string") {
           items = JSON.parse(raw);
         }
-        items = [newItem, ...items.filter((i: any) => i.id !== newItem.id)].slice(0, 150);
+        // Filter out legacy sample cards
+        items = (items || []).filter((i: any) => i && !String(i.id).startsWith("sample-"));
+
+        // Put new item at front, keep up to 100 items
+        items = [newItem, ...items.filter((i: any) => i.id !== newItem.id)].slice(0, 100);
+
         await kv.put("lookbooks_community_all", JSON.stringify(items));
         await kv.put(`lookbook:${newItem.id}`, JSON.stringify(newItem));
         storageUsed = storageUsed === "none" ? "cloudflare-kv" : `${storageUsed}+kv`;
       } catch (err: any) {
-        console.warn("KV write error:", err);
+        console.error("KV write error:", err);
+        kvError = err?.message || "Lỗi ghi vào Cloudflare KV";
       }
+    }
+
+    if (storageUsed === "none") {
+      const envKeys = context.env ? Object.keys(context.env) : [];
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: kvError 
+            ? `Lỗi ghi vào Cloudflare KV: ${kvError}` 
+            : `Cloudflare KV (LOOKBOOK_KV) chưa có hiệu lực trên deployment này. Biến môi trường hiện có: [${envKeys.join(", ")}]. Vui lòng đảm bảo bản deploy mới nhất đã hoàn thành.`,
+          data: newItem,
+          storage: "none",
+        }),
+        { status: 503, headers: CORS_HEADERS }
+      );
     }
 
     return new Response(
@@ -278,9 +311,6 @@ export async function onRequestPost(context: { request: Request; env: any }) {
         success: true,
         data: newItem,
         storage: storageUsed,
-        warning: storageUsed === "none"
-          ? "LOOKBOOK_KV is not bound in Cloudflare Pages Settings -> Functions -> KV namespace bindings. Card is only saved on local browser until binding is added."
-          : null,
       }),
       { status: 201, headers: CORS_HEADERS }
     );
@@ -291,3 +321,4 @@ export async function onRequestPost(context: { request: Request; env: any }) {
     );
   }
 }
+
