@@ -81,7 +81,24 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
   };
 
   useEffect(() => {
-    fetchAdvice();
+    // 1. Cập nhật ngay bằng Local Rule Engine để UI phản hồi mượt 0ms khi vuốt
+    const local = evaluateCulturalHarmony({
+      garmentId: outfit.garmentId,
+      colorId: outfit.colorId,
+      occasionId: outfit.occasionId,
+      styleId: outfit.styleId,
+      accessoryId: outfit.accessoryId,
+      accessoryIds: outfit.accessoryIds,
+      personaId: outfit.personaId,
+    });
+    setData((prev) => (prev ? { ...prev, colorHarmonyScore: local.colorHarmonyScore, overallScore: local.overallScore, culturalRespectScore: local.culturalRespectScore } : local));
+
+    // 2. Debounce 650ms: chỉ khi dừng vuốt ở món cụ thể mới gửi request gọi Gemini AI
+    const timer = setTimeout(() => {
+      fetchAdvice();
+    }, 650);
+
+    return () => clearTimeout(timer);
   }, [outfit.garmentId, outfit.colorId, outfit.occasionId, outfit.styleId, outfit.accessoryId, outfit.accessoryIds?.join(",")]);
 
   // Convert 100-point score to 5-star rating (e.g., 98 -> 4.9, 90 -> 4.5)

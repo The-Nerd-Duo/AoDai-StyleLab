@@ -14,10 +14,6 @@ export const DEFAULT_PRO_MODEL = process.env.GEMINI_PRO_MODEL || "gemini-3.5-fla
 export const FALLBACK_MODELS: string[] = [
   "gemini-3.5-flash-lite",
   "gemini-3.8-flash",
-  "gemini-2.5-flash",
-  "gemini-2.5-flash-lite",
-  "gemini-2.0-flash",
-  "gemini-1.5-flash",
 ];
 
 export function getCandidateModels(preferredModel?: string): string[] {
