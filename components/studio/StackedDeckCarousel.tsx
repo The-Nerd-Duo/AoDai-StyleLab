@@ -18,49 +18,31 @@ import {
 } from "lucide-react";
 
 export const GARMENT_IMAGES: Record<string, string> = {
-  "ao-dai-cach-tan":
-    "https://images.unsplash.com/photo-1643030080539-b411caf44c37?auto=format&fit=crop&w=800&q=80",
-  "ao-dai-truyen-thong":
-    "https://images.unsplash.com/photo-1673233816654-e0c17cc39920?auto=format&fit=crop&w=800&q=80",
-  "ao-ngu-than-tay-chen":
-    "https://images.unsplash.com/photo-1672958431362-e6e737c73d9d?auto=format&fit=crop&w=800&q=80",
-  "ao-tac-ngu-than-tay-thung":
-    "https://images.unsplash.com/photo-1672958431327-047f3b8f1082?auto=format&fit=crop&w=800&q=80",
-  "ao-tu-than":
-    "https://images.unsplash.com/photo-1672958431309-843d4847d066?auto=format&fit=crop&w=800&q=80",
-  "ao-nhat-binh":
-    "https://images.unsplash.com/photo-1732321588647-75e396917646?auto=format&fit=crop&w=800&q=80",
-  "ao-giao-linh":
-    "https://images.unsplash.com/photo-1767603087616-b7620d39a42f?auto=format&fit=crop&w=800&q=80",
-  "ao-lap-linh":
-    "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=800&q=80",
+  "ao-dai-cach-tan": "/mockups/ao-dai-cach-tan.jpg",
+  "ao-dai-truyen-thong": "/mockups/ao-dai_heritage.webp",
+  "ao-ngu-than-tay-chen": "/mockups/ngu-than_heritage.webp",
+  "ao-tac-ngu-than-tay-thung": "/mockups/ao-tac.jpg",
+  "ao-tu-than": "/mockups/ao-tu-than.jpg",
+  "ao-nhat-binh": "/mockups/nhat-binh_heritage.webp",
+  "ao-giao-linh": "/mockups/giao-linh_heritage.webp",
+  "ao-lap-linh": "/mockups/lap-linh_heritage.webp",
   // Aliases
-  "ngu-than-tay-chen":
-    "https://images.unsplash.com/photo-1672958431362-e6e737c73d9d?auto=format&fit=crop&w=800&q=80",
-  "giao-linh":
-    "https://images.unsplash.com/photo-1767603087616-b7620d39a42f?auto=format&fit=crop&w=800&q=80",
-  "tu-than":
-    "https://images.unsplash.com/photo-1672958431309-843d4847d066?auto=format&fit=crop&w=800&q=80",
-  "nhat-binh":
-    "https://images.unsplash.com/photo-1732321588647-75e396917646?auto=format&fit=crop&w=800&q=80",
-  "lemur-1930":
-    "https://images.unsplash.com/photo-1643030080539-b411caf44c37?auto=format&fit=crop&w=800&q=80",
-  "ao-tac":
-    "https://images.unsplash.com/photo-1672958431327-047f3b8f1082?auto=format&fit=crop&w=800&q=80",
+  "ngu-than-tay-chen": "/mockups/ngu-than_heritage.webp",
+  "giao-linh": "/mockups/giao-linh_heritage.webp",
+  "tu-than": "/mockups/ao-tu-than.jpg",
+  "nhat-binh": "/mockups/nhat-binh_heritage.webp",
+  "lemur-1930": "/mockups/ao-dai-cach-tan.jpg",
+  "ao-tac": "/mockups/ao-tac.jpg",
 };
 
 export const ACCESSORY_IMAGES: Record<string, string> = {
   "man-modern": "/accessories/man-modern.jpg",
   "silver-choker": "/accessories/silver-choker.jpg",
   "tui-gam": "/accessories/tui-gam.jpg",
-  "sneaker-chunky":
-    "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=600&q=80",
-  "retro-sunglasses":
-    "https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=600&q=80",
-  "tote-coi":
-    "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=700&q=80",
-  "non-quai-thao-mini":
-    "https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=700&q=80",
+  "sneaker-chunky": "/accessories/sneaker-chunky.jpg",
+  "retro-sunglasses": "/accessories/retro-sunglasses.jpg",
+  "tote-coi": "/accessories/tote-coi.jpg",
+  "non-quai-thao-mini": "/accessories/non-quai-thao.jpg",
   none:
     "https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=600&q=80",
 };
@@ -87,20 +69,16 @@ export const STYLE_IMAGES: Record<string, string> = {
     "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=600&q=80",
   "minimal-chic":
     "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=600&q=80",
-  "cyber-retro":
-    "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=600&q=80",
+  "cyber-retro": "/patterns/cyberpunk-dong-a.jpg",
   "vintage-academia":
     "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80",
 };
 
-const DEFAULT_GARMENT_FALLBACK =
-  "https://images.unsplash.com/photo-1673233816654-e0c17cc39920?auto=format&fit=crop&w=800&q=80";
-const DEFAULT_ACCESSORY_FALLBACK =
-  "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=700&q=80";
+const DEFAULT_GARMENT_FALLBACK = "/mockups/ao-dai_heritage.webp";
+const DEFAULT_ACCESSORY_FALLBACK = "/accessories/tote-coi.jpg";
 const DEFAULT_OCCASION_FALLBACK =
   "https://images.unsplash.com/photo-1563354860-799d15199ac3?auto=format&fit=crop&w=700&q=80";
-const DEFAULT_STYLE_FALLBACK =
-  "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=600&q=80";
+const DEFAULT_STYLE_FALLBACK = "/patterns/cyberpunk-dong-a.jpg";
 
 interface StackedDeckCarouselProps {
   category: "garment" | "color" | "accessory" | "occasion" | "style";
@@ -165,17 +143,49 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
     hasDraggedRef.current = false;
   }, [category, outfit.garmentId, outfit.colorId, outfit.occasionId, outfit.styleId]);
 
-  // Navigate to Next
+  // Auto-select for single-choice categories with tactile press-down feedback
+  const applySelectionForIndex = useCallback(
+    (targetIndex: number) => {
+      if (targetIndex < 0 || targetIndex >= items.length) return;
+      const targetItem = items[targetIndex];
+      if (!targetItem) return;
+
+      // Trigger tactile press-down feedback
+      setPressedItemId(targetItem.id);
+      setTimeout(() => {
+        setPressedItemId(null);
+      }, 120);
+
+      // Auto-select for garment, color, occasion, style (single-choice)
+      if (category === "garment") {
+        onChange("garmentId", targetItem.id);
+      } else if (category === "color") {
+        onChange("colorId", targetItem.id);
+      } else if (category === "occasion") {
+        onChange("occasionId", targetItem.id);
+      } else if (category === "style") {
+        onChange("styleId", targetItem.id);
+      }
+      // Note: for accessory, do not auto-select on swipe
+    },
+    [category, items, onChange]
+  );
+
+  // Navigate to Next & auto-select
   const handleNext = useCallback(() => {
     if (total <= 1) return;
-    setActiveIndex((prev) => (prev + 1) % total);
-  }, [total]);
+    const nextIdx = (activeIndex + 1) % total;
+    setActiveIndex(nextIdx);
+    applySelectionForIndex(nextIdx);
+  }, [total, activeIndex, applySelectionForIndex]);
 
-  // Navigate to Previous
+  // Navigate to Previous & auto-select
   const handlePrev = useCallback(() => {
     if (total <= 1) return;
-    setActiveIndex((prev) => (prev - 1 + total) % total);
-  }, [total]);
+    const prevIdx = (activeIndex - 1 + total) % total;
+    setActiveIndex(prevIdx);
+    applySelectionForIndex(prevIdx);
+  }, [total, activeIndex, applySelectionForIndex]);
 
   // Shortest circular offset between index and activeIndex
   const getCircularOffset = (index: number, active: number, count: number) => {
@@ -212,30 +222,24 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
   const handleCardClick = (item: any, offset: number) => {
     if (hasDraggedRef.current) return;
 
-    // Fast, crisp 80ms press-down feedback (no lingering depression)
+    // Fast, crisp press-down feedback
     setPressedItemId(item.id);
     setTimeout(() => {
       setPressedItemId(null);
-    }, 85);
+    }, 120);
 
-    // If card was peeking behind, advance/retreat it to the front
-    if (offset === 1) {
-      handleNext();
-    } else if (offset === -1) {
-      handlePrev();
+    const targetIdx = items.findIndex((i: any) => i.id === item.id);
+    if (targetIdx !== -1 && targetIdx !== activeIndex) {
+      setActiveIndex(targetIdx);
     }
 
-    // Execute choice selection
-    if (category === "garment") {
-      onChange("garmentId", item.id);
-    } else if (category === "color") {
-      onChange("colorId", item.id);
-    } else if (category === "accessory") {
+    if (category === "accessory") {
       handleToggleAccessory(item.id);
-    } else if (category === "occasion") {
-      onChange("occasionId", item.id);
-    } else if (category === "style") {
-      onChange("styleId", item.id);
+    } else {
+      if (category === "garment") onChange("garmentId", item.id);
+      else if (category === "color") onChange("colorId", item.id);
+      else if (category === "occasion") onChange("occasionId", item.id);
+      else if (category === "style") onChange("styleId", item.id);
     }
   };
 
@@ -478,6 +482,18 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
           const style = getCardTransform(offset);
           const isFront = offset === 0;
           const isPressed = pressedItemId === item.id;
+          const isSelected =
+            category === "garment"
+              ? outfit.garmentId === item.id
+              : category === "color"
+              ? outfit.colorId === item.id
+              : category === "accessory"
+              ? selectedAccessoryIds.includes(item.id)
+              : category === "occasion"
+              ? outfit.occasionId === item.id
+              : category === "style"
+              ? outfit.styleId === item.id
+              : false;
 
           // Render card content based on category
           return (
@@ -491,17 +507,20 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
                 onClick={() => handleCardClick(item, offset)}
                 className={`w-full h-full rounded-2xl bg-surface-pure border-2 flex flex-col overflow-hidden select-none cursor-pointer group ${
                   isFront
-                    ? "border-vermilion-red/70 shadow-xl ring-2 ring-vermilion-red/20"
-                    : "border-border-bronze-light/70 shadow-md hover:border-bronze-gold/60"
+                    ? isSelected
+                      ? "border-vermilion-red/80 shadow-xl ring-2 ring-vermilion-red/25"
+                      : "border-border-bronze-light shadow-md hover:border-bronze-gold/60"
+                    : "border-border-bronze-light/70 shadow-md hover:border-bronze-gold/60 opacity-85 hover:opacity-95"
                 } ${
                   isPressed
-                    ? "scale-[0.97] translate-y-1 shadow-sm ring-2 ring-vermilion-red/50 brightness-98"
-                    : "active:scale-[0.97] active:translate-y-1 active:shadow-sm"
+                    ? "scale-[0.96] translate-y-1.5 shadow-sm ring-2 ring-vermilion-red/60 brightness-95"
+                    : "active:scale-[0.97] active:translate-y-1"
                 }`}
                 style={{
                   transformOrigin: "center center",
-                  transition:
-                    "transform 0.08s ease-out, box-shadow 0.08s ease-out, filter 0.08s ease-out, border-color 0.1s ease",
+                  transition: isPressed
+                    ? "transform 0.08s ease-out, filter 0.08s ease-out, box-shadow 0.08s ease-out"
+                    : "transform 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.15), filter 0.2s ease, box-shadow 0.2s ease, border-color 0.15s ease",
                 }}
               >
                 {/* CATEGORY 1: GARMENT CARD */}
@@ -538,13 +557,13 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
                           <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-amber-200 border border-amber-300/30 font-semibold shadow-xs">
                             {item.dynasty}
                           </span>
-                          {isSelected ? (
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-vermilion-red text-white font-bold flex items-center gap-1 shadow-xs">
+                          {isSelected && isFront ? (
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-vermilion-red text-white font-bold flex items-center gap-1 shadow-xs transition-all">
                               <Check className="w-3 h-3 stroke-[3]" />
                               Đang mặc
                             </span>
                           ) : (
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/80 backdrop-blur-sm text-text-charcoal border border-border-bronze-light font-semibold shadow-xs">
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/40 text-white/80 border border-white/10 font-medium shadow-xs">
                               {item.tag}
                             </span>
                           )}
@@ -562,30 +581,23 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
                           <h3 className="font-serif text-sm font-bold text-text-charcoal leading-snug">
                             {item.name}
                           </h3>
-                          <p className="text-[11px] text-text-warm-gray mt-1 line-clamp-2 leading-relaxed">
+                          <p className="text-[11px] text-text-warm-gray mt-1 line-clamp-3 leading-relaxed">
                             {item.description}
                           </p>
                         </div>
 
-                        {/* Status / Action Pill */}
-                        <div
-                          className={`w-full py-2 px-3 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 shadow-2xs ${
-                            isSelected
-                              ? "bg-vermilion-red/10 border-2 border-vermilion-red text-vermilion-red"
-                              : "bg-surface-pure border-2 border-border-bronze-light text-text-charcoal group-hover:border-vermilion-red/60 group-hover:text-vermilion-red group-hover:bg-paper-cream"
-                          }`}
-                        >
-                          {isSelected ? (
-                            <>
-                              <Check className="w-3.5 h-3.5 stroke-[3]" />
-                              Đã chọn mặc trang phục này
-                            </>
-                          ) : (
-                            <>
-                              <Sparkles className="w-3.5 h-3.5 text-bronze-gold" />
-                              Bấm vào thẻ để chọn
-                            </>
-                          )}
+                        {/* Clean Status Footer */}
+                        <div className="pt-2 border-t border-border-bronze-light/40 flex items-center justify-between text-[11px]">
+                          <span
+                            className={`font-bold transition-colors ${
+                              isSelected && isFront ? "text-vermilion-red" : "text-text-warm-gray"
+                            }`}
+                          >
+                            {isSelected && isFront ? "✓ Đang chọn mặc" : "Vuốt sang để chọn"}
+                          </span>
+                          <span className="text-[10px] text-bronze-gold font-mono font-medium">
+                            {item.tag}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -610,9 +622,16 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
                           <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-sm text-white border border-white/20 font-bold shadow-xs">
                             Ngũ Hành: {item.element}
                           </span>
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-sm text-white/90 border border-white/20 font-semibold shadow-xs">
-                            {item.hex}
-                          </span>
+                          {isSelected && isFront ? (
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-vermilion-red text-white font-bold flex items-center gap-1 shadow-xs transition-all">
+                              <Check className="w-3 h-3 stroke-[3]" />
+                              Đang dùng
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-sm text-white/90 border border-white/20 font-semibold shadow-xs">
+                              {item.hex}
+                            </span>
+                          )}
                         </div>
 
                         {/* Silk Sheen Circle Swatch */}
@@ -621,7 +640,7 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
                           style={{ backgroundColor: item.hex }}
                         >
                           <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/30 to-transparent pointer-events-none" />
-                          {isSelected && (
+                          {isSelected && isFront && (
                             <div className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-xs flex items-center justify-center text-white shadow-inner">
                               <Check className="w-5 h-5 stroke-[3]" />
                             </div>
@@ -636,7 +655,7 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
                             <h3 className="font-serif text-sm font-bold text-text-charcoal leading-snug">
                               {item.name}
                             </h3>
-                            {isSelected && (
+                            {isSelected && isFront && (
                               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-vermilion-red/10 text-vermilion-red font-bold border border-vermilion-red/20">
                                 Đang dùng
                               </span>
@@ -647,25 +666,18 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
                           </p>
                         </div>
 
-                        {/* Status / Action Pill */}
-                        <div
-                          className={`w-full py-2 px-3 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 shadow-2xs ${
-                            isSelected
-                              ? "bg-vermilion-red/10 border-2 border-vermilion-red text-vermilion-red"
-                              : "bg-surface-pure border-2 border-border-bronze-light text-text-charcoal group-hover:border-bronze-gold group-hover:bg-paper-cream"
-                          }`}
-                        >
-                          {isSelected ? (
-                            <>
-                              <Check className="w-3.5 h-3.5 stroke-[3]" />
-                              Đã áp dụng sắc màu này
-                            </>
-                          ) : (
-                            <>
-                              <Sparkles className="w-3.5 h-3.5 text-bronze-gold" />
-                              Bấm vào thẻ để chọn màu này
-                            </>
-                          )}
+                        {/* Clean Status Footer */}
+                        <div className="pt-2 border-t border-border-bronze-light/40 flex items-center justify-between text-[11px]">
+                          <span
+                            className={`font-bold transition-colors ${
+                              isSelected && isFront ? "text-vermilion-red" : "text-text-warm-gray"
+                            }`}
+                          >
+                            {isSelected && isFront ? "✓ Đã áp dụng sắc màu" : "Vuốt sang để chọn"}
+                          </span>
+                          <span className="text-[10px] text-bronze-gold font-mono font-bold">
+                            {item.hex}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -783,10 +795,14 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
                           <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-amber-200 border border-amber-300/30 font-bold shadow-xs">
                             {item.formalityLevel}
                           </span>
-                          {isSelected && (
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-vermilion-red text-white font-bold flex items-center gap-1 shadow-xs">
+                          {isSelected && isFront ? (
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-vermilion-red text-white font-bold flex items-center gap-1 shadow-xs transition-all">
                               <Check className="w-3 h-3 stroke-[3]" />
                               Đang chọn
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/50 text-white/80 font-medium backdrop-blur-xs">
+                              Chưa chọn
                             </span>
                           )}
                         </div>
@@ -798,30 +814,23 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
                           <h3 className="font-serif text-sm font-bold text-text-charcoal leading-snug">
                             {item.name}
                           </h3>
-                          <p className="text-[11px] text-text-warm-gray mt-1 line-clamp-2 leading-relaxed">
+                          <p className="text-[11px] text-text-warm-gray mt-1 line-clamp-3 leading-relaxed">
                             {item.weatherHint}
                           </p>
                         </div>
 
-                        {/* Status / Action Pill */}
-                        <div
-                          className={`w-full py-2 px-3 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 shadow-2xs ${
-                            isSelected
-                              ? "bg-vermilion-red/10 border-2 border-vermilion-red text-vermilion-red"
-                              : "bg-surface-pure border-2 border-border-bronze-light text-text-charcoal group-hover:border-vermilion-red/60 group-hover:text-vermilion-red group-hover:bg-paper-cream"
-                          }`}
-                        >
-                          {isSelected ? (
-                            <>
-                              <Check className="w-3.5 h-3.5 stroke-[3]" />
-                              Đã đặt bối cảnh này
-                            </>
-                          ) : (
-                            <>
-                              <Sparkles className="w-3.5 h-3.5 text-bronze-gold" />
-                              Bấm vào thẻ để chọn bối cảnh
-                            </>
-                          )}
+                        {/* Clean Status Footer */}
+                        <div className="pt-2 border-t border-border-bronze-light/40 flex items-center justify-between text-[11px]">
+                          <span
+                            className={`font-bold transition-colors ${
+                              isSelected && isFront ? "text-vermilion-red" : "text-text-warm-gray"
+                            }`}
+                          >
+                            {isSelected && isFront ? "✓ Đã đặt bối cảnh này" : "Vuốt sang để chọn"}
+                          </span>
+                          <span className="text-[10px] text-bronze-gold font-mono font-medium">
+                            {item.formalityLevel}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -860,10 +869,14 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
                           <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-amber-200 border border-amber-300/30 font-bold shadow-xs">
                             Gen Z Vibe
                           </span>
-                          {isSelected && (
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-vermilion-red text-white font-bold flex items-center gap-1 shadow-xs">
+                          {isSelected && isFront ? (
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-vermilion-red text-white font-bold flex items-center gap-1 shadow-xs transition-all">
                               <Check className="w-3 h-3 stroke-[3]" />
-                              Đang dùng
+                              Đang chọn
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/50 text-white/80 font-medium backdrop-blur-xs">
+                              Chưa chọn
                             </span>
                           )}
                         </div>
@@ -875,30 +888,23 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
                           <h3 className="font-serif text-sm font-bold text-text-charcoal leading-snug">
                             {item.name}
                           </h3>
-                          <p className="text-[11px] text-text-warm-gray mt-1 line-clamp-2 leading-relaxed">
+                          <p className="text-[11px] text-text-warm-gray mt-1 line-clamp-3 leading-relaxed">
                             {item.description}
                           </p>
                         </div>
 
-                        {/* Status / Action Pill */}
-                        <div
-                          className={`w-full py-2 px-3 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 shadow-2xs ${
-                            isSelected
-                              ? "bg-vermilion-red/10 border-2 border-vermilion-red text-vermilion-red"
-                              : "bg-surface-pure border-2 border-border-bronze-light text-text-charcoal group-hover:border-bronze-gold group-hover:bg-paper-cream"
-                          }`}
-                        >
-                          {isSelected ? (
-                            <>
-                              <Check className="w-3.5 h-3.5 stroke-[3]" />
-                              Đã chọn phong cách này
-                            </>
-                          ) : (
-                            <>
-                              <Sparkles className="w-3.5 h-3.5 text-bronze-gold" />
-                              Bấm vào thẻ để chọn phong cách
-                            </>
-                          )}
+                        {/* Clean Status Footer */}
+                        <div className="pt-2 border-t border-border-bronze-light/40 flex items-center justify-between text-[11px]">
+                          <span
+                            className={`font-bold transition-colors ${
+                              isSelected && isFront ? "text-vermilion-red" : "text-text-warm-gray"
+                            }`}
+                          >
+                            {isSelected && isFront ? "✓ Đã chọn phong cách này" : "Vuốt sang để chọn"}
+                          </span>
+                          <span className="text-[10px] text-bronze-gold font-mono font-bold">
+                            Gen Z
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -916,7 +922,10 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
           <button
             key={idx}
             type="button"
-            onClick={() => setActiveIndex(idx)}
+            onClick={() => {
+              setActiveIndex(idx);
+              applySelectionForIndex(idx);
+            }}
             className={`transition-all duration-300 rounded-full ${
               idx === activeIndex
                 ? "w-6 h-1.5 bg-vermilion-red shadow-xs"
@@ -930,7 +939,7 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
       {/* Swipe Guidance Hint */}
       <div className="flex items-center justify-center gap-1.5 text-[10px] text-text-warm-gray font-medium pt-0.5">
         <ArrowLeftRight className="w-3 h-3 text-bronze-gold animate-pulse" />
-        <span>👉 Bấm trực tiếp vào thẻ để chọn • Vuốt ngang để xem thêm</span>
+        <span>👉 Vuốt ngang để tự động chọn &amp; phối đồ ngay</span>
       </div>
     </div>
   );
