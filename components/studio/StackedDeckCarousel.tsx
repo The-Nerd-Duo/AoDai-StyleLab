@@ -18,49 +18,31 @@ import {
 } from "lucide-react";
 
 export const GARMENT_IMAGES: Record<string, string> = {
-  "ao-dai-cach-tan":
-    "https://images.unsplash.com/photo-1643030080539-b411caf44c37?auto=format&fit=crop&w=800&q=80",
-  "ao-dai-truyen-thong":
-    "https://images.unsplash.com/photo-1673233816654-e0c17cc39920?auto=format&fit=crop&w=800&q=80",
-  "ao-ngu-than-tay-chen":
-    "https://images.unsplash.com/photo-1672958431362-e6e737c73d9d?auto=format&fit=crop&w=800&q=80",
-  "ao-tac-ngu-than-tay-thung":
-    "https://images.unsplash.com/photo-1672958431327-047f3b8f1082?auto=format&fit=crop&w=800&q=80",
-  "ao-tu-than":
-    "https://images.unsplash.com/photo-1672958431309-843d4847d066?auto=format&fit=crop&w=800&q=80",
-  "ao-nhat-binh":
-    "https://images.unsplash.com/photo-1732321588647-75e396917646?auto=format&fit=crop&w=800&q=80",
-  "ao-giao-linh":
-    "https://images.unsplash.com/photo-1767603087616-b7620d39a42f?auto=format&fit=crop&w=800&q=80",
-  "ao-lap-linh":
-    "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=800&q=80",
+  "ao-dai-cach-tan": "/mockups/ao-dai-cach-tan.jpg",
+  "ao-dai-truyen-thong": "/mockups/ao-dai_heritage.webp",
+  "ao-ngu-than-tay-chen": "/mockups/ngu-than_heritage.webp",
+  "ao-tac-ngu-than-tay-thung": "/mockups/ao-tac.jpg",
+  "ao-tu-than": "/mockups/ao-tu-than.jpg",
+  "ao-nhat-binh": "/mockups/nhat-binh_heritage.webp",
+  "ao-giao-linh": "/mockups/giao-linh_heritage.webp",
+  "ao-lap-linh": "/mockups/lap-linh_heritage.webp",
   // Aliases
-  "ngu-than-tay-chen":
-    "https://images.unsplash.com/photo-1672958431362-e6e737c73d9d?auto=format&fit=crop&w=800&q=80",
-  "giao-linh":
-    "https://images.unsplash.com/photo-1767603087616-b7620d39a42f?auto=format&fit=crop&w=800&q=80",
-  "tu-than":
-    "https://images.unsplash.com/photo-1672958431309-843d4847d066?auto=format&fit=crop&w=800&q=80",
-  "nhat-binh":
-    "https://images.unsplash.com/photo-1732321588647-75e396917646?auto=format&fit=crop&w=800&q=80",
-  "lemur-1930":
-    "https://images.unsplash.com/photo-1643030080539-b411caf44c37?auto=format&fit=crop&w=800&q=80",
-  "ao-tac":
-    "https://images.unsplash.com/photo-1672958431327-047f3b8f1082?auto=format&fit=crop&w=800&q=80",
+  "ngu-than-tay-chen": "/mockups/ngu-than_heritage.webp",
+  "giao-linh": "/mockups/giao-linh_heritage.webp",
+  "tu-than": "/mockups/ao-tu-than.jpg",
+  "nhat-binh": "/mockups/nhat-binh_heritage.webp",
+  "lemur-1930": "/mockups/ao-dai-cach-tan.jpg",
+  "ao-tac": "/mockups/ao-tac.jpg",
 };
 
 export const ACCESSORY_IMAGES: Record<string, string> = {
   "man-modern": "/accessories/man-modern.jpg",
   "silver-choker": "/accessories/silver-choker.jpg",
   "tui-gam": "/accessories/tui-gam.jpg",
-  "sneaker-chunky":
-    "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=600&q=80",
-  "retro-sunglasses":
-    "https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=600&q=80",
-  "tote-coi":
-    "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=700&q=80",
-  "non-quai-thao-mini":
-    "https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=700&q=80",
+  "sneaker-chunky": "/accessories/sneaker-chunky.jpg",
+  "retro-sunglasses": "/accessories/retro-sunglasses.jpg",
+  "tote-coi": "/accessories/tote-coi.jpg",
+  "non-quai-thao-mini": "/accessories/non-quai-thao.jpg",
   none:
     "https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=600&q=80",
 };
@@ -87,20 +69,16 @@ export const STYLE_IMAGES: Record<string, string> = {
     "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=600&q=80",
   "minimal-chic":
     "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=600&q=80",
-  "cyber-retro":
-    "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=600&q=80",
+  "cyber-retro": "/patterns/cyberpunk-dong-a.jpg",
   "vintage-academia":
     "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80",
 };
 
-const DEFAULT_GARMENT_FALLBACK =
-  "https://images.unsplash.com/photo-1673233816654-e0c17cc39920?auto=format&fit=crop&w=800&q=80";
-const DEFAULT_ACCESSORY_FALLBACK =
-  "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=700&q=80";
+const DEFAULT_GARMENT_FALLBACK = "/mockups/ao-dai_heritage.webp";
+const DEFAULT_ACCESSORY_FALLBACK = "/accessories/tote-coi.jpg";
 const DEFAULT_OCCASION_FALLBACK =
   "https://images.unsplash.com/photo-1563354860-799d15199ac3?auto=format&fit=crop&w=700&q=80";
-const DEFAULT_STYLE_FALLBACK =
-  "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=600&q=80";
+const DEFAULT_STYLE_FALLBACK = "/patterns/cyberpunk-dong-a.jpg";
 
 interface StackedDeckCarouselProps {
   category: "garment" | "color" | "accessory" | "occasion" | "style";
