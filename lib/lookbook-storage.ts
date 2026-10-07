@@ -16,9 +16,16 @@ export function getLocalLookbooks(): LookbookItem[] {
     }
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) {
-      // Purge any legacy sample/demo cards
+      // Purge any legacy sample/demo cards and automated duplicate spam cards
       const clean = parsed.filter(
-        (item) => item && !String(item.id).startsWith("sample-")
+        (item) =>
+          item &&
+          !String(item.id).startsWith("sample-") &&
+          !(
+            item.isAnonymous &&
+            item.author === "Khách Ẩn Danh" &&
+            item.title === "Bản Phối Di Sản 2026"
+          )
       );
       if (clean.length !== parsed.length) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(clean));

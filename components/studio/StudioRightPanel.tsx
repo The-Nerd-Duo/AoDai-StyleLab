@@ -42,35 +42,6 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
   const [shareId, setShareId] = useState<string>("");
 
   React.useEffect(() => {
-    let isCancelled = false;
-    if (resultImage) {
-      fetch("/api/lookbook", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          outfit,
-          frameId: selectedFrame,
-          img: resultImage,
-          isAnonymous: true,
-          title: "Bản Phối Di Sản 2026",
-        }),
-      })
-        .then((res) => (res.ok ? res.json() : null))
-        .then((json) => {
-          if (!isCancelled && json?.data?.id) {
-            setShareId(json.data.id);
-          }
-        })
-        .catch(() => {});
-    } else {
-      setShareId("");
-    }
-    return () => {
-      isCancelled = true;
-    };
-  }, [outfit, selectedFrame, resultImage]);
-
-  React.useEffect(() => {
     if (typeof window !== "undefined") {
       const query = encodeOutfitToQuery(outfit, selectedFrame, resultImage, shareId);
       const baseOrigin = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
@@ -82,7 +53,8 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
 
   const handleCopyShareLink = async () => {
     let currentId = shareId;
-    if (!currentId && resultImage) {
+    // Only upload a snapshot to KV if there is an AI image (data: / blob:) and no shareId yet
+    if (!currentId && resultImage && (resultImage.startsWith("data:") || resultImage.startsWith("blob:"))) {
       try {
         const res = await fetch("/api/lookbook", {
           method: "POST",
@@ -92,7 +64,8 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
             frameId: selectedFrame,
             img: resultImage,
             isAnonymous: true,
-            title: "Bản Phối Di Sản 2026",
+            isCommunity: false, // CRITICAL: Only private share, do NOT post to public community feed!
+            title: `${garment.name} (Bản Chia Sẻ)`,
           }),
         });
         if (res.ok) {
