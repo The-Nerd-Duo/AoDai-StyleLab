@@ -10,6 +10,8 @@ import { useOutfitStore } from "@/lib/store";
 import { toPng } from "html-to-image";
 import { Download, Share2, Check, Sparkles } from "lucide-react";
 import { ShareCommunityModal } from "./ShareCommunityModal";
+import { useQrCode } from "@/lib/use-qr-code";
+import { FrameDecoration } from "./FrameDecoration";
 
 interface LookbookCardProps {
   outfit: OutfitState;
@@ -66,12 +68,24 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
     setImageError(false);
   }, [rawDisplayImage]);
 
+  const [shareUrl, setShareUrl] = useState("");
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const query = encodeOutfitToQuery(outfit, frameId, displayImage);
+      const baseOrigin = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+      setShareUrl(`${baseOrigin}/share?${query}`);
+    }
+  }, [outfit, frameId, displayImage]);
+
+  const qrCodeUrl = useQrCode(shareUrl);
+
   const handleCopyShareLink = () => {
     const query = encodeOutfitToQuery(outfit, frameId, displayImage);
-    const origin = typeof window !== "undefined" ? window.location.origin : "";
-    const shareUrl = `${origin}/share?${query}`;
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== "undefined" ? window.location.origin : "");
+    const currentShareUrl = `${origin}/share?${query}`;
 
-    navigator.clipboard.writeText(shareUrl).then(() => {
+    navigator.clipboard.writeText(currentShareUrl).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     });
@@ -79,125 +93,149 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
 
   return (
     <div className="flex flex-col items-center gap-4 w-full">
-      {/* Lookbook 9:16 Render Canvas Container */}
+      {/* Lookbook 9:16 Render Canvas Container - Full Bleed Magazine Style */}
       <div
         ref={cardRef}
-        className="relative w-full max-w-[340px] sm:max-w-[380px] aspect-[9/16] rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between p-4 sm:p-5 select-none bg-gradient-to-b from-[#FAF5EC] via-surface-pure to-[#F4EDE0]"
+        className="relative w-full max-w-[340px] sm:max-w-[380px] aspect-[9/16] rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between select-none bg-[#0D0C0B]"
         style={{
-          border: `3px solid ${frame.borderColor || "#D93829"}`,
+          border: `3.5px solid ${frame.borderColor || "#D93829"}`,
+          boxShadow: `0 20px 50px -10px rgba(0,0,0,0.6), 0 0 25px -5px ${frame.borderColor || "#D93829"}40`,
         }}
       >
-        <div className="relative w-full h-full rounded-2xl overflow-hidden bg-text-charcoal flex flex-col justify-between p-4 shadow-inner">
-          {/* Frame Decorative Background & Glow */}
-          <div
-            className="absolute inset-0 opacity-20 blur-2xl pointer-events-none"
-            style={{ backgroundColor: color.hex }}
-          />
-
-          {/* Layer 1: Top Seal Header */}
-          <div className="relative z-10 flex items-center justify-between text-white">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-vermilion-red flex items-center justify-center text-[12px] font-bold text-white shadow-md">
-                V
-              </div>
-              <div className="flex flex-col">
-                <span className="font-serif text-[11px] leading-tight text-paper-cream tracking-wider uppercase font-bold">
-                  AODAI STYLELAB
-                </span>
-                <span className="font-mono text-[9px] text-bronze-gold tracking-widest uppercase">
-                  {frame.badgeText || "LOOKBOOK ARCHIVE #088"}
-                </span>
-              </div>
+        {/* Hero Visual: Full Bleed AI Photo or Empty State (Base Layer z-0) */}
+        {displayImage ? (
+          <>
+            <img
+              src={displayImage}
+              alt={garment.name}
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 hover:scale-[1.02]"
+              onError={() => setImageError(true)}
+            />
+            {/* Top protective gradient */}
+            <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-black/85 via-black/40 to-transparent pointer-events-none z-10" />
+            {/* Bottom protective gradient */}
+            <div className="absolute bottom-0 inset-x-0 h-64 bg-gradient-to-t from-black/95 via-black/85 to-transparent pointer-events-none z-10" />
+            {/* Subtle ambient hue tint */}
+            <div
+              className="absolute inset-0 opacity-15 mix-blend-screen pointer-events-none z-10"
+              style={{ backgroundColor: color.hex }}
+            />
+          </>
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-[#181615] via-[#121110] to-[#0A0908] z-0 select-none">
+            <div
+              className="absolute inset-0 opacity-25 blur-3xl pointer-events-none"
+              style={{ backgroundColor: color.hex }}
+            />
+            <div className="relative z-10 w-14 h-14 rounded-2xl bg-white/[0.05] border border-white/10 backdrop-blur-md flex items-center justify-center text-bronze-gold mb-3 shadow-inner">
+              <Sparkles className="w-7 h-7 text-bronze-gold/90" />
             </div>
-            <div className="bg-text-charcoal/70 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-sm border border-white/10">
-              <span className="w-1.5 h-1.5 rounded-full bg-guardrail-pass animate-pulse" />
-              <span className="font-mono text-[10px] text-paper-cream">
-                {garment.dynasty.toUpperCase()}
-              </span>
-            </div>
-          </div>
-
-          {/* Layer 2: Center Visual AI Photo or Empty Frame ("khung trống") */}
-          <div className="relative z-10 flex-1 flex flex-col items-center justify-center my-3 overflow-hidden">
-            <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl border border-bronze-gold/50 flex items-center justify-center bg-black/40 relative">
-              {displayImage ? (
-                <>
-                  <img
-                    src={displayImage}
-                    alt={garment.name}
-                    className="w-full h-full object-cover"
-                    onError={() => setImageError(true)}
-                  />
-                  <div className="absolute bottom-2 left-2 right-2 px-2 py-1 rounded bg-black/70 backdrop-blur-md text-[9px] text-bronze-gold text-center font-medium">
-                    Ảnh AI Thực Tế • Cloudflare Worker
-                  </div>
-                </>
-              ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-[#181615] to-[#100f0e] rounded-xl relative overflow-hidden select-none">
-                  {/* Subtle Ambient Color Glow */}
-                  <div
-                    className="absolute inset-0 opacity-20 blur-2xl pointer-events-none"
-                    style={{ backgroundColor: color.hex }}
-                  />
-
-                  {/* Corner accents */}
-                  <div className="absolute top-4 left-4 w-3 h-3 border-t border-l border-bronze-gold/30 pointer-events-none" />
-                  <div className="absolute top-4 right-4 w-3 h-3 border-t border-r border-bronze-gold/30 pointer-events-none" />
-                  <div className="absolute bottom-4 left-4 w-3 h-3 border-b border-l border-bronze-gold/30 pointer-events-none" />
-                  <div className="absolute bottom-4 right-4 w-3 h-3 border-b border-r border-bronze-gold/30 pointer-events-none" />
-
-                  {/* Minimalist Glowing Icon */}
-                  <div className="relative z-10 w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-md flex items-center justify-center text-bronze-gold mb-3 shadow-inner">
-                    <Sparkles className="w-6 h-6 text-bronze-gold/85" />
-                  </div>
-                  <h4 className="relative z-10 font-serif text-sm font-bold text-paper-cream tracking-wide">
-                    Khung Trưng Bày 9:16
-                  </h4>
-                  <p className="relative z-10 text-[11px] text-white/50 mt-1 max-w-[200px] leading-relaxed">
-                    Chưa có ảnh phối đồ AI. Hãy tạo ảnh trong Studio để hoàn thiện thẻ Lookbook.
-                  </p>
-                  <span className="relative z-10 mt-3 px-2.5 py-0.5 rounded-full bg-white/[0.06] text-paper-cream/80 text-[9px] font-mono border border-white/10">
-                    HERITAGE READY
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Layer 3: Bottom Narrative & Palette Tray */}
-          <div className="relative z-10 flex flex-col gap-2 bg-text-charcoal/85 backdrop-blur-md p-3.5 rounded-xl shadow-lg border border-white/15 text-white">
-            <div className="flex items-center justify-between gap-1 pb-1">
-              <div className="flex items-center gap-1.5">
-                <div className="flex items-center -space-x-1.5">
-                  <span className="w-4 h-4 rounded-full bg-vermilion-red shadow-sm border border-white/20" title="#D93829 Đỏ Son" />
-                  <span className="w-4 h-4 rounded-full bg-bronze-gold shadow-sm border border-white/20" title="#C5A059 Vàng Đồng" />
-                  <span className="w-4 h-4 rounded-full bg-paper-cream shadow-sm border border-white/20" title="#FDFBF7 Trắng Ngà Điệp" />
-                  <span className="w-4 h-4 rounded-full bg-[#1A1A1A] shadow-sm border border-white/20" title="#1A1A1A Than Trắc" />
-                </div>
-                <span className="text-[10px] text-paper-cream/80 font-medium">
-                  {color.name} ({occasion.name.split("&")[0].trim()})
-                </span>
-              </div>
-              <span className="text-[9px] font-mono text-bronze-gold bg-tertiary/40 px-2 py-0.5 rounded uppercase">
-                {style.name}
-              </span>
-            </div>
-
-            <p className="font-serif text-paper-cream/95 leading-snug line-clamp-2 text-[11px] italic">
-              &ldquo;{garment.culturalSignificance}&rdquo;
+            <h4 className="relative z-10 font-serif text-base font-bold text-paper-cream tracking-wide">
+              Khung Trưng Bày 9:16
+            </h4>
+            <p className="relative z-10 text-[11px] text-white/55 mt-1.5 max-w-[210px] leading-relaxed">
+              Chưa có ảnh phối đồ AI. Hãy tạo ảnh trong Studio để hoàn thiện thẻ Lookbook.
             </p>
+            <span className="relative z-10 mt-3.5 px-3 py-0.5 rounded-full bg-white/[0.07] text-paper-cream/80 text-[9px] font-mono border border-white/10">
+              HERITAGE READY
+            </span>
+          </div>
+        )}
 
-            <div className="flex items-center justify-between pt-1 border-t border-white/15">
-              <div className="flex items-center gap-1.5 text-guardrail-pass">
-                <span className="material-symbols-outlined text-[15px]">verified_user</span>
-                <span className="text-[10px] text-paper-cream tracking-wide">
-                  Gemini AI: <strong className="text-guardrail-pass font-semibold">100% Chuẩn Lịch Sử</strong>
+        {/* Decorative Heritage Frame Corners & Motifs (Layer z-20, sits above image & gradients) */}
+        <FrameDecoration
+          theme={frame.theme || "royal"}
+          borderColor={frame.borderColor}
+          accentColor={frame.accentColor}
+        />
+
+        {/* Layer 1: Floating Top Seal Header (Layer z-30, Inset Safe Margins) */}
+        <div className="relative z-30 flex items-center justify-between px-6 pt-5 sm:px-7 sm:pt-6 text-white">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-vermilion-red to-primary flex items-center justify-center text-[13px] font-bold text-white shadow-md border border-white/20">
+              V
+            </div>
+            <div className="flex flex-col">
+              <span className="font-serif text-[11px] leading-tight text-paper-cream tracking-wider uppercase font-bold">
+                AODAI STYLELAB
+              </span>
+              <span className="font-mono text-[9px] text-bronze-gold tracking-widest uppercase">
+                {frame.badgeText || "LOOKBOOK ARCHIVE #088"}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Layer 2: Floating Bottom Narrative & QR Tray (Layer z-30, Inset Safe Margins) */}
+        <div className="relative z-30 flex flex-col gap-2 px-6 pb-5 sm:px-7 sm:pb-6 text-white">
+          {/* Palette & Style Row */}
+          <div className="flex items-center justify-between gap-1">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center -space-x-1.5">
+                <span className="w-4 h-4 rounded-full bg-vermilion-red shadow-sm border border-white/20" title="#D93829 Đỏ Son" />
+                <span className="w-4 h-4 rounded-full bg-bronze-gold shadow-sm border border-white/20" title="#C5A059 Vàng Đồng" />
+                <span className="w-4 h-4 rounded-full bg-paper-cream shadow-sm border border-white/20" title="#FDFBF7 Trắng Ngà Điệp" />
+                <span className="w-4 h-4 rounded-full bg-[#1A1A1A] shadow-sm border border-white/20" title="#1A1A1A Than Trắc" />
+              </div>
+              <span className="text-[10px] text-paper-cream/90 font-medium">
+                {color.name} ({occasion.name.split("&")[0].trim()})
+              </span>
+            </div>
+            <span className="text-[9px] font-mono text-bronze-gold bg-white/10 px-2 py-0.5 rounded uppercase border border-white/10">
+              {style.name}
+            </span>
+          </div>
+
+          {/* Garment Title */}
+          <h3 className="font-serif text-base sm:text-lg font-bold text-white tracking-wide leading-tight drop-shadow-md">
+            {garment.name}
+          </h3>
+
+          {/* Cultural Significance Quote */}
+          <p className="font-serif text-paper-cream/90 leading-snug line-clamp-2 text-[10.5px] italic">
+            &ldquo;{garment.culturalSignificance}&rdquo;
+          </p>
+
+          {/* Clean Heritage Metadata & Prominent Scannable QR Code */}
+          <div className="flex items-center justify-between pt-2 border-t border-white/20 gap-3">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-1.5">
+                <span className="font-mono text-[9px] text-bronze-gold font-bold tracking-wider">
+                  DIGITAL ID
+                </span>
+                <span className="text-white/30">•</span>
+                <span className="font-mono text-[9px] text-paper-cream/80 tracking-widest">
+                  #{outfit.garmentId.toUpperCase().slice(0, 8)}
                 </span>
               </div>
-              <div className="flex items-center gap-1 bg-white/10 px-1.5 py-0.5 rounded text-[9px] font-mono text-white/90">
-                <span className="material-symbols-outlined text-[12px]">qr_code</span>
-                <span>VERIFIED</span>
+              <span className="font-mono text-[8.5px] text-white/60">
+                Quét mã để xem & remix bản phối
+              </span>
+            </div>
+
+            {/* QR Code Container - Enforced Big & Crisp for Mobile Scanning */}
+            <div className="flex flex-col items-center flex-shrink-0">
+              <div
+                className="w-13 h-13 sm:w-14 sm:h-14 bg-white p-1 rounded-xl shadow-xl border-2 border-bronze-gold/70 flex items-center justify-center overflow-hidden transition-transform hover:scale-105"
+                title="Quét mã QR để mở & remix bản phối trên điện thoại"
+              >
+                {qrCodeUrl ? (
+                  <img
+                    src={qrCodeUrl}
+                    alt="Quét mã QR để remix bản phối"
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-[#1A1A1A] rounded flex items-center justify-center">
+                    <span className="material-symbols-outlined text-[18px] text-white">
+                      qr_code
+                    </span>
+                  </div>
+                )}
               </div>
+              <span className="font-mono text-[7px] text-paper-cream/75 uppercase tracking-widest mt-0.5">
+                QUÉT REMIX
+              </span>
             </div>
           </div>
         </div>

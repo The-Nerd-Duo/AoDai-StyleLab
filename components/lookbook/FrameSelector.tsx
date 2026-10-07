@@ -19,10 +19,10 @@ export const FrameSelector: React.FC<FrameSelectorProps> = ({
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-vermilion-red" />
           <h3 className="text-sm font-bold text-text-charcoal font-serif">
-            Khung Họa Tiết Hoàng Gia &amp; Cyber-Heritage
+            Khung Viền Di Sản &amp; Tạp Chí 9:16
           </h3>
         </div>
-        <span className="text-[11px] text-text-warm-gray font-mono">{framesData.length} kiểu viền 9:16</span>
+        <span className="text-[11px] text-text-warm-gray font-mono">{framesData.length} phong cách độc bản</span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -32,25 +32,40 @@ export const FrameSelector: React.FC<FrameSelectorProps> = ({
             <button
               key={f.id}
               onClick={() => onSelectFrame(f.id)}
-              className={`p-3 rounded-xl text-left border transition-all flex flex-col justify-between relative ${
+              className={`p-3.5 rounded-xl text-left border transition-all flex flex-col justify-between relative group ${
                 isSelected
-                  ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-xs ring-1 ring-vermilion-red/30"
-                  : "bg-paper-cream hover:bg-surface-container border-border-bronze-light/50"
+                  ? "bg-gradient-to-r from-paper-cream to-surface-pure border-2 border-vermilion-red shadow-sm ring-1 ring-vermilion-red/30"
+                  : "bg-paper-cream hover:bg-surface-container border-border-bronze-light/60"
               }`}
             >
-              <div className="flex items-start justify-between gap-2 mb-1.5">
-                <span className="text-xs font-bold text-text-charcoal leading-tight">
-                  {f.name}
-                </span>
-                {isSelected && (
-                  <span className="w-4 h-4 rounded-full bg-vermilion-red text-white flex items-center justify-center flex-shrink-0">
-                    <Check className="w-3 h-3 stroke-[3]" />
-                  </span>
-                )}
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="w-3.5 h-3.5 rounded-full border border-black/20 shadow-xs flex-shrink-0"
+                      style={{ backgroundColor: f.borderColor }}
+                    />
+                    <span className="text-xs font-bold text-text-charcoal leading-tight">
+                      {f.name}
+                    </span>
+                  </div>
+                  {isSelected && (
+                    <span className="w-4 h-4 rounded-full bg-vermilion-red text-white flex items-center justify-center flex-shrink-0">
+                      <Check className="w-3 h-3 stroke-[3]" />
+                    </span>
+                  )}
+                </div>
+                <p className="text-[11px] text-text-warm-gray line-clamp-2 mt-1 leading-relaxed">
+                  {f.description}
+                </p>
               </div>
-              <p className="text-[10px] text-text-warm-gray line-clamp-2 mt-1">
-                {f.description}
-              </p>
+
+              <div className="mt-3 pt-2 border-t border-border-bronze-light/40 flex items-center justify-between text-[10px] font-mono text-bronze-gold">
+                <span className="uppercase font-semibold tracking-wider">
+                  {f.theme}
+                </span>
+                <span className="text-text-warm-gray/80">9:16 Editorial</span>
+              </div>
             </button>
           );
         })}

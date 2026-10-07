@@ -15,6 +15,7 @@ import {
   Sparkles,
   ArrowLeftRight,
   Layers,
+  Ban,
 } from "lucide-react";
 
 export const GARMENT_IMAGES: Record<string, string> = {
@@ -197,24 +198,37 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
 
   // Multi-select helpers for accessories
   const selectedAccessoryIds = React.useMemo(() => {
-    if (outfit.accessoryIds !== undefined) return outfit.accessoryIds;
+    if (outfit.accessoryIds !== undefined && outfit.accessoryIds.length > 0) return outfit.accessoryIds;
     if (outfit.accessoryId && outfit.accessoryId !== "none") return [outfit.accessoryId];
-    return [];
+    return ["none"];
   }, [outfit.accessoryIds, outfit.accessoryId]);
 
   const handleToggleAccessory = (accId: string) => {
-    let nextIds: string[];
-    if (selectedAccessoryIds.includes(accId)) {
-      nextIds = selectedAccessoryIds.filter((id) => id !== accId);
-    } else {
-      nextIds = [...selectedAccessoryIds, accId];
+    if (accId === "none") {
+      onChange("accessoryIds", ["none"]);
+      onChange("accessoryId", "none");
+      return;
     }
-    onChange("accessoryIds", nextIds);
-    onChange("accessoryId", nextIds[0] || "none");
+
+    const currentActive = selectedAccessoryIds.filter((id) => id !== "none");
+    let nextIds: string[];
+    if (currentActive.includes(accId)) {
+      nextIds = currentActive.filter((id) => id !== accId);
+    } else {
+      nextIds = [...currentActive, accId];
+    }
+
+    if (nextIds.length === 0) {
+      onChange("accessoryIds", ["none"]);
+      onChange("accessoryId", "none");
+    } else {
+      onChange("accessoryIds", nextIds);
+      onChange("accessoryId", nextIds[0]);
+    }
   };
 
   const handleClearAccessories = () => {
-    onChange("accessoryIds", []);
+    onChange("accessoryIds", ["none"]);
     onChange("accessoryId", "none");
   };
 
@@ -411,6 +425,112 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
     style: { title: "PHONG CÁCH GEN Z", subtitle: `${total} Phong Cách` },
   };
 
+  // Render dedicated 2-Column Grid for Accessories
+  if (category === "accessory") {
+    const isNoneSelected =
+      selectedAccessoryIds.includes("none") || selectedAccessoryIds.length === 0;
+    const activeCount = isNoneSelected ? 0 : selectedAccessoryIds.length;
+
+    return (
+      <div className="flex flex-col gap-2.5 w-full">
+        {/* Header bar */}
+        <div className="flex items-center justify-between px-1 bg-paper-cream/80 p-2 rounded-xl border border-border-bronze-light/50">
+          <div className="flex items-center gap-1.5">
+            <Layers className="w-3.5 h-3.5 text-vermilion-red" />
+            <span className="font-mono text-[11px] font-bold text-text-charcoal uppercase tracking-wider">
+              {categoryHeaders.accessory.title}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-mono text-bronze-gold font-bold">
+              {activeCount > 0 ? `Đã chọn ${activeCount} món` : "Không dùng phụ kiện"}
+            </span>
+            {activeCount > 0 && (
+              <button
+                type="button"
+                onClick={handleClearAccessories}
+                className="text-[11px] text-vermilion-red hover:underline font-semibold"
+              >
+                Bỏ chọn hết
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* 2-Column Card Grid */}
+        <div className="grid grid-cols-2 gap-2.5 max-h-[415px] overflow-y-auto pr-1">
+          {items.map((item: any) => {
+            const isNone = item.id === "none";
+            const isSelected = selectedAccessoryIds.includes(item.id);
+            const imgUrl = ACCESSORY_IMAGES[item.id] || DEFAULT_ACCESSORY_FALLBACK;
+
+            return (
+              <div
+                key={item.id}
+                onClick={() => handleToggleAccessory(item.id)}
+                className={`relative h-[175px] rounded-xl overflow-hidden border-2 cursor-pointer select-none transition-all duration-150 active:scale-95 group ${
+                  isSelected
+                    ? "border-vermilion-red shadow-md ring-2 ring-vermilion-red/25"
+                    : "border-border-bronze-light/70 hover:border-bronze-gold/70 shadow-2xs"
+                }`}
+              >
+                {isNone ? (
+                  /* Option không dùng phụ kiện: Nền xám trơn + hình tròn có gạch chéo */
+                  <div className="absolute inset-0 bg-[#D8D6D0] flex flex-col items-center justify-center p-3">
+                    <div className="w-14 h-14 rounded-full border-2 border-stone-500/70 flex items-center justify-center bg-stone-300/70 shadow-inner">
+                      <Ban className="w-8 h-8 text-stone-600 stroke-[2]" />
+                    </div>
+                  </div>
+                ) : (
+                  <img
+                    src={imgUrl}
+                    alt={item.name}
+                    referrerPolicy="no-referrer"
+                    loading="lazy"
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      if (target.src !== DEFAULT_ACCESSORY_FALLBACK) {
+                        target.src = DEFAULT_ACCESSORY_FALLBACK;
+                      }
+                    }}
+                    draggable={false}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                )}
+
+                {/* Gradient đen mờ từ đáy lên */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 via-45% to-transparent pointer-events-none" />
+
+                {/* Top Badges */}
+                <div className="absolute top-2 inset-x-2 flex items-center justify-between pointer-events-none z-10">
+                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-black/60 text-white/90 backdrop-blur-xs capitalize border border-white/10">
+                    {isNone ? "Mặc định" : item.type}
+                  </span>
+                  {isSelected && (
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-vermilion-red text-white font-bold flex items-center gap-0.5 shadow-xs">
+                      <Check className="w-2.5 h-2.5 stroke-[3]" />
+                      Đã chọn
+                    </span>
+                  )}
+                </div>
+
+                {/* Bottom Overlaid Text */}
+                <div className="absolute bottom-0 inset-x-0 p-2.5 flex flex-col justify-end text-white z-10 pointer-events-none">
+                  <h4 className="font-serif text-xs font-bold text-amber-100 leading-snug drop-shadow-sm">
+                    {item.name}
+                  </h4>
+                  <p className="text-[10px] text-white/80 line-clamp-1 mt-0.5 leading-normal">
+                    {item.culturalNote}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-2 w-full">
       {/* Category Subheader */}
@@ -422,15 +542,6 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
           </span>
         </div>
         <div className="flex items-center gap-2">
-          {category === "accessory" && selectedAccessoryIds.length > 0 && (
-            <button
-              type="button"
-              onClick={handleClearAccessories}
-              className="text-[10px] text-vermilion-red hover:underline font-semibold"
-            >
-              Bỏ chọn tất cả
-            </button>
-          )}
           <span className="text-[11px] font-mono text-bronze-gold font-bold">
             {activeIndex + 1}/{total}
           </span>
@@ -487,8 +598,6 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
               ? outfit.garmentId === item.id
               : category === "color"
               ? outfit.colorId === item.id
-              : category === "accessory"
-              ? selectedAccessoryIds.includes(item.id)
               : category === "occasion"
               ? outfit.occasionId === item.id
               : category === "style"
@@ -533,71 +642,56 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
                   const promptKeyword = GARMENT_PROMPT_MAP[item.id] || "";
 
                   return (
-                    <div className="flex flex-col h-full pointer-events-none">
-                      {/* Top Image Banner */}
-                      <div className="relative h-[200px] w-full bg-stone-100 overflow-hidden shrink-0 border-b border-border-bronze-light/40">
-                        <img
-                          src={imgUrl}
-                          alt={item.name}
-                          referrerPolicy="no-referrer"
-                          loading="lazy"
-                          onError={(e) => {
-                            const target = e.currentTarget;
-                            if (target.src !== DEFAULT_GARMENT_FALLBACK) {
-                              target.src = DEFAULT_GARMENT_FALLBACK;
-                            }
-                          }}
-                          draggable={false}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+                    <div className="relative w-full h-full overflow-hidden pointer-events-none">
+                      {/* Full Vertical Image */}
+                      <img
+                        src={imgUrl}
+                        alt={item.name}
+                        referrerPolicy="no-referrer"
+                        loading="lazy"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          if (target.src !== DEFAULT_GARMENT_FALLBACK) {
+                            target.src = DEFAULT_GARMENT_FALLBACK;
+                          }
+                        }}
+                        draggable={false}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      {/* Dark Gradient Overlay for Legibility */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/55 via-45% to-transparent pointer-events-none" />
 
-                        {/* Top Badges */}
-                        <div className="absolute top-2.5 inset-x-2.5 flex items-center justify-between pointer-events-none">
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-amber-200 border border-amber-300/30 font-semibold shadow-xs">
-                            {item.dynasty}
+                      {/* Top Badges */}
+                      <div className="absolute top-2.5 inset-x-2.5 flex items-center justify-between pointer-events-none z-10">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-amber-200 border border-amber-300/30 font-semibold shadow-xs">
+                          {item.dynasty}
+                        </span>
+                        {isSelected && isFront ? (
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-vermilion-red text-white font-bold flex items-center gap-1 shadow-xs transition-all">
+                            <Check className="w-3 h-3 stroke-[3]" />
+                            Đang mặc
                           </span>
-                          {isSelected && isFront ? (
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-vermilion-red text-white font-bold flex items-center gap-1 shadow-xs transition-all">
-                              <Check className="w-3 h-3 stroke-[3]" />
-                              Đang mặc
-                            </span>
-                          ) : (
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/40 text-white/80 border border-white/10 font-medium shadow-xs">
-                              {item.tag}
-                            </span>
-                          )}
-                        </div>
-                        <div className="absolute bottom-2 left-2.5 right-2.5 flex justify-between items-center pointer-events-none">
-                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-black/60 text-white/95 backdrop-blur-xs truncate max-w-[170px]">
-                            {promptKeyword}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Card Body */}
-                      <div className="p-3.5 flex-1 flex flex-col justify-between bg-gradient-to-b from-paper-cream to-surface-pure">
-                        <div>
-                          <h3 className="font-serif text-sm font-bold text-text-charcoal leading-snug">
-                            {item.name}
-                          </h3>
-                          <p className="text-[11px] text-text-warm-gray mt-1 line-clamp-3 leading-relaxed">
-                            {item.description}
-                          </p>
-                        </div>
-
-                        {/* Clean Status Footer */}
-                        <div className="pt-2 border-t border-border-bronze-light/40 flex items-center justify-between text-[11px]">
-                          <span
-                            className={`font-bold transition-colors ${
-                              isSelected && isFront ? "text-vermilion-red" : "text-text-warm-gray"
-                            }`}
-                          >
-                            {isSelected && isFront ? "✓ Đang chọn mặc" : "Vuốt sang để chọn"}
-                          </span>
-                          <span className="text-[10px] text-bronze-gold font-mono font-medium">
+                        ) : (
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/50 text-white/90 border border-white/20 font-medium shadow-xs backdrop-blur-xs">
                             {item.tag}
                           </span>
+                        )}
+                      </div>
+
+                      {/* Bottom Overlaid Content */}
+                      <div className="absolute bottom-0 inset-x-0 p-3.5 flex flex-col justify-end text-white z-10">
+                        <div className="mb-1">
+                          <div className="flex items-center gap-1.5 mb-1.5">
+                            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-black/60 text-amber-200 border border-amber-400/20 backdrop-blur-xs truncate max-w-[180px]">
+                              {promptKeyword}
+                            </span>
+                          </div>
+                          <h3 className="font-serif text-base font-bold text-amber-100 leading-snug drop-shadow-sm">
+                            {item.name}
+                          </h3>
+                          <p className="text-[11px] text-white/85 mt-1 line-clamp-2 leading-relaxed drop-shadow-xs">
+                            {item.description}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -609,161 +703,61 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
                   const isSelected = outfit.colorId === item.id;
 
                   return (
-                    <div className="flex flex-col h-full pointer-events-none">
-                      {/* Top Silk Swatch Banner */}
-                      <div
-                        className="relative h-[180px] w-full flex items-center justify-center shrink-0 border-b border-border-bronze-light/40 overflow-hidden"
-                        style={{
-                          background: `radial-gradient(circle at 50% 40%, ${item.hex}ee, ${item.hex}bb 60%, #1a1a1a 140%)`,
-                        }}
-                      >
-                        {/* Top Badges */}
-                        <div className="absolute top-2.5 inset-x-2.5 flex items-center justify-between pointer-events-none z-10">
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-sm text-white border border-white/20 font-bold shadow-xs">
-                            Ngũ Hành: {item.element}
-                          </span>
-                          {isSelected && isFront ? (
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-vermilion-red text-white font-bold flex items-center gap-1 shadow-xs transition-all">
-                              <Check className="w-3 h-3 stroke-[3]" />
-                              Đang dùng
-                            </span>
-                          ) : (
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-sm text-white/90 border border-white/20 font-semibold shadow-xs">
-                              {item.hex}
-                            </span>
-                          )}
-                        </div>
+                    <div
+                      className="relative w-full h-full overflow-hidden pointer-events-none flex flex-col justify-between"
+                      style={{
+                        background: `radial-gradient(circle at 50% 38%, ${item.hex}ee, ${item.hex} 55%, #181818 120%)`,
+                      }}
+                    >
+                      {/* Dark gradient at bottom for text contrast */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 via-45% to-transparent pointer-events-none" />
 
-                        {/* Silk Sheen Circle Swatch */}
+                      {/* Top Badges */}
+                      <div className="relative top-0 inset-x-0 p-2.5 flex items-center justify-between pointer-events-none z-10">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-white border border-white/20 font-bold shadow-xs">
+                          Ngũ Hành: {item.element}
+                        </span>
+                        {isSelected && isFront ? (
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-vermilion-red text-white font-bold shadow-xs transition-all">
+                            Đang dùng
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-white/90 border border-white/20 font-semibold shadow-xs">
+                            {item.hex}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Silk Sheen Circle Swatch in Center (No checkmark tick) */}
+                      <div className="relative flex items-center justify-center my-auto z-10">
                         <div
-                          className="w-20 h-20 rounded-full border-4 border-white/70 shadow-2xl flex items-center justify-center relative transition-transform duration-300 group-hover:scale-105"
+                          className="w-24 h-24 rounded-full border-4 border-white/80 shadow-2xl flex items-center justify-center relative transition-transform duration-300 group-hover:scale-105"
                           style={{ backgroundColor: item.hex }}
                         >
-                          <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/30 to-transparent pointer-events-none" />
-                          {isSelected && isFront && (
-                            <div className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-xs flex items-center justify-center text-white shadow-inner">
-                              <Check className="w-5 h-5 stroke-[3]" />
-                            </div>
-                          )}
+                          <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/35 to-transparent pointer-events-none" />
                         </div>
                       </div>
 
-                      {/* Card Body */}
-                      <div className="p-3.5 flex-1 flex flex-col justify-between bg-gradient-to-b from-paper-cream to-surface-pure">
+                      {/* Bottom Overlaid Content */}
+                      <div className="relative bottom-0 inset-x-0 p-3.5 flex flex-col justify-end text-white z-10">
                         <div>
                           <div className="flex items-center justify-between">
-                            <h3 className="font-serif text-sm font-bold text-text-charcoal leading-snug">
+                            <h3 className="font-serif text-base font-bold text-amber-100 leading-snug drop-shadow-sm">
                               {item.name}
                             </h3>
-                            {isSelected && isFront && (
-                              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-vermilion-red/10 text-vermilion-red font-bold border border-vermilion-red/20">
-                                Đang dùng
-                              </span>
-                            )}
                           </div>
-                          <p className="text-[11px] text-text-warm-gray mt-1.5 line-clamp-3 leading-relaxed italic">
+                          <p className="text-[11px] text-white/85 mt-1 line-clamp-2 leading-relaxed italic drop-shadow-xs">
                             &ldquo;{item.meaning}&rdquo;
                           </p>
                         </div>
-
-                        {/* Clean Status Footer */}
-                        <div className="pt-2 border-t border-border-bronze-light/40 flex items-center justify-between text-[11px]">
-                          <span
-                            className={`font-bold transition-colors ${
-                              isSelected && isFront ? "text-vermilion-red" : "text-text-warm-gray"
-                            }`}
-                          >
-                            {isSelected && isFront ? "✓ Đã áp dụng sắc màu" : "Vuốt sang để chọn"}
-                          </span>
-                          <span className="text-[10px] text-bronze-gold font-mono font-bold">
-                            {item.hex}
-                          </span>
-                        </div>
                       </div>
                     </div>
                   );
                 })()}
 
-                {/* CATEGORY 3: ACCESSORY CARD (WITH REAL IMAGES) */}
-                {category === "accessory" && (() => {
-                  const isSelected = selectedAccessoryIds.includes(item.id);
-                  const imgUrl =
-                    ACCESSORY_IMAGES[item.id] ||
-                    DEFAULT_ACCESSORY_FALLBACK;
 
-                  return (
-                    <div className="flex flex-col h-full pointer-events-none">
-                      {/* Top Real Image Banner */}
-                      <div className="relative h-[200px] w-full bg-stone-100 overflow-hidden shrink-0 border-b border-border-bronze-light/40">
-                        <img
-                          src={imgUrl}
-                          alt={item.name}
-                          referrerPolicy="no-referrer"
-                          loading="lazy"
-                          onError={(e) => {
-                            const target = e.currentTarget;
-                            if (target.src !== DEFAULT_ACCESSORY_FALLBACK) {
-                              target.src = DEFAULT_ACCESSORY_FALLBACK;
-                            }
-                          }}
-                          draggable={false}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
 
-                        {/* Top Badges */}
-                        <div className="absolute top-2.5 inset-x-2.5 flex items-center justify-between pointer-events-none">
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-white border border-white/20 font-bold shadow-xs capitalize">
-                            {item.type}
-                          </span>
-                          {isSelected && (
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-vermilion-red text-white font-bold flex items-center gap-1 shadow-xs">
-                              <Check className="w-3 h-3 stroke-[3]" />
-                              Đã thêm
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Card Body */}
-                      <div className="p-3.5 flex-1 flex flex-col justify-between bg-gradient-to-b from-paper-cream to-surface-pure">
-                        <div>
-                          <div className="flex items-center justify-between">
-                            <h3 className="font-serif text-sm font-bold text-text-charcoal leading-snug">
-                              {item.name}
-                            </h3>
-                          </div>
-                          <p className="text-[11px] text-text-warm-gray mt-1 line-clamp-2 leading-relaxed">
-                            {item.culturalNote}
-                          </p>
-                        </div>
-
-                        {/* Status / Action Pill */}
-                        <div
-                          className={`w-full py-2 px-3 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 shadow-2xs ${
-                            isSelected
-                              ? "bg-vermilion-red text-white shadow-xs"
-                              : "bg-surface-pure border-2 border-border-bronze-light/80 text-text-charcoal group-hover:border-bronze-gold group-hover:bg-paper-cream"
-                          }`}
-                        >
-                          {isSelected ? (
-                            <>
-                              <Check className="w-3.5 h-3.5 stroke-[3]" />
-                              Đã chọn (Bấm để gỡ)
-                            </>
-                          ) : (
-                            <>
-                              <Sparkles className="w-3.5 h-3.5 text-bronze-gold" />
-                              + Bấm vào thẻ để thêm
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })()}
-
-                {/* CATEGORY 4: OCCASION CARD (WITH REAL IMAGES) */}
+                {/* CATEGORY 4: OCCASION CARD */}
                 {category === "occasion" && (() => {
                   const isSelected = outfit.occasionId === item.id;
                   const imgUrl =
@@ -771,73 +765,56 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
                     DEFAULT_OCCASION_FALLBACK;
 
                   return (
-                    <div className="flex flex-col h-full pointer-events-none">
-                      {/* Top Real Scenic Banner */}
-                      <div className="relative h-[200px] w-full bg-stone-100 overflow-hidden shrink-0 border-b border-border-bronze-light/40">
-                        <img
-                          src={imgUrl}
-                          alt={item.name}
-                          referrerPolicy="no-referrer"
-                          loading="lazy"
-                          onError={(e) => {
-                            const target = e.currentTarget;
-                            if (target.src !== DEFAULT_OCCASION_FALLBACK) {
-                              target.src = DEFAULT_OCCASION_FALLBACK;
-                            }
-                          }}
-                          draggable={false}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+                    <div className="relative w-full h-full overflow-hidden pointer-events-none">
+                      <img
+                        src={imgUrl}
+                        alt={item.name}
+                        referrerPolicy="no-referrer"
+                        loading="lazy"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          if (target.src !== DEFAULT_OCCASION_FALLBACK) {
+                            target.src = DEFAULT_OCCASION_FALLBACK;
+                          }
+                        }}
+                        draggable={false}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/55 via-45% to-transparent pointer-events-none" />
 
-                        {/* Top Badges */}
-                        <div className="absolute top-2.5 inset-x-2.5 flex items-center justify-between pointer-events-none">
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-amber-200 border border-amber-300/30 font-bold shadow-xs">
-                            {item.formalityLevel}
+                      {/* Top Badges */}
+                      <div className="absolute top-2.5 inset-x-2.5 flex items-center justify-between pointer-events-none z-10">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-amber-200 border border-amber-300/30 font-bold shadow-xs">
+                          {item.formalityLevel}
+                        </span>
+                        {isSelected && isFront ? (
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-vermilion-red text-white font-bold flex items-center gap-1 shadow-xs transition-all">
+                            <Check className="w-3 h-3 stroke-[3]" />
+                            Đang chọn
                           </span>
-                          {isSelected && isFront ? (
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-vermilion-red text-white font-bold flex items-center gap-1 shadow-xs transition-all">
-                              <Check className="w-3 h-3 stroke-[3]" />
-                              Đang chọn
-                            </span>
-                          ) : (
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/50 text-white/80 font-medium backdrop-blur-xs">
-                              Chưa chọn
-                            </span>
-                          )}
-                        </div>
+                        ) : (
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/50 text-white/90 font-medium backdrop-blur-xs border border-white/20">
+                            Chưa chọn
+                          </span>
+                        )}
                       </div>
 
-                      {/* Card Body */}
-                      <div className="p-3.5 flex-1 flex flex-col justify-between bg-gradient-to-b from-paper-cream to-surface-pure">
+                      {/* Bottom Overlaid Content */}
+                      <div className="absolute bottom-0 inset-x-0 p-3.5 flex flex-col justify-end text-white z-10">
                         <div>
-                          <h3 className="font-serif text-sm font-bold text-text-charcoal leading-snug">
+                          <h3 className="font-serif text-base font-bold text-amber-100 leading-snug drop-shadow-sm">
                             {item.name}
                           </h3>
-                          <p className="text-[11px] text-text-warm-gray mt-1 line-clamp-3 leading-relaxed">
+                          <p className="text-[11px] text-white/85 mt-1 line-clamp-2 leading-relaxed drop-shadow-xs">
                             {item.weatherHint}
                           </p>
-                        </div>
-
-                        {/* Clean Status Footer */}
-                        <div className="pt-2 border-t border-border-bronze-light/40 flex items-center justify-between text-[11px]">
-                          <span
-                            className={`font-bold transition-colors ${
-                              isSelected && isFront ? "text-vermilion-red" : "text-text-warm-gray"
-                            }`}
-                          >
-                            {isSelected && isFront ? "✓ Đã đặt bối cảnh này" : "Vuốt sang để chọn"}
-                          </span>
-                          <span className="text-[10px] text-bronze-gold font-mono font-medium">
-                            {item.formalityLevel}
-                          </span>
                         </div>
                       </div>
                     </div>
                   );
                 })()}
 
-                {/* CATEGORY 5: STYLE CARD (WITH REAL IMAGES) */}
+                {/* CATEGORY 5: STYLE CARD */}
                 {category === "style" && (() => {
                   const isSelected = outfit.styleId === item.id;
                   const imgUrl =
@@ -845,66 +822,49 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
                     DEFAULT_STYLE_FALLBACK;
 
                   return (
-                    <div className="flex flex-col h-full pointer-events-none">
-                      {/* Top Real Editorial Style Banner */}
-                      <div className="relative h-[200px] w-full bg-stone-100 overflow-hidden shrink-0 border-b border-border-bronze-light/40">
-                        <img
-                          src={imgUrl}
-                          alt={item.name}
-                          referrerPolicy="no-referrer"
-                          loading="lazy"
-                          onError={(e) => {
-                            const target = e.currentTarget;
-                            if (target.src !== DEFAULT_STYLE_FALLBACK) {
-                              target.src = DEFAULT_STYLE_FALLBACK;
-                            }
-                          }}
-                          draggable={false}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+                    <div className="relative w-full h-full overflow-hidden pointer-events-none">
+                      <img
+                        src={imgUrl}
+                        alt={item.name}
+                        referrerPolicy="no-referrer"
+                        loading="lazy"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          if (target.src !== DEFAULT_STYLE_FALLBACK) {
+                            target.src = DEFAULT_STYLE_FALLBACK;
+                          }
+                        }}
+                        draggable={false}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/55 via-45% to-transparent pointer-events-none" />
 
-                        {/* Top Badges */}
-                        <div className="absolute top-2.5 inset-x-2.5 flex items-center justify-between pointer-events-none z-10">
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-amber-200 border border-amber-300/30 font-bold shadow-xs">
-                            Gen Z Vibe
+                      {/* Top Badges */}
+                      <div className="absolute top-2.5 inset-x-2.5 flex items-center justify-between pointer-events-none z-10">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-amber-200 border border-amber-300/30 font-bold shadow-xs">
+                          Gen Z Vibe
+                        </span>
+                        {isSelected && isFront ? (
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-vermilion-red text-white font-bold flex items-center gap-1 shadow-xs transition-all">
+                            <Check className="w-3 h-3 stroke-[3]" />
+                            Đang chọn
                           </span>
-                          {isSelected && isFront ? (
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-vermilion-red text-white font-bold flex items-center gap-1 shadow-xs transition-all">
-                              <Check className="w-3 h-3 stroke-[3]" />
-                              Đang chọn
-                            </span>
-                          ) : (
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/50 text-white/80 font-medium backdrop-blur-xs">
-                              Chưa chọn
-                            </span>
-                          )}
-                        </div>
+                        ) : (
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/50 text-white/90 font-medium backdrop-blur-xs border border-white/20">
+                            Chưa chọn
+                          </span>
+                        )}
                       </div>
 
-                      {/* Card Body */}
-                      <div className="p-3.5 flex-1 flex flex-col justify-between bg-gradient-to-b from-paper-cream to-surface-pure">
+                      {/* Bottom Overlaid Content */}
+                      <div className="absolute bottom-0 inset-x-0 p-3.5 flex flex-col justify-end text-white z-10">
                         <div>
-                          <h3 className="font-serif text-sm font-bold text-text-charcoal leading-snug">
+                          <h3 className="font-serif text-base font-bold text-amber-100 leading-snug drop-shadow-sm">
                             {item.name}
                           </h3>
-                          <p className="text-[11px] text-text-warm-gray mt-1 line-clamp-3 leading-relaxed">
+                          <p className="text-[11px] text-white/85 mt-1 line-clamp-2 leading-relaxed drop-shadow-xs">
                             {item.description}
                           </p>
-                        </div>
-
-                        {/* Clean Status Footer */}
-                        <div className="pt-2 border-t border-border-bronze-light/40 flex items-center justify-between text-[11px]">
-                          <span
-                            className={`font-bold transition-colors ${
-                              isSelected && isFront ? "text-vermilion-red" : "text-text-warm-gray"
-                            }`}
-                          >
-                            {isSelected && isFront ? "✓ Đã chọn phong cách này" : "Vuốt sang để chọn"}
-                          </span>
-                          <span className="text-[10px] text-bronze-gold font-mono font-bold">
-                            Gen Z
-                          </span>
                         </div>
                       </div>
                     </div>
