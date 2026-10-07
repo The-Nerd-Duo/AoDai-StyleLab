@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense } from "react";
+import React, { Suspense, useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Header } from "@/components/shared/Header";
 import { Footer } from "@/components/shared/Footer";
@@ -12,20 +12,36 @@ import { Sparkles, Palette } from "lucide-react";
 function ShareContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { setOutfit, setSelectedFrame, setResultImage } = useOutfitStore();
+  const { setOutfit, setSelectedFrame, setResultImage, resultImage } = useOutfitStore();
 
   const paramsObject: { [key: string]: string | string[] | undefined } = {};
   searchParams.forEach((value, key) => {
     paramsObject[key] = value;
   });
 
-  const { outfit, frameId, imageUrl } = decodeOutfitFromQuery(paramsObject);
+  const { outfit, frameId, imageUrl, shareId } = decodeOutfitFromQuery(paramsObject);
+  const [resolvedImage, setResolvedImage] = useState<string | null>(imageUrl);
+
+  // If a shareId was provided, fetch the full card from Cloudflare D1/KV to load the AI photo
+  useEffect(() => {
+    if (shareId && !resolvedImage) {
+      fetch(`/api/lookbook/${shareId}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((json) => {
+          if (json?.data?.img) {
+            setResolvedImage(json.data.img);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [shareId, resolvedImage]);
 
   const handleRemixThisOutfit = () => {
     setOutfit(outfit);
     setSelectedFrame(frameId);
-    if (imageUrl) {
-      setResultImage(imageUrl);
+    const finalImageToRemix = resolvedImage || resultImage;
+    if (finalImageToRemix) {
+      setResultImage(finalImageToRemix);
     }
     router.push("/");
   };
@@ -47,7 +63,7 @@ function ShareContent() {
       </div>
 
       {/* Lookbook Render Canvas */}
-      <LookbookCard outfit={outfit} frameId={frameId} imageUrl={imageUrl} />
+      <LookbookCard outfit={outfit} frameId={frameId} imageUrl={resolvedImage || undefined} />
 
       {/* CTA Button to Remix */}
       <div className="pt-2">

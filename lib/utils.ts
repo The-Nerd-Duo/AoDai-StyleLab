@@ -15,8 +15,32 @@ export interface OutfitState {
   personaId: string;
 }
 
-export function encodeOutfitToQuery(state: OutfitState, frameId?: string, imageUrl?: string | null): string {
-  const accIds = state.accessoryIds && state.accessoryIds.length > 0 ? state.accessoryIds.join(",") : state.accessoryId || "none";
+export const GARMENT_MOCKUP_MAP: Record<string, string> = {
+  "ao-dai-cach-tan": "/mockups/ao-dai-cach-tan.jpg",
+  "ao-dai-truyen-thong": "/mockups/ao-dai_heritage.webp",
+  "ao-ngu-than-tay-chen": "/mockups/ngu-than_heritage.webp",
+  "ao-tac-ngu-than-tay-thung": "/mockups/ao-tac.jpg",
+  "ao-tu-than": "/mockups/ao-tu-than.jpg",
+  "ao-nhat-binh": "/mockups/nhat-binh_heritage.webp",
+  "ao-giao-linh": "/mockups/giao-linh_heritage.webp",
+  "ao-lap-linh": "/mockups/lap-linh_heritage.webp",
+};
+
+export function getGarmentMockupUrl(garmentId?: string): string {
+  if (!garmentId) return "/mockups/ao-dai-cach-tan.jpg";
+  return GARMENT_MOCKUP_MAP[garmentId] || "/mockups/ao-dai-cach-tan.jpg";
+}
+
+export function encodeOutfitToQuery(
+  state: OutfitState,
+  frameId?: string,
+  imageUrl?: string | null,
+  shareId?: string
+): string {
+  const accIds =
+    state.accessoryIds && state.accessoryIds.length > 0
+      ? state.accessoryIds.join(",")
+      : state.accessoryId || "none";
   const params = new URLSearchParams({
     g: state.garmentId,
     c: state.colorId,
@@ -28,6 +52,9 @@ export function encodeOutfitToQuery(state: OutfitState, frameId?: string, imageU
   if (frameId) {
     params.set("f", frameId);
   }
+  if (shareId) {
+    params.set("id", shareId);
+  }
   if (imageUrl && !imageUrl.startsWith("data:") && !imageUrl.startsWith("blob:")) {
     params.set("img", imageUrl);
   }
@@ -38,6 +65,7 @@ export function decodeOutfitFromQuery(searchParams: { [key: string]: string | st
   outfit: OutfitState;
   frameId: string;
   imageUrl: string | null;
+  shareId?: string;
 } {
   const getParam = (key: string, defaultVal: string) => {
     const val = searchParams[key];
@@ -47,7 +75,20 @@ export function decodeOutfitFromQuery(searchParams: { [key: string]: string | st
   };
 
   const rawImg = searchParams["img"];
-  const imageUrl = typeof rawImg === "string" && rawImg.length > 0 ? rawImg : Array.isArray(rawImg) && rawImg[0] ? rawImg[0] : null;
+  const imageUrl =
+    typeof rawImg === "string" && rawImg.length > 0
+      ? rawImg
+      : Array.isArray(rawImg) && rawImg[0]
+      ? rawImg[0]
+      : null;
+
+  const rawId = searchParams["id"];
+  const shareId =
+    typeof rawId === "string" && rawId.length > 0
+      ? rawId
+      : Array.isArray(rawId) && rawId[0]
+      ? rawId[0]
+      : undefined;
 
   const rawAcc = getParam("a", "man-modern");
   const accessoryIds = rawAcc === "none" ? [] : rawAcc.split(",").filter(Boolean);
@@ -65,5 +106,6 @@ export function decodeOutfitFromQuery(searchParams: { [key: string]: string | st
     },
     frameId: getParam("f", "frame-minimal-gold"),
     imageUrl,
+    shareId,
   };
 }
