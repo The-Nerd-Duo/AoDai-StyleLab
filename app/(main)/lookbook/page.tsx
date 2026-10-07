@@ -75,12 +75,18 @@ export default function LookbookPage() {
         if (json.success && Array.isArray(json.data)) {
           if (json.storage !== "none") {
             setIsLiveConnected(true);
-            const serverItems: LookbookItem[] = json.data;
+            const serverItems: LookbookItem[] = json.data.filter(
+              (i: LookbookItem) =>
+                !(i.isAnonymous && i.author === "Khách Ẩn Danh" && i.title === "Bản Phối Di Sản 2026")
+            );
             const serverIds = new Set(serverItems.map((i) => i.id));
 
             // Merge server items with any locally created items not yet synced
             const recentLocal = localData.filter(
-              (l) => !serverIds.has(l.id) && Date.now() - new Date(l.createdAt).getTime() < 30 * 60 * 1000
+              (l) =>
+                !serverIds.has(l.id) &&
+                !(l.isAnonymous && l.author === "Khách Ẩn Danh" && l.title === "Bản Phối Di Sản 2026") &&
+                Date.now() - new Date(l.createdAt).getTime() < 30 * 60 * 1000
             );
             const merged = [...recentLocal, ...serverItems];
             setItems(merged);
@@ -167,14 +173,21 @@ export default function LookbookPage() {
             }
 
             setItems((prev) => {
+              const filteredData = (json.data || []).filter(
+                (i: LookbookItem) =>
+                  !(i.isAnonymous && i.author === "Khách Ẩn Danh" && i.title === "Bản Phối Di Sản 2026")
+              );
+
               // 1. If server returned empty array: NEVER wipe out items that exist locally!
-              if (json.data.length === 0) {
-                return prev;
+              if (filteredData.length === 0) {
+                return prev.filter(
+                  (i) => !(i.isAnonymous && i.author === "Khách Ẩn Danh" && i.title === "Bản Phối Di Sản 2026")
+                );
               }
 
               // 2. Identify newly received items from other devices
               const prevIds = new Set(prev.map((i) => i.id));
-              const newlyReceived = json.data.filter((i: LookbookItem) => !prevIds.has(i.id));
+              const newlyReceived = filteredData.filter((i: LookbookItem) => !prevIds.has(i.id));
 
               if (newlyReceived.length > 0) {
                 newlyReceived.forEach((newCard: LookbookItem) => {
@@ -195,9 +208,13 @@ export default function LookbookPage() {
               }
 
               // 3. Merge: keep any local cards not yet indexed on server
-              const serverIdSet = new Set(json.data.map((i: LookbookItem) => i.id));
-              const localPending = prev.filter((p) => !serverIdSet.has(p.id));
-              const merged = [...localPending, ...json.data];
+              const serverIdSet = new Set(filteredData.map((i: LookbookItem) => i.id));
+              const localPending = prev.filter(
+                (p) =>
+                  !serverIdSet.has(p.id) &&
+                  !(p.isAnonymous && p.author === "Khách Ẩn Danh" && p.title === "Bản Phối Di Sản 2026")
+              );
+              const merged = [...localPending, ...filteredData];
 
               try {
                 localStorage.setItem("vietphuc_community_lookbooks", JSON.stringify(merged));

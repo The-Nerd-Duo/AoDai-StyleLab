@@ -17,6 +17,7 @@ interface LookbookCardProps {
   outfit: OutfitState;
   frameId: string;
   imageUrl?: string | null;
+  shareId?: string;
   onShareSuccess?: (item: LookbookItem) => void;
 }
 
@@ -24,6 +25,7 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
   outfit,
   frameId,
   imageUrl,
+  shareId: propShareId,
   onShareSuccess,
 }) => {
   const { resultImage } = useOutfitStore();
@@ -74,50 +76,23 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
   }, [rawDisplayImage]);
 
   const [shareUrl, setShareUrl] = useState("");
-  const [shareId, setShareId] = useState<string>("");
-
-  React.useEffect(() => {
-    let isCancelled = false;
-    if (displayImage) {
-      fetch("/api/lookbook", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          outfit,
-          frameId,
-          img: displayImage,
-          isAnonymous: true,
-          title: "Bản Phối Di Sản 2026",
-        }),
-      })
-        .then((res) => (res.ok ? res.json() : null))
-        .then((json) => {
-          if (!isCancelled && json?.data?.id) {
-            setShareId(json.data.id);
-          }
-        })
-        .catch(() => {});
-    } else {
-      setShareId("");
-    }
-    return () => {
-      isCancelled = true;
-    };
-  }, [outfit, frameId, displayImage]);
+  const [internalShareId, setInternalShareId] = useState<string>("");
+  const activeShareId = propShareId || internalShareId;
 
   React.useEffect(() => {
     if (typeof window !== "undefined") {
-      const query = encodeOutfitToQuery(outfit, frameId, displayImage, shareId);
+      const query = encodeOutfitToQuery(outfit, frameId, displayImage, activeShareId);
       const baseOrigin = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
       setShareUrl(`${baseOrigin}/share?${query}`);
     }
-  }, [outfit, frameId, displayImage, shareId]);
+  }, [outfit, frameId, displayImage, activeShareId]);
 
   const qrCodeUrl = useQrCode(shareUrl);
 
   const handleCopyShareLink = async () => {
-    let currentId = shareId;
-    if (!currentId && displayImage) {
+    let currentId = activeShareId;
+    // Only upload a snapshot to KV if there is an AI image (data: / blob:) and no activeShareId yet
+    if (!currentId && displayImage && (displayImage.startsWith("data:") || displayImage.startsWith("blob:"))) {
       try {
         const res = await fetch("/api/lookbook", {
           method: "POST",
@@ -127,14 +102,15 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
             frameId,
             img: displayImage,
             isAnonymous: true,
-            title: "Bản Phối Di Sản 2026",
+            isCommunity: false, // CRITICAL: Only private share, do NOT post to public community feed!
+            title: `${garment.name} (Bản Chia Sẻ)`,
           }),
         });
         if (res.ok) {
           const json = await res.json();
           if (json?.data?.id) {
             currentId = json.data.id;
-            setShareId(currentId);
+            setInternalShareId(currentId);
           }
         }
       } catch {}
@@ -366,6 +342,9 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
         frameId={frameId}
         imageUrl={displayImage}
         onSuccess={(item) => {
+          if (item?.id) {
+            setInternalShareId(item.id);
+          }
           if (onShareSuccess && item) {
             onShareSuccess(item);
           }

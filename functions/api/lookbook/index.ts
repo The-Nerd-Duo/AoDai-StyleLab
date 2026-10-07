@@ -116,6 +116,11 @@ export async function onRequestGet(context: { request: Request; env: any }) {
           )
         `).run();
 
+        // Clean any auto spam records from D1 if present
+        await d1.prepare(
+          "DELETE FROM lookbooks WHERE isAnonymous = 1 AND author = 'Khách Ẩn Danh' AND title = 'Bản Phối Di Sản 2026'"
+        ).run().catch(() => {});
+
         const { results } = await d1.prepare(
           "SELECT * FROM lookbooks ORDER BY createdAt DESC LIMIT 200"
         ).all();
@@ -149,10 +154,31 @@ export async function onRequestGet(context: { request: Request; env: any }) {
         } else if (typeof raw === "string") {
           items = JSON.parse(raw);
         }
-        // Purge legacy sample cards
-        items = (items || []).filter(
-          (item) => item && !String(item.id).startsWith("sample-")
-        );
+
+        const initialCount = items.length;
+        // Purge legacy sample cards & automated duplicate spam cards
+        items = (items || []).filter((item) => {
+          if (!item) return false;
+          if (String(item.id).startsWith("sample-")) return false;
+          // Filter out automated duplicate spam cards caused by useEffect auto-trigger
+          if (
+            item.isAnonymous &&
+            item.author === "Khách Ẩn Danh" &&
+            item.title === "Bản Phối Di Sản 2026"
+          ) {
+            return false;
+          }
+          return true;
+        });
+
+        // Permanently persist the cleaned list back to KV if any spam was removed
+        if (items.length !== initialCount) {
+          try {
+            await kv.put("lookbooks_community_all", JSON.stringify(items));
+          } catch (writeErr) {
+            console.warn("KV sync cleaned items notice:", writeErr);
+          }
+        }
 
         return new Response(
           JSON.stringify({
@@ -200,6 +226,7 @@ export async function onRequestGet(context: { request: Request; env: any }) {
 export async function onRequestPost(context: { request: Request; env: any }) {
   try {
     const body: any = await context.request.json();
+    const isCommunity = body.isCommunity !== false;
     const isAnon = !!body.isAnonymous;
     const author = isAnon ? "Khách Ẩn Danh" : (body.author && body.author.trim()) || "Đồng Sáng Tạo";
 
@@ -224,9 +251,9 @@ export async function onRequestPost(context: { request: Request; env: any }) {
     let storageUsed = "none";
     let kvError: string | null = null;
 
-    // 1. Save to Cloudflare D1 if available
+    // 1. Save to Cloudflare D1 if available (only for public community posts)
     const d1 = findD1(context.env);
-    if (d1) {
+    if (d1 && isCommunity) {
       try {
         await d1.prepare(`
           CREATE TABLE IF NOT EXISTS lookbooks (
@@ -279,21 +306,31 @@ export async function onRequestPost(context: { request: Request; env: any }) {
     const kv = findKV(context.env);
     if (kv) {
       try {
-        const raw = await kv.get("lookbooks_community_all", "json");
-        let items: any[] = [];
-        if (Array.isArray(raw)) {
-          items = raw;
-        } else if (typeof raw === "string") {
-          items = JSON.parse(raw);
-        }
-        // Filter out legacy sample cards
-        items = (items || []).filter((i: any) => i && !String(i.id).startsWith("sample-"));
-
-        // Put new item at front, keep up to 100 items
-        items = [newItem, ...items.filter((i: any) => i.id !== newItem.id)].slice(0, 100);
-
-        await kv.put("lookbooks_community_all", JSON.stringify(items));
+        // Always store individual card snapshot so /api/lookbook/[id] can load it for sharing
         await kv.put(`lookbook:${newItem.id}`, JSON.stringify(newItem));
+
+        // ONLY add to public community feed if this is an explicit community submission
+        if (isCommunity) {
+          const raw = await kv.get("lookbooks_community_all", "json");
+          let items: any[] = [];
+          if (Array.isArray(raw)) {
+            items = raw;
+          } else if (typeof raw === "string") {
+            items = JSON.parse(raw);
+          }
+          // Filter out legacy sample cards and automated duplicate spam cards
+          items = (items || []).filter(
+            (i: any) =>
+              i &&
+              !String(i.id).startsWith("sample-") &&
+              !(i.isAnonymous && i.author === "Khách Ẩn Danh" && i.title === "Bản Phối Di Sản 2026")
+          );
+
+          // Put new item at front, keep up to 100 items
+          items = [newItem, ...items.filter((i: any) => i.id !== newItem.id)].slice(0, 100);
+          await kv.put("lookbooks_community_all", JSON.stringify(items));
+        }
+
         storageUsed = storageUsed === "none" ? "cloudflare-kv" : `${storageUsed}+kv`;
       } catch (err: any) {
         console.error("KV write error:", err);

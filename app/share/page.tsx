@@ -63,7 +63,7 @@ function ShareContent() {
       </div>
 
       {/* Lookbook Render Canvas */}
-      <LookbookCard outfit={outfit} frameId={frameId} imageUrl={resolvedImage || undefined} />
+      <LookbookCard outfit={outfit} frameId={frameId} imageUrl={resolvedImage || undefined} shareId={shareId} />
 
       {/* CTA Button to Remix */}
       <div className="pt-2">
