@@ -17,7 +17,6 @@ import {
 } from "@/lib/lookbook-storage";
 import {
   Sparkles,
-  ArrowLeft,
   Share2,
   Heart,
   Check,
@@ -401,22 +400,13 @@ export default function LookbookPage() {
         {/* Header Title & Navigation Bar */}
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pt-6 pb-2">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <Link
-                href="/"
-                className="p-2.5 rounded-xl bg-paper-cream hover:bg-surface-container border border-border-bronze-light/60 text-text-warm-gray hover:text-text-charcoal transition-colors shadow-2xs"
-                title="Quay lại Studio"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </Link>
-              <div>
-                <h1 className="font-serif font-bold text-xl sm:text-2xl text-text-charcoal tracking-tight flex items-center gap-2">
+            <div>
+              <h1 className="font-serif font-bold text-xl sm:text-2xl text-text-charcoal tracking-tight flex items-center gap-2">
                   <span>Bộ sưu tập Lookbook Di sản 9:16</span>
                 </h1>
-                <p className="text-xs text-text-warm-gray mt-0.5">
-                  Tạo thẻ định danh di sản của bạn hoặc khám phá và tương tác cùng cộng đồng
-                </p>
-              </div>
+              <p className="text-xs text-text-warm-gray mt-0.5">
+                Tạo thẻ định danh di sản của bạn hoặc khám phá và tương tác cùng cộng đồng
+              </p>
             </div>
 
             {/* Real-time Live Status Badge */}

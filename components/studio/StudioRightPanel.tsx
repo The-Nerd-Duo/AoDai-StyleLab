@@ -6,6 +6,8 @@ import { OutfitState, encodeOutfitToQuery } from "@/lib/utils";
 import mockupsData from "@/config/mockups.json";
 import framesData from "@/config/frames.json";
 import { Download, Share2, Check, Sparkles } from "lucide-react";
+import { useQrCode } from "@/lib/use-qr-code";
+import { FrameDecoration } from "@/components/lookbook/FrameDecoration";
 
 interface StudioRightPanelProps {
   outfit: OutfitState;
@@ -36,12 +38,24 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
   const style = mockupsData.styles.find((s) => s.id === outfit.styleId) || mockupsData.styles[0];
   const frame = framesData.find((f) => f.id === selectedFrame) || framesData[0];
 
+  const [shareUrl, setShareUrl] = useState("");
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const query = encodeOutfitToQuery(outfit, selectedFrame, resultImage);
+      const baseOrigin = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+      setShareUrl(`${baseOrigin}/share?${query}`);
+    }
+  }, [outfit, selectedFrame, resultImage]);
+
+  const qrCodeUrl = useQrCode(shareUrl);
+
   const handleCopyShareLink = () => {
     const query = encodeOutfitToQuery(outfit, selectedFrame, resultImage);
-    const origin = typeof window !== "undefined" ? window.location.origin : "";
-    const shareUrl = `${origin}/share?${query}`;
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== "undefined" ? window.location.origin : "");
+    const currentShareUrl = `${origin}/share?${query}`;
 
-    navigator.clipboard.writeText(shareUrl).then(() => {
+    navigator.clipboard.writeText(currentShareUrl).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
@@ -66,9 +80,6 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
               Thẻ Lookbook 9:16 Digital ID
             </h2>
           </div>
-          <span className="font-mono text-[10px] px-2 py-0.5 rounded-full bg-bronze-gold/15 text-stone-800 font-bold border border-bronze-gold/30">
-            {frame.name.split(" ")[0]}
-          </span>
         </div>
 
         {/* Mini 9:16 Card Mockup Wrapper (Centered, flexible height) */}
@@ -78,7 +89,7 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
             style={{ borderColor: frame.borderColor || "#C5A059" }}
           >
             {/* Top Tag */}
-            <div className="flex items-center justify-between z-10">
+            <div className="flex items-center justify-between z-30">
               <span className="font-mono text-[8px] uppercase tracking-wider text-surface-pure font-bold px-1.5 py-0.5 bg-vermilion-red/90 rounded">
                 AODAI STYLELAB
               </span>
@@ -97,7 +108,7 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
                     src={resultImage!}
                     onError={() => setImageError(true)}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-text-charcoal via-transparent to-black/30" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-text-charcoal via-transparent to-black/40" />
                 </>
               ) : (
                 /* Minimalist aesthetic empty state for 9:16 lookbook card */
@@ -107,12 +118,6 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
                     className="absolute inset-0 opacity-20 blur-xl pointer-events-none"
                     style={{ backgroundColor: color.hex }}
                   />
-
-                  {/* Corner accents */}
-                  <div className="absolute top-8 left-3 w-2.5 h-2.5 border-t border-l border-bronze-gold/30 pointer-events-none" />
-                  <div className="absolute top-8 right-3 w-2.5 h-2.5 border-t border-r border-bronze-gold/30 pointer-events-none" />
-                  <div className="absolute bottom-16 left-3 w-2.5 h-2.5 border-b border-l border-bronze-gold/30 pointer-events-none" />
-                  <div className="absolute bottom-16 right-3 w-2.5 h-2.5 border-b border-r border-bronze-gold/30 pointer-events-none" />
 
                   {/* Minimalist Center Icon */}
                   <div className="relative z-10 w-11 h-11 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-md flex items-center justify-center text-bronze-gold mb-2 shadow-inner">
@@ -135,8 +140,15 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
               )}
             </div>
 
+            {/* Heritage Frame Corner Decorations (z-20, sits above image) */}
+            <FrameDecoration
+              theme={frame.theme || "royal"}
+              borderColor={frame.borderColor}
+              accentColor={frame.accentColor}
+            />
+
             {/* Bottom Card Overlay */}
-            <div className="relative z-10 text-white space-y-1.5">
+            <div className="relative z-20 text-white space-y-1.5">
               <div className="flex items-end justify-between">
                 <div>
                   <span className="font-mono text-[9px] text-bronze-gold block font-semibold uppercase">
@@ -146,12 +158,23 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
                     {garment.name}
                   </p>
                 </div>
-                <div className="w-7 h-7 bg-surface-pure p-0.5 rounded shadow-sm flex items-center justify-center">
-                  <div className="w-full h-full bg-text-charcoal rounded-[2px] flex items-center justify-center">
-                    <span className="material-symbols-outlined text-[15px] text-white">
-                      qr_code
-                    </span>
-                  </div>
+                <div
+                  className="w-8 h-8 bg-surface-pure p-0.5 rounded-lg shadow-md border border-bronze-gold/50 flex items-center justify-center overflow-hidden flex-shrink-0"
+                  title="Quét mã QR để mở bản phối"
+                >
+                  {qrCodeUrl ? (
+                    <img
+                      src={qrCodeUrl}
+                      alt="QR Code"
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-text-charcoal rounded-[2px] flex items-center justify-center">
+                      <span className="material-symbols-outlined text-[15px] text-white">
+                        qr_code
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 

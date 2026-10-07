@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import { OutfitState } from "@/lib/utils";
 import mockupsData from "@/config/mockups.json";
 import { generateOutfitPrompt, callFluxWorkerAi } from "@/lib/ai-prompt";
-import { Sparkles, ArrowRight, RefreshCw, Copy, Check, Maximize2, RotateCcw } from "lucide-react";
+import { Sparkles, RefreshCw, Maximize2, RotateCcw } from "lucide-react";
 
 interface PreviewWorkspaceProps {
   outfit: OutfitState;
@@ -28,7 +27,6 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
 }) => {
   const [internalResultImage, setInternalResultImage] = useState<string | null>(null);
   const [internalLoading, setInternalLoading] = useState(false);
-  const [copiedPrompt, setCopiedPrompt] = useState(false);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
 
@@ -65,12 +63,6 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
     }
   }
 
-  const handleCopyPrompt = () => {
-    const prompt = generateOutfitPrompt(outfit);
-    navigator.clipboard.writeText(prompt);
-    setCopiedPrompt(true);
-    setTimeout(() => setCopiedPrompt(false), 2000);
-  };
 
   const handleResetToEmpty = () => {
     setImageError(false);
@@ -97,10 +89,6 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="font-mono text-[10px] text-guardrail-pass bg-guardrail-pass-surface border border-guardrail-pass/30 px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1.5 shadow-2xs">
-            <span className="w-1.5 h-1.5 rounded-full bg-guardrail-pass animate-pulse" />
-            DI SẢN HỢP CHUẨN
-          </span>
           {hasDisplayImage && (
             <button
               onClick={handleResetToEmpty}
@@ -139,8 +127,6 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
               <RefreshCw className="w-9 h-9 text-bronze-gold animate-spin" />
               <div className="flex flex-col gap-1">
                 <span className="text-sm font-bold text-white">AI đang tạo ảnh trang phục...</span>
-                <span className="text-xs text-gray-300">Cloudflare Worker FLUX</span>
-                <span className="text-[10px] text-bronze-gold font-mono">8K Cinematic Heritage</span>
               </div>
             </div>
           ) : hasDisplayImage ? (
@@ -215,53 +201,15 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
           {loading ? (
             <>
               <RefreshCw className="w-4 h-4 animate-spin text-white" />
-              <span>Đang xử lý ảnh từ Cloudflare Worker...</span>
+              <span>Đang tạo ảnh AI...</span>
             </>
           ) : (
             <>
               <Sparkles className="w-4 h-4" />
-              <span>{resultImage ? "Tạo Lại Ảnh AI Khác" : "Tạo Ảnh AI Thực Tế (Worker AI)"}</span>
+              <span>{resultImage ? "Tạo Lại Ảnh AI Khác" : "Tạo Ảnh AI Thực Tế"}</span>
             </>
           )}
         </button>
-
-        <div className="grid grid-cols-2 gap-2">
-          {/* Link to Lookbook */}
-          <Link
-            href="/lookbook"
-            onClick={() => {
-              if (resultImage) {
-                try {
-                  sessionStorage.setItem("vietphuc_result_image", resultImage);
-                  localStorage.setItem("vietphuc_result_image", resultImage);
-                } catch {}
-              }
-            }}
-            className="py-2.5 px-3 rounded-xl bg-paper-cream hover:bg-surface-container text-text-charcoal border border-border-bronze-light/60 font-semibold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs"
-          >
-            <span>Tạo Lookbook 9:16</span>
-            <ArrowRight className="w-3.5 h-3.5 text-vermilion-red" />
-          </Link>
-
-          {/* Copy Prompt */}
-          <button
-            onClick={handleCopyPrompt}
-            className="py-2.5 px-3 rounded-xl bg-paper-cream hover:bg-surface-container text-text-charcoal border border-border-bronze-light/60 font-semibold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs"
-            type="button"
-          >
-            {copiedPrompt ? (
-              <>
-                <Check className="w-3.5 h-3.5 text-guardrail-pass" />
-                <span className="text-guardrail-pass font-bold">Đã chép prompt!</span>
-              </>
-            ) : (
-              <>
-                <Copy className="w-3.5 h-3.5 text-text-warm-gray" />
-                <span>Sao chép Prompt</span>
-              </>
-            )}
-          </button>
-        </div>
       </div>
 
       {/* Fullscreen Zoom Modal */}
