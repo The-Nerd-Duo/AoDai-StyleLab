@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from "react";
 import Link from "next/link";
-import { OutfitState, encodeOutfitToQuery } from "@/lib/utils";
+import { OutfitState, encodeOutfitToQuery, getGarmentMockupUrl } from "@/lib/utils";
 import { LookbookItem } from "@/lib/types";
 import mockupsData from "@/config/mockups.json";
 import framesData from "@/config/frames.json";
@@ -60,28 +60,87 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
 
   const [imageError, setImageError] = useState(false);
 
-  // Resolved display image: props imageUrl takes precedence, then store resultImage, otherwise null ("để khung trống")
-  const rawDisplayImage = imageUrl !== undefined ? imageUrl : resultImage;
-  const displayImage = imageError ? null : rawDisplayImage;
+  // Resolved display image:
+  // 1. props imageUrl takes precedence if non-empty
+  // 2. store resultImage (local AI generation)
+  // 3. Fallback to authentic garment heritage illustration mockup
+  const hasPropImage = Boolean(imageUrl && imageUrl.trim());
+  const fallbackMockup = getGarmentMockupUrl(outfit.garmentId);
+  const rawDisplayImage = hasPropImage ? imageUrl! : (resultImage || fallbackMockup);
+  const displayImage = imageError ? fallbackMockup : rawDisplayImage;
 
   React.useEffect(() => {
     setImageError(false);
   }, [rawDisplayImage]);
 
   const [shareUrl, setShareUrl] = useState("");
+  const [shareId, setShareId] = useState<string>("");
+
+  React.useEffect(() => {
+    let isCancelled = false;
+    if (displayImage) {
+      fetch("/api/lookbook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          outfit,
+          frameId,
+          img: displayImage,
+          isAnonymous: true,
+          title: "Bản Phối Di Sản 2026",
+        }),
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((json) => {
+          if (!isCancelled && json?.data?.id) {
+            setShareId(json.data.id);
+          }
+        })
+        .catch(() => {});
+    } else {
+      setShareId("");
+    }
+    return () => {
+      isCancelled = true;
+    };
+  }, [outfit, frameId, displayImage]);
 
   React.useEffect(() => {
     if (typeof window !== "undefined") {
-      const query = encodeOutfitToQuery(outfit, frameId, displayImage);
+      const query = encodeOutfitToQuery(outfit, frameId, displayImage, shareId);
       const baseOrigin = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
       setShareUrl(`${baseOrigin}/share?${query}`);
     }
-  }, [outfit, frameId, displayImage]);
+  }, [outfit, frameId, displayImage, shareId]);
 
   const qrCodeUrl = useQrCode(shareUrl);
 
-  const handleCopyShareLink = () => {
-    const query = encodeOutfitToQuery(outfit, frameId, displayImage);
+  const handleCopyShareLink = async () => {
+    let currentId = shareId;
+    if (!currentId && displayImage) {
+      try {
+        const res = await fetch("/api/lookbook", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            outfit,
+            frameId,
+            img: displayImage,
+            isAnonymous: true,
+            title: "Bản Phối Di Sản 2026",
+          }),
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json?.data?.id) {
+            currentId = json.data.id;
+            setShareId(currentId);
+          }
+        }
+      } catch {}
+    }
+
+    const query = encodeOutfitToQuery(outfit, frameId, displayImage, currentId);
     const origin = process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== "undefined" ? window.location.origin : "");
     const currentShareUrl = `${origin}/share?${query}`;
 
@@ -198,42 +257,44 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
 
           {/* Clean Heritage Metadata & Prominent Scannable QR Code */}
           <div className="flex items-center justify-between pt-2 border-t border-white/20 gap-3">
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-1.5">
-                <span className="font-mono text-[9px] text-bronze-gold font-bold tracking-wider">
+            <div className="flex flex-col gap-0.5 flex-1 min-w-0 pr-2">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="font-mono text-[9px] text-bronze-gold font-bold tracking-wider whitespace-nowrap">
                   DIGITAL ID
                 </span>
                 <span className="text-white/30">•</span>
-                <span className="font-mono text-[9px] text-paper-cream/80 tracking-widest">
-                  #{outfit.garmentId.toUpperCase().slice(0, 8)}
+                <span className="font-mono text-[9px] text-paper-cream/80 truncate">
+                  #{outfit.garmentId.toUpperCase().slice(0, 10)}
                 </span>
               </div>
-              <span className="font-mono text-[8.5px] text-white/60">
-                Quét mã để xem & remix bản phối
+              <span className="font-mono text-[8px] text-white/60 truncate">
+                Quét mã để xem & remix
               </span>
             </div>
 
-            {/* QR Code Container - Enforced Big & Crisp for Mobile Scanning */}
+            {/* QR Code Container - Strictly sized to 48px to prevent mobile blowout */}
             <div className="flex flex-col items-center flex-shrink-0">
               <div
-                className="w-13 h-13 sm:w-14 sm:h-14 bg-white p-1 rounded-xl shadow-xl border-2 border-bronze-gold/70 flex items-center justify-center overflow-hidden transition-transform hover:scale-105"
+                className="w-12 h-12 bg-white p-1 rounded-xl shadow-lg border-2 border-bronze-gold/70 flex items-center justify-center overflow-hidden flex-shrink-0"
+                style={{ width: "48px", height: "48px", minWidth: "48px", minHeight: "48px", maxWidth: "48px", maxHeight: "48px" }}
                 title="Quét mã QR để mở & remix bản phối trên điện thoại"
               >
                 {qrCodeUrl ? (
                   <img
                     src={qrCodeUrl}
                     alt="Quét mã QR để remix bản phối"
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-contain pointer-events-none"
+                    style={{ width: "40px", height: "40px", maxWidth: "40px", maxHeight: "40px" }}
                   />
                 ) : (
                   <div className="w-full h-full bg-[#1A1A1A] rounded flex items-center justify-center">
-                    <span className="material-symbols-outlined text-[18px] text-white">
+                    <span className="material-symbols-outlined text-[16px] text-white">
                       qr_code
                     </span>
                   </div>
                 )}
               </div>
-              <span className="font-mono text-[7px] text-paper-cream/75 uppercase tracking-widest mt-0.5">
+              <span className="font-mono text-[7px] text-paper-cream/75 uppercase tracking-widest mt-0.5 whitespace-nowrap">
                 QUÉT REMIX
               </span>
             </div>

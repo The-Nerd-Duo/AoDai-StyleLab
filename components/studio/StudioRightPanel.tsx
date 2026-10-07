@@ -39,19 +39,73 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
   const frame = framesData.find((f) => f.id === selectedFrame) || framesData[0];
 
   const [shareUrl, setShareUrl] = useState("");
+  const [shareId, setShareId] = useState<string>("");
+
+  React.useEffect(() => {
+    let isCancelled = false;
+    if (resultImage) {
+      fetch("/api/lookbook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          outfit,
+          frameId: selectedFrame,
+          img: resultImage,
+          isAnonymous: true,
+          title: "Bản Phối Di Sản 2026",
+        }),
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((json) => {
+          if (!isCancelled && json?.data?.id) {
+            setShareId(json.data.id);
+          }
+        })
+        .catch(() => {});
+    } else {
+      setShareId("");
+    }
+    return () => {
+      isCancelled = true;
+    };
+  }, [outfit, selectedFrame, resultImage]);
 
   React.useEffect(() => {
     if (typeof window !== "undefined") {
-      const query = encodeOutfitToQuery(outfit, selectedFrame, resultImage);
+      const query = encodeOutfitToQuery(outfit, selectedFrame, resultImage, shareId);
       const baseOrigin = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
       setShareUrl(`${baseOrigin}/share?${query}`);
     }
-  }, [outfit, selectedFrame, resultImage]);
+  }, [outfit, selectedFrame, resultImage, shareId]);
 
   const qrCodeUrl = useQrCode(shareUrl);
 
-  const handleCopyShareLink = () => {
-    const query = encodeOutfitToQuery(outfit, selectedFrame, resultImage);
+  const handleCopyShareLink = async () => {
+    let currentId = shareId;
+    if (!currentId && resultImage) {
+      try {
+        const res = await fetch("/api/lookbook", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            outfit,
+            frameId: selectedFrame,
+            img: resultImage,
+            isAnonymous: true,
+            title: "Bản Phối Di Sản 2026",
+          }),
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json?.data?.id) {
+            currentId = json.data.id;
+            setShareId(currentId);
+          }
+        }
+      } catch {}
+    }
+
+    const query = encodeOutfitToQuery(outfit, selectedFrame, resultImage, currentId);
     const origin = process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== "undefined" ? window.location.origin : "");
     const currentShareUrl = `${origin}/share?${query}`;
 
