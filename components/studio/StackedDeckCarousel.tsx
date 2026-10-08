@@ -227,11 +227,6 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
     }
   };
 
-  const handleClearAccessories = () => {
-    onChange("accessoryIds", ["none"]);
-    onChange("accessoryId", "none");
-  };
-
   // Click anywhere on a card to select with snappy, fast press-down animation
   const handleCardClick = (item: any, offset: number) => {
     if (hasDraggedRef.current) return;
@@ -445,15 +440,6 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
             <span className="text-[11px] font-mono text-bronze-gold font-bold">
               {activeCount > 0 ? `Đã chọn ${activeCount} món` : "Không dùng phụ kiện"}
             </span>
-            {activeCount > 0 && (
-              <button
-                type="button"
-                onClick={handleClearAccessories}
-                className="text-[11px] text-vermilion-red hover:underline font-semibold"
-              >
-                Bỏ chọn hết
-              </button>
-            )}
           </div>
         </div>
 

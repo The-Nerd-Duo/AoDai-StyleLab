@@ -46,11 +46,10 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
   // Resolved display image:
   // 1. props imageUrl takes precedence if non-empty
   // 2. store resultImage (local AI generation)
-  // 3. Fallback to authentic garment heritage illustration mockup
+  // When no image has been generated yet, remains null to display empty frame state
   const hasPropImage = Boolean(imageUrl && imageUrl.trim());
-  const fallbackMockup = getGarmentMockupUrl(outfit.garmentId);
-  const rawDisplayImage = hasPropImage ? imageUrl! : (resultImage || fallbackMockup);
-  const displayImage = imageError ? fallbackMockup : rawDisplayImage;
+  const rawDisplayImage = hasPropImage ? imageUrl! : (resultImage || null);
+  const displayImage = imageError ? null : rawDisplayImage;
 
   React.useEffect(() => {
     setImageError(false);
@@ -89,7 +88,7 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
     }
   }, [outfit, frameId, displayImage, activeShareId]);
 
-  const qrCodeUrl = useQrCode(shareUrl);
+  const qrCodeUrl = useQrCode(displayImage ? shareUrl : "");
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
@@ -258,7 +257,7 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
             <div className="flex flex-col gap-0.5 flex-1 min-w-0 pr-2">
               <div className="flex items-center gap-1.5 flex-wrap">
                 <span className="font-mono text-[9px] text-bronze-gold font-bold tracking-wider whitespace-nowrap">
-                  DIGITAL ID
+                  LOOKBOOK
                 </span>
                 <span className="text-white/30">•</span>
                 <span className="font-mono text-[9px] text-paper-cream/80 truncate">
@@ -270,32 +269,34 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
               </span>
             </div>
 
-            {/* QR Code Container - Enforced Crisp & Unclipped for Phone Cameras */}
-            <div className="flex flex-col items-center flex-shrink-0">
-              <div
-                className="w-13 h-13 sm:w-14 sm:h-14 bg-white p-1 rounded-md shadow-md border border-bronze-gold/40 flex items-center justify-center flex-shrink-0"
-                style={{ width: "54px", height: "54px", minWidth: "54px", minHeight: "54px" }}
-                title="Quét mã QR để mở & remix bản phối trên điện thoại"
-              >
-                {qrCodeUrl ? (
-                  <img
-                    src={qrCodeUrl}
-                    alt="Quét mã QR để remix bản phối"
-                    className="w-full h-full object-contain pointer-events-none"
-                    style={{ imageRendering: "pixelated" }}
-                  />
-                ) : (
-                  <div className="w-full h-full bg-[#1A1A1A] rounded flex items-center justify-center">
-                    <span className="material-symbols-outlined text-[16px] text-white">
-                      qr_code
-                    </span>
-                  </div>
-                )}
+            {/* QR Code Container - Only shown when AI image has been generated */}
+            {displayImage && (
+              <div className="flex flex-col items-center flex-shrink-0">
+                <div
+                  className="w-13 h-13 sm:w-14 sm:h-14 bg-white p-1 rounded-md shadow-md border border-bronze-gold/40 flex items-center justify-center flex-shrink-0"
+                  style={{ width: "54px", height: "54px", minWidth: "54px", minHeight: "54px" }}
+                  title="Quét mã QR để mở & remix bản phối trên điện thoại"
+                >
+                  {qrCodeUrl ? (
+                    <img
+                      src={qrCodeUrl}
+                      alt="Quét mã QR để remix bản phối"
+                      className="w-full h-full object-contain pointer-events-none"
+                      style={{ imageRendering: "pixelated" }}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-[#1A1A1A] rounded flex items-center justify-center">
+                      <span className="material-symbols-outlined text-[16px] text-white">
+                        qr_code
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <span className="font-mono text-[7px] text-paper-cream/75 uppercase tracking-widest mt-0.5 whitespace-nowrap">
+                  QUÉT REMIX
+                </span>
               </div>
-              <span className="font-mono text-[7px] text-paper-cream/75 uppercase tracking-widest mt-0.5 whitespace-nowrap">
-                QUÉT REMIX
-              </span>
-            </div>
+            )}
           </div>
         </div>
       </div>

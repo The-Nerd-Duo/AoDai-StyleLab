@@ -1,5 +1,17 @@
 [
   {
+    "id": "frame-default-none",
+    "name": "Mặc Định (Không Dùng Khung)",
+    "description": "Hiển thị ảnh nguyên bản tinh giản, thuần khiết không viền hoa văn trang trí.",
+    "theme": "none",
+    "borderColor": "transparent",
+    "secondaryBorderColor": "transparent",
+    "accentColor": "#C5A059",
+    "badgeText": "ORIGINAL • KHÔNG DÙNG KHUNG",
+    "aspectRatio": "9:16",
+    "cornerMotif": "none"
+  },
+  {
     "id": "frame-heritage-vermilion",
     "name": "Chu Sa Hoàng Kim (Cung Đình)",
     "description": "Viền kép chu sa lộng lẫy, 4 góc hoa văn mây cuộn hoàng triều Đại Việt và ấn triện son truyền thống.",

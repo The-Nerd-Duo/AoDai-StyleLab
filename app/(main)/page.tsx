@@ -21,7 +21,6 @@ export default function StudioPage() {
     setSelectedFrame,
   } = useOutfitStore();
 
-  const [customAvatar, setCustomAvatar] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -60,8 +59,6 @@ export default function StudioPage() {
             <OptionSelector
               outfit={outfit}
               onChange={updateOutfitField}
-              customAvatarUrl={customAvatar}
-              onUploadCustomAvatar={(dataUrl) => setCustomAvatar(dataUrl)}
             />
           </div>
 
@@ -93,7 +90,7 @@ export default function StudioPage() {
 
             {/* BOTTOM ROW: Cultural Harmony AI - Mở rộng toàn bộ sang bên phải đến mép của thẻ lookbook */}
             <div className="w-full">
-              <CulturalAdvisorCard outfit={outfit} />
+              <CulturalAdvisorCard outfit={outfit} resultImage={resultImage} />
             </div>
           </div>
         </div>

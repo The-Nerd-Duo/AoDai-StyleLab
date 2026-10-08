@@ -163,29 +163,9 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
                 <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 opacity-85 text-bronze-gold" />
               </div>
 
-              <div className="flex flex-col gap-1 max-w-[280px]">
-                <h3 className="font-serif font-bold text-sm sm:text-base text-paper-cream tracking-wide">
-                  Khung Trưng Bày Phối Đồ
-                </h3>
-                <p className="text-[11px] sm:text-xs text-white/50 leading-relaxed">
-                  Tùy chỉnh cổ phục &amp; phong cách, sau đó nhấn nút bên dưới để tạo ảnh AI thực tế.
-                </p>
-              </div>
-
-              {/* Minimalist tags pill */}
-              <div className="flex items-center gap-1.5 mt-3.5 flex-wrap justify-center">
-                <span className="px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/10 text-[10px] text-paper-cream/80 font-mono">
-                  {garment.name}
-                </span>
-                <span className="w-1 h-1 rounded-full bg-bronze-gold/50" />
-                <span className="px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/10 text-[10px] text-paper-cream/80 font-mono">
-                  {color.name}
-                </span>
-                <span className="w-1 h-1 rounded-full bg-bronze-gold/50" />
-                <span className="px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/10 text-[10px] text-paper-cream/80 font-mono">
-                  {style.name}
-                </span>
-              </div>
+              <h3 className="font-serif font-bold text-sm sm:text-base text-paper-cream tracking-wide">
+                Khung Trưng Bày Phối Đồ
+              </h3>
             </div>
           )}
         </div>

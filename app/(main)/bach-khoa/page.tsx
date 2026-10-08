@@ -412,27 +412,28 @@ export default function BachKhoaPage() {
       <Footer />
 
       {/* Floating Action Button (FAB) - Bottom Right Corner */}
-      {!isChatOpen && (
-        <button
-          type="button"
-          onClick={() => setIsChatOpen(true)}
-          className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-vermilion-red via-primary to-bronze-gold text-white shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center border-2 border-paper-cream group"
-          title="Mở Trợ lý Cố vấn Di sản AI"
-        >
-          <div className="relative flex items-center justify-center">
+      <button
+        type="button"
+        onClick={() => setIsChatOpen(!isChatOpen)}
+        className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-50 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-vermilion-red via-primary to-bronze-gold text-white shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center border-2 border-paper-cream group"
+        title={isChatOpen ? "Đóng cửa sổ chat (X)" : "Mở Trợ lý Cố vấn Di sản AI"}
+      >
+        <div className="relative flex items-center justify-center">
+          {isChatOpen ? (
+            <X className="w-6 h-6 sm:w-7 sm:h-7 text-paper-cream transition-transform rotate-0" />
+          ) : (
             <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 text-paper-cream group-hover:rotate-12 transition-transform" />
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-guardrail-pass border-2 border-white rounded-full animate-pulse" />
-          </div>
-          {/* Tooltip on hover for desktop */}
-          <span className="hidden sm:block absolute right-full mr-3 px-3 py-1.5 bg-text-charcoal/90 backdrop-blur-md text-white text-xs font-semibold rounded-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg border border-white/10">
-            Hỏi Trợ lý Di sản AI 💬
-          </span>
-        </button>
-      )}
+          )}
+        </div>
+        {/* Tooltip on hover for desktop */}
+        <span className="hidden sm:block absolute right-full mr-3 px-3 py-1.5 bg-text-charcoal/90 backdrop-blur-md text-white text-xs font-semibold rounded-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg border border-white/10">
+          {isChatOpen ? "Đóng cửa sổ chat ✕" : "Hỏi Trợ lý Di sản AI 💬"}
+        </span>
+      </button>
 
-      {/* Floating Chat Modal / Bottom Sheet (~60% Viewport Height) */}
+      {/* Floating Chat Modal / Bottom Sheet */}
       {isChatOpen && (
-        <div className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-[440px] md:w-[460px] h-[60vh] max-h-[620px] min-h-[440px] bg-surface-pure rounded-3xl shadow-2xl border border-bronze-gold/50 flex flex-col overflow-hidden animate-in slide-in-from-bottom-6 fade-in duration-300">
+        <div className="fixed bottom-[9rem] right-4 sm:bottom-24 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-[500px] md:w-[540px] lg:w-[560px] h-[68vh] max-h-[700px] min-h-[460px] bg-surface-pure rounded-3xl shadow-2xl border border-bronze-gold/50 flex flex-col overflow-hidden animate-in slide-in-from-bottom-6 fade-in duration-300">
           {/* Chat Header */}
           <div className="p-3.5 sm:p-4 bg-gradient-to-r from-vermilion-red/10 via-bronze-gold/10 to-paper-cream border-b border-border-bronze-light/60 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -448,25 +449,6 @@ export default function BachKhoaPage() {
                   <span>Gemini Cultural AI</span>
                 </div>
               </div>
-            </div>
-
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={handleResetChat}
-                className="p-1.5 text-text-warm-gray hover:text-text-charcoal rounded-lg hover:bg-white/60 transition-colors"
-                title="Làm mới cuộc trò chuyện"
-              >
-                <RefreshCw className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsChatOpen(false)}
-                className="w-7 h-7 rounded-full bg-white/80 hover:bg-white border border-border-bronze-light flex items-center justify-center text-text-warm-gray hover:text-text-charcoal transition-colors shadow-2xs"
-                title="Thu nhỏ cửa sổ chat (X)"
-              >
-                <X className="w-4 h-4" />
-              </button>
             </div>
           </div>
 

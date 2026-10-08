@@ -2,18 +2,13 @@
 
 import React, { useState } from "react";
 import { OutfitState } from "@/lib/utils";
-import {
-  generateOutfitPrompt,
-  getOutfitPromptBreakdown,
-} from "@/lib/ai-prompt";
+import { getOutfitPromptBreakdown } from "@/lib/ai-prompt";
 import {
   Shirt,
   Palette,
   Calendar,
-  Sparkles,
   Glasses,
   Flame,
-  Copy,
   ArrowLeft,
   User,
 } from "lucide-react";
@@ -23,21 +18,17 @@ import { PersonaSelector } from "./PersonaSelector";
 interface OptionSelectorProps {
   outfit: OutfitState;
   onChange: <K extends keyof OutfitState>(key: K, value: OutfitState[K]) => void;
-  customAvatarUrl?: string | null;
-  onUploadCustomAvatar?: (dataUrl: string) => void;
 }
 
 export const OptionSelector: React.FC<OptionSelectorProps> = ({
   outfit,
   onChange,
-  customAvatarUrl,
-  onUploadCustomAvatar,
 }) => {
   const [isPersonaConfirmed, setIsPersonaConfirmed] = useState(false);
+  const [chosenCategories, setChosenCategories] = useState<Set<string>>(() => new Set());
   const [activeCategory, setActiveCategory] = useState<
     "garment" | "color" | "occasion" | "style" | "accessory"
   >("garment");
-  const [copied, setCopied] = useState(false);
 
   const categories = [
     { id: "garment", label: "Cổ Phục", icon: Shirt },
@@ -48,6 +39,26 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
   ];
 
   const breakdown = getOutfitPromptBreakdown(outfit);
+
+  const handleOptionChange = <K extends keyof OutfitState>(key: K, value: OutfitState[K]) => {
+    setChosenCategories((prev) => {
+      const next = new Set(prev);
+      next.add(key as string);
+      if (key === "accessoryId" || key === "accessoryIds") {
+        next.add("accessory");
+      }
+      return next;
+    });
+    onChange(key, value);
+  };
+
+  const hasAnySelected =
+    (chosenCategories.has("personaId")) ||
+    (chosenCategories.has("garmentId")) ||
+    (chosenCategories.has("colorId")) ||
+    (chosenCategories.has("occasionId")) ||
+    (chosenCategories.has("styleId")) ||
+    (chosenCategories.has("accessory") || chosenCategories.has("accessoryIds"));
 
   return (
     <aside className="w-full flex flex-col gap-4 bg-surface-pure rounded-2xl p-4 shadow-sm border border-border-bronze-light/60">
@@ -73,10 +84,14 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
         <div className="animate-fadeIn">
           <PersonaSelector
             selectedPersonaId={outfit.personaId || "female-modern"}
-            onSelectPersona={(id) => onChange("personaId", id)}
-            customAvatarUrl={customAvatarUrl}
-            onUploadCustomAvatar={onUploadCustomAvatar}
-            onConfirm={() => setIsPersonaConfirmed(true)}
+            onSelectPersona={(id) => {
+              onChange("personaId", id);
+              setChosenCategories((prev) => new Set(prev).add("personaId"));
+            }}
+            onConfirm={() => {
+              setIsPersonaConfirmed(true);
+              setChosenCategories((prev) => new Set(prev).add("personaId"));
+            }}
           />
         </div>
       ) : (
@@ -100,11 +115,6 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
                   ? "Nhân vật: Nữ"
                   : "Nhân vật: Nam"}
               </span>
-              {customAvatarUrl && (
-                <span className="text-[10px] text-bronze-gold font-bold">
-                  (+Ảnh riêng)
-                </span>
-              )}
             </div>
           </div>
 
@@ -133,64 +143,49 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
             })}
           </div>
 
+          {/* Active Selection Chips - Nằm giữa thanh chọn 5 mục và phần Cổ phục giám tuyển */}
+          {hasAnySelected && (
+            <div className="flex flex-wrap gap-1 text-[9px] p-2 bg-paper-cream/60 rounded-xl border border-border-bronze-light/50 items-center animate-fadeIn">
+              {chosenCategories.has("personaId") && (
+                <span className="px-2 py-0.5 rounded-lg bg-vermilion-red/10 text-vermilion-red border border-vermilion-red/25 font-bold truncate">
+                  👤 {outfit.personaId === "female-modern" ? "Nữ" : "Nam"}
+                </span>
+              )}
+              {chosenCategories.has("garmentId") && (
+                <span className="px-2 py-0.5 rounded-lg bg-bronze-gold/15 text-stone-800 border border-bronze-gold/30 font-medium truncate max-w-[130px]">
+                  👘 {breakdown.garmentName}
+                </span>
+              )}
+              {chosenCategories.has("colorId") && (
+                <span className="px-2 py-0.5 rounded-lg bg-vermilion-red/10 text-vermilion-red border border-vermilion-red/20 font-medium truncate">
+                  🎨 {breakdown.colorName}
+                </span>
+              )}
+              {(chosenCategories.has("accessory") || chosenCategories.has("accessoryIds")) &&
+                breakdown.accessoryPrompt && (
+                  <span className="px-2 py-0.5 rounded-lg bg-amber-500/10 text-amber-800 border border-amber-500/20 font-medium truncate">
+                    👓 {breakdown.accessoryName}
+                  </span>
+                )}
+              {chosenCategories.has("occasionId") && (
+                <span className="px-2 py-0.5 rounded-lg bg-sky-500/10 text-sky-800 border border-sky-500/20 font-medium truncate">
+                  📍 {breakdown.occasionName}
+                </span>
+              )}
+              {chosenCategories.has("styleId") && (
+                <span className="px-2 py-0.5 rounded-lg bg-guardrail-pass-surface text-guardrail-pass border border-guardrail-pass/30 font-medium truncate">
+                  ⚡ {breakdown.styleName}
+                </span>
+              )}
+            </div>
+          )}
+
           {/* 3D Depth Card Deck with Horizontal Swipe */}
           <StackedDeckCarousel
             category={activeCategory}
             outfit={outfit}
-            onChange={onChange}
+            onChange={handleOptionChange}
           />
-
-          {/* Full Prompt Preview Footer */}
-          <div className="pt-2 border-t border-border-bronze-light/40 flex flex-col gap-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-text-charcoal flex items-center gap-1.5 text-[11px]">
-                <Sparkles className="w-3.5 h-3.5 text-bronze-gold" />
-                Prompt AI FLUX (Tự động đồng bộ):
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  const fullPrompt = generateOutfitPrompt(outfit);
-                  navigator.clipboard.writeText(fullPrompt);
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 2000);
-                }}
-                className="flex items-center gap-1 text-[10px] text-vermilion-red hover:underline font-semibold"
-              >
-                <Copy className="w-3 h-3" />
-                <span>{copied ? "Đã sao chép!" : "Sao chép"}</span>
-              </button>
-            </div>
-
-            {/* Chips showing active choices including persona */}
-            <div className="flex flex-wrap gap-1 text-[9px]">
-              <span className="px-2 py-0.5 rounded-lg bg-vermilion-red/10 text-vermilion-red border border-vermilion-red/25 font-bold truncate">
-                👤 {outfit.personaId === "female-modern" ? "Nữ" : "Nam"}
-              </span>
-              <span className="px-2 py-0.5 rounded-lg bg-bronze-gold/15 text-stone-800 border border-bronze-gold/30 font-medium truncate max-w-[120px]">
-                👘 {breakdown.garmentName}
-              </span>
-              <span className="px-2 py-0.5 rounded-lg bg-vermilion-red/10 text-vermilion-red border border-vermilion-red/20 font-medium truncate">
-                🎨 {breakdown.colorName}
-              </span>
-              {breakdown.accessoryPrompt ? (
-                <span className="px-2 py-0.5 rounded-lg bg-amber-500/10 text-amber-800 border border-amber-500/20 font-medium truncate">
-                  👓 {breakdown.accessoryName}
-                </span>
-              ) : null}
-              <span className="px-2 py-0.5 rounded-lg bg-sky-500/10 text-sky-800 border border-sky-500/20 font-medium truncate">
-                📍 {breakdown.occasionName}
-              </span>
-              <span className="px-2 py-0.5 rounded-lg bg-guardrail-pass-surface text-guardrail-pass border border-guardrail-pass/30 font-medium truncate">
-                ⚡ {breakdown.styleName}
-              </span>
-            </div>
-
-            {/* Full prompt string text box */}
-            <p className="text-[10px] text-text-warm-gray font-mono bg-paper-cream p-2 rounded-xl border border-border-bronze-light/50 leading-relaxed max-h-16 overflow-y-auto select-all">
-              {breakdown.fullPrompt}
-            </p>
-          </div>
         </div>
       )}
     </aside>

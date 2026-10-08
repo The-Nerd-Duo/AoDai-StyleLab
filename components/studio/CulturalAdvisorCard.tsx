@@ -12,12 +12,18 @@ import {
 } from "lucide-react";
 
 import { evaluateCulturalHarmony } from "@/lib/cultural-engine";
+import { useOutfitStore } from "@/lib/store";
 
 interface CulturalAdvisorCardProps {
   outfit: OutfitState;
+  resultImage?: string | null;
 }
 
-export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit }) => {
+export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit, resultImage: propResultImage }) => {
+  const store = useOutfitStore();
+  const resultImage = propResultImage !== undefined ? propResultImage : store.resultImage;
+  const hasGenerated = Boolean(resultImage && resultImage.trim());
+
   const [data, setData] = useState<CulturalAdvisorResponse | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -132,23 +138,47 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
           <span className="font-mono text-[10px] uppercase tracking-wider text-text-warm-gray font-bold hidden sm:inline">
             Đánh giá tổng thể AI:
           </span>
-          <div className="flex items-center gap-0.5 text-bronze-gold">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <span
-                key={star}
-                className="material-symbols-outlined text-[16px] text-bronze-gold"
-                style={{
-                  fontVariationSettings: star <= numStars ? "'FILL' 1" : "'FILL' 0",
-                }}
-              >
-                star
+          {hasGenerated ? (
+            <div className="flex items-center gap-0.5 text-bronze-gold">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <span
+                  key={star}
+                  className="material-symbols-outlined text-[16px] text-bronze-gold"
+                  style={{
+                    fontVariationSettings: star <= numStars ? "'FILL' 1" : "'FILL' 0",
+                  }}
+                >
+                  star
+                </span>
+              ))}
+              <span className="font-sans text-[14px] text-text-charcoal font-bold ml-1">
+                {starRating}
+                <span className="text-[10px] text-text-warm-gray font-normal font-mono">/5</span>
               </span>
-            ))}
-            <span className="font-sans text-[14px] text-text-charcoal font-bold ml-1">
-              {starRating}
-              <span className="text-[10px] text-text-warm-gray font-normal font-mono">/5</span>
-            </span>
-          </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 text-text-warm-gray">
+              <div className="flex items-center gap-0.5 text-stone-300">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <span
+                    key={star}
+                    className="material-symbols-outlined text-[16px] text-stone-300"
+                    style={{
+                      fontVariationSettings: "'FILL' 0",
+                    }}
+                  >
+                    star
+                  </span>
+                ))}
+              </div>
+              <span className="font-mono text-[11px] text-text-warm-gray font-medium ml-0.5">
+                Chưa chấm điểm
+              </span>
+              <span className="text-[10px] text-text-warm-gray/70 font-mono font-normal">
+                (—/5)
+              </span>
+            </div>
+          )}
         </div>
       </div>
 

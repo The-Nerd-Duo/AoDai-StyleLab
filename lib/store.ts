@@ -8,8 +8,8 @@ export const DEFAULT_OUTFIT: OutfitState = {
   colorId: "red-son",
   occasionId: "street-walk",
   styleId: "y2k-neo",
-  accessoryId: "man-modern",
-  accessoryIds: ["man-modern"],
+  accessoryId: "none",
+  accessoryIds: ["none"],
   personaId: "female-modern",
 };
 
@@ -29,7 +29,7 @@ interface StoreState {
 const SERVER_SNAPSHOT: StoreState = {
   outfit: DEFAULT_OUTFIT,
   compareOutfit: null,
-  selectedFrame: "frame-heritage-vermilion",
+  selectedFrame: "frame-default-none",
   resultImage: null,
   isLoaded: false,
 };
@@ -114,19 +114,8 @@ function initFromStorage() {
       savedFrame = rawFrame;
     }
 
-    // Try reading resultImage from sessionStorage first, then localStorage
-    let savedImage = currentStoreState.resultImage;
-    try {
-      const fromSession = sessionStorage.getItem(RESULT_IMAGE_KEY);
-      if (fromSession && fromSession.trim()) {
-        savedImage = fromSession;
-      } else {
-        const fromLocal = localStorage.getItem(RESULT_IMAGE_KEY);
-        if (fromLocal && fromLocal.trim()) {
-          savedImage = fromLocal;
-        }
-      }
-    } catch {}
+    // Mặc định khi vào app, khung ảnh luôn ở trạng thái trống
+    let savedImage: string | null = null;
 
     currentStoreState = {
       outfit: savedOutfit,

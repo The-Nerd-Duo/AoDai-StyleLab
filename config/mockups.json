@@ -205,6 +205,12 @@
   ],
   "accessories": [
     {
+      "id": "none",
+      "name": "Không dùng phụ kiện",
+      "type": "none",
+      "culturalNote": "Giữ trọn nét đẹp mộc mạc nguyên bản của trang phục."
+    },
+    {
       "id": "man-modern",
       "name": "Mấn Tết Cách Điệu",
       "type": "headwear",
@@ -245,12 +251,6 @@
       "name": "Nón Quai Thao / Nón Lá Mini",
       "type": "props",
       "culturalNote": "Đạo cụ biểu tượng đậm chất Kinh Bắc, biến hóa thành phụ kiện chụp ảnh ấn tượng."
-    },
-    {
-      "id": "none",
-      "name": "Không dùng phụ kiện",
-      "type": "none",
-      "culturalNote": "Giữ trọn nét đẹp mộc mạc nguyên bản của trang phục."
     }
   ],
   "personas": [

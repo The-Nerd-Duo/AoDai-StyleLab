@@ -578,10 +578,7 @@ export default function LookbookPage() {
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-text-charcoal font-serif flex items-center gap-1.5">
                   <Sparkles className="w-4 h-4 text-bronze-gold" />
-                  Bản Phối Của Bạn (Live 9:16)
-                </span>
-                <span className="text-[11px] font-mono text-text-warm-gray bg-surface-pure px-2.5 py-0.5 rounded-full border border-border-bronze-light/50">
-                  Tỷ lệ 1080 x 1920
+                  Bản Phối Của Bạn
                 </span>
               </div>
 
