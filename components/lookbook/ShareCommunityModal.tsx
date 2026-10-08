@@ -7,6 +7,7 @@ import mockupsData from "@/config/mockups.json";
 import framesData from "@/config/frames.json";
 import { X, Sparkles, User, UserX, Check, AlertCircle, Share2, Layers } from "lucide-react";
 import { saveLocalLookbook, getLocalLookbooks } from "@/lib/lookbook-storage";
+import { compressImageForUpload, savePrivateShareLocally } from "@/lib/share-service";
 
 interface ShareCommunityModalProps {
   isOpen: boolean;
@@ -86,51 +87,6 @@ export const ShareCommunityModal: React.FC<ShareCommunityModalProps> = ({
 
   if (!isOpen || !mounted) return null;
 
-  const compressImageForUpload = async (imgUrl: string | null): Promise<string | null> => {
-    if (!imgUrl) return null;
-    if (!imgUrl.startsWith("data:image")) return imgUrl;
-
-    return new Promise((resolve) => {
-      try {
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        img.onload = () => {
-          try {
-            const MAX_SIZE = 800;
-            let w = img.width;
-            let h = img.height;
-            if (w > MAX_SIZE || h > MAX_SIZE) {
-              if (w > h) {
-                h = Math.round((h * MAX_SIZE) / w);
-                w = MAX_SIZE;
-              } else {
-                w = Math.round((w * MAX_SIZE) / h);
-                h = MAX_SIZE;
-              }
-            }
-            const canvas = document.createElement("canvas");
-            canvas.width = w;
-            canvas.height = h;
-            const ctx = canvas.getContext("2d");
-            if (!ctx) {
-              resolve(imgUrl);
-              return;
-            }
-            ctx.drawImage(img, 0, 0, w, h);
-            const compressed = canvas.toDataURL("image/jpeg", 0.82);
-            resolve(compressed);
-          } catch {
-            resolve(imgUrl);
-          }
-        };
-        img.onerror = () => resolve(imgUrl);
-        img.src = imgUrl;
-      } catch {
-        resolve(imgUrl);
-      }
-    });
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
@@ -201,6 +157,10 @@ export const ShareCommunityModal: React.FC<ShareCommunityModalProps> = ({
         } catch (storageErr) {
           console.warn("Local storage cache warning:", storageErr);
         }
+      }
+
+      if (newItem) {
+        savePrivateShareLocally(newItem);
       }
 
       setSuccessDone(true);

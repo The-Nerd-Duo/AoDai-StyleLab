@@ -8,6 +8,7 @@ import framesData from "@/config/frames.json";
 import { Download, Share2, Check, Sparkles } from "lucide-react";
 import { useQrCode } from "@/lib/use-qr-code";
 import { FrameDecoration } from "@/components/lookbook/FrameDecoration";
+import { getOrGeneratePrivateShareId } from "@/lib/share-service";
 
 interface StudioRightPanelProps {
   outfit: OutfitState;
@@ -41,6 +42,27 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
   const [shareUrl, setShareUrl] = useState("");
   const [shareId, setShareId] = useState<string>("");
 
+  // Automatically prepare private share ID in background as soon as AI image is ready
+  // This guarantees the QR code works IMMEDIATELY without needing to publish to the community library!
+  React.useEffect(() => {
+    let isSubscribed = true;
+    if (resultImage && (resultImage.startsWith("data:") || resultImage.startsWith("blob:"))) {
+      getOrGeneratePrivateShareId({
+        outfit,
+        frameId: selectedFrame,
+        imageUrl: resultImage,
+        title: `${garment.name} (Bản Phối Di Sản)`,
+      }).then((id) => {
+        if (isSubscribed && id) {
+          setShareId(id);
+        }
+      });
+    }
+    return () => {
+      isSubscribed = false;
+    };
+  }, [outfit, selectedFrame, resultImage, garment.name]);
+
   React.useEffect(() => {
     if (typeof window !== "undefined") {
       const query = encodeOutfitToQuery(outfit, selectedFrame, resultImage, shareId);
@@ -53,32 +75,19 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
 
   const handleCopyShareLink = async () => {
     let currentId = shareId;
-    // Only upload a snapshot to KV if there is an AI image (data: / blob:) and no shareId yet
     if (!currentId && resultImage && (resultImage.startsWith("data:") || resultImage.startsWith("blob:"))) {
-      try {
-        const res = await fetch("/api/lookbook", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            outfit,
-            frameId: selectedFrame,
-            img: resultImage,
-            isAnonymous: true,
-            isCommunity: false, // CRITICAL: Only private share, do NOT post to public community feed!
-            title: `${garment.name} (Bản Chia Sẻ)`,
-          }),
-        });
-        if (res.ok) {
-          const json = await res.json();
-          if (json?.data?.id) {
-            currentId = json.data.id;
-            setShareId(currentId);
-          }
-        }
-      } catch {}
+      currentId = (await getOrGeneratePrivateShareId({
+        outfit,
+        frameId: selectedFrame,
+        imageUrl: resultImage,
+        title: `${garment.name} (Bản Chia Sẻ)`,
+      })) || "";
+      if (currentId) {
+        setShareId(currentId);
+      }
     }
 
-    const query = encodeOutfitToQuery(outfit, selectedFrame, resultImage, currentId);
+    const query = encodeOutfitToQuery(outfit, selectedFrame, resultImage, currentId || undefined);
     const origin = process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== "undefined" ? window.location.origin : "");
     const currentShareUrl = `${origin}/share?${query}`;
 
@@ -187,7 +196,7 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
                 </div>
                 <div
                   className="w-8 h-8 bg-surface-pure p-0.5 rounded-lg shadow-md border border-bronze-gold/50 flex items-center justify-center overflow-hidden flex-shrink-0"
-                  title="Quét mã QR để mở bản phối"
+                  title="Quét mã QR để mở & remix bản phối trên điện thoại (Hoạt động riêng tư, không cần đăng cộng đồng)"
                 >
                   {qrCodeUrl ? (
                     <img

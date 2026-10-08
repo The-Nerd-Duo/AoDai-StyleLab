@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import QRCode from "qrcode";
+import { QrCodeGenerator } from "./qr-generator";
 
 export function useQrCode(text: string): string | null {
   const [dataUrl, setDataUrl] = useState<string | null>(null);
@@ -13,21 +13,18 @@ export function useQrCode(text: string): string | null {
       return;
     }
 
-    QRCode.toDataURL(text, {
-      margin: 1,
-      width: 320,
-      color: {
-        dark: "#0F0F0F",
-        light: "#FFFFFF",
-      },
-      errorCorrectionLevel: "M",
-    })
-      .then((url) => {
-        if (isMounted) setDataUrl(url);
-      })
-      .catch((err) => {
-        console.warn("QR code generation error:", err);
-      });
+    try {
+      const qr = QrCodeGenerator.QrCode.encodeText(text, QrCodeGenerator.Ecc.MEDIUM);
+      const url = qr.toDataUrl(2, "#0F0F0F", "#FFFFFF");
+      if (isMounted) {
+        setDataUrl(url);
+      }
+    } catch (err) {
+      console.warn("QR code generation error:", err);
+      if (isMounted) {
+        setDataUrl(null);
+      }
+    }
 
     return () => {
       isMounted = false;

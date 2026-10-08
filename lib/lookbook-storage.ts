@@ -1,4 +1,5 @@
 import { LookbookItem, CreateLookbookInput } from "./types";
+export { getPrivateShareLocally, savePrivateShareLocally } from "./share-service";
 
 // All demo lookbook cards removed per user request (starts empty, only user creations)
 export const SAMPLE_LOOKBOOKS: LookbookItem[] = [];
