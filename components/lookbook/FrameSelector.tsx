@@ -43,7 +43,7 @@ export const FrameSelector: React.FC<FrameSelectorProps> = ({
                   <div className="flex items-center gap-2">
                     <span
                       className="w-3.5 h-3.5 rounded-full border border-black/20 shadow-xs flex-shrink-0"
-                      style={{ backgroundColor: f.borderColor }}
+                      style={{ backgroundColor: f.borderColor !== "transparent" ? f.borderColor : "#D1D5DB" }}
                     />
                     <span className="text-xs font-bold text-text-charcoal leading-tight">
                       {f.name}
@@ -62,7 +62,7 @@ export const FrameSelector: React.FC<FrameSelectorProps> = ({
 
               <div className="mt-3 pt-2 border-t border-border-bronze-light/40 flex items-center justify-between text-[10px] font-mono text-bronze-gold">
                 <span className="uppercase font-semibold tracking-wider">
-                  {f.theme}
+                  {f.theme === "none" ? "Không Khung" : f.theme}
                 </span>
                 <span className="text-text-warm-gray/80">9:16 Editorial</span>
               </div>

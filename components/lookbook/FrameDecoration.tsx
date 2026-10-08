@@ -13,6 +13,11 @@ export const FrameDecoration: React.FC<FrameDecorationProps> = ({
   borderColor = "#C5A059",
   accentColor = "#BA2D27",
 }) => {
+  // 0. Default: Không dùng khung lookbook
+  if (theme === "none" || !theme) {
+    return null;
+  }
+
   // 1. Royal Imperial: Hoa văn mây cuộn hoàng triều Đại Việt & Viền kép hoàng kim
   if (theme === "royal") {
     return (

@@ -71,7 +71,7 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
     }
   }, [outfit, selectedFrame, resultImage, shareId]);
 
-  const qrCodeUrl = useQrCode(shareUrl);
+  const qrCodeUrl = useQrCode(hasDisplayImage ? shareUrl : "");
 
   const handleCopyShareLink = async () => {
     let currentId = shareId;
@@ -105,7 +105,7 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
 
   return (
     <div className={`w-full h-full flex flex-col ${className || ""}`}>
-      {/* Lookbook 9:16 Digital ID Card Preview */}
+      {/* Lookbook Card Preview */}
       <div className="w-full h-full bg-surface-pure rounded-2xl p-3.5 sm:p-4 shadow-sm border border-border-bronze-light/60 flex flex-col justify-between gap-3.5">
         <div className="flex items-center justify-between border-b border-border-bronze-light/40 pb-3 px-1">
           <div className="flex items-center gap-2">
@@ -113,7 +113,7 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
               qr_code_2
             </span>
             <h2 className="font-serif text-sm sm:text-base font-bold text-text-charcoal">
-              Thẻ Lookbook 9:16 Digital ID
+              Thẻ Lookbook
             </h2>
           </div>
         </div>
@@ -122,7 +122,12 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
         <div className="flex items-center justify-center flex-1 w-full my-auto py-1">
           <div
             className="relative w-full max-w-[210px] sm:max-w-[220px] aspect-[9/16] max-h-[440px] bg-[#111111] rounded-xl overflow-hidden shadow-lg border-2 flex flex-col justify-between p-3 select-none transition-all duration-300 group"
-            style={{ borderColor: frame.borderColor || "#C5A059" }}
+            style={{
+              borderColor:
+                frame.borderColor && frame.borderColor !== "transparent"
+                  ? frame.borderColor
+                  : "rgba(197, 160, 89, 0.25)",
+            }}
           >
             {/* Top Tag */}
             <div className="flex items-center justify-between z-30">
@@ -147,7 +152,7 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
                   <div className="absolute inset-0 bg-gradient-to-t from-text-charcoal via-transparent to-black/40" />
                 </>
               ) : (
-                /* Minimalist aesthetic empty state for 9:16 lookbook card */
+                /* Minimalist aesthetic empty state for lookbook card */
                 <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center bg-gradient-to-b from-[#181615] to-[#100F0E] relative overflow-hidden select-none">
                   {/* Subtle Ambient Color Glow */}
                   <div
@@ -162,7 +167,7 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
 
                   <div className="relative z-10 flex flex-col gap-0.5">
                     <span className="text-[11px] font-serif text-paper-cream font-bold tracking-wide">
-                      Thẻ Digital ID
+                      Thẻ Lookbook
                     </span>
                     <span className="text-[9px] text-white/50 font-sans leading-tight">
                       Sẵn sàng kết nối ảnh AI
@@ -194,26 +199,28 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
                     {garment.name}
                   </p>
                 </div>
-                <div
-                  className="w-9 h-9 bg-white p-0.5 rounded-md shadow-md border border-bronze-gold/40 flex items-center justify-center flex-shrink-0"
-                  style={{ width: "36px", height: "36px" }}
-                  title="Quét mã QR để mở & remix bản phối trên điện thoại"
-                >
-                  {qrCodeUrl ? (
-                    <img
-                      src={qrCodeUrl}
-                      alt="QR Code"
-                      className="w-full h-full object-contain pointer-events-none"
-                      style={{ imageRendering: "pixelated" }}
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-text-charcoal rounded-[2px] flex items-center justify-center">
-                      <span className="material-symbols-outlined text-[15px] text-white">
-                        qr_code
-                      </span>
-                    </div>
-                  )}
-                </div>
+                {hasDisplayImage && (
+                  <div
+                    className="w-9 h-9 bg-white p-0.5 rounded-md shadow-md border border-bronze-gold/40 flex items-center justify-center flex-shrink-0"
+                    style={{ width: "36px", height: "36px" }}
+                    title="Quét mã QR để mở & remix bản phối trên điện thoại"
+                  >
+                    {qrCodeUrl ? (
+                      <img
+                        src={qrCodeUrl}
+                        alt="QR Code"
+                        className="w-full h-full object-contain pointer-events-none"
+                        style={{ imageRendering: "pixelated" }}
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-text-charcoal rounded-[2px] flex items-center justify-center">
+                        <span className="material-symbols-outlined text-[15px] text-white">
+                          qr_code
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center justify-between pt-1 border-t border-white/20">
