@@ -76,7 +76,7 @@ export async function createLookbook(input: CreateLookbookInput): Promise<Lookbo
     author,
     authorInitial,
     isAnonymous,
-    likes: 1, // Auto 1 like from creator
+    likes: 0,
     shares: 0,
     category: input.category || "y2k",
     img: input.img || null,

@@ -91,7 +91,7 @@ export async function onRequestPost(context: {
     const body: any = await context.request.json().catch(() => ({}));
     const action = body.action === "unlike" ? "unlike" : "like";
     const delta = action === "like" ? 1 : -1;
-    let newLikes = 1;
+    let newLikes = 0;
 
     // 1. Cloudflare D1
     const d1 = findD1(context.env);
