@@ -15,9 +15,9 @@ export function useQrCode(text: string): string | null {
 
     QRCode.toDataURL(text, {
       margin: 2,
-      width: 360,
+      width: 400,
       color: {
-        dark: "#0F0F0F",
+        dark: "#000000",
         light: "#FFFFFF",
       },
       errorCorrectionLevel: "M",

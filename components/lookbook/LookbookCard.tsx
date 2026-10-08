@@ -2,13 +2,13 @@
 
 import React, { useRef, useState } from "react";
 import Link from "next/link";
-import { OutfitState, encodeOutfitToQuery, getGarmentMockupUrl } from "@/lib/utils";
+import { OutfitState, encodeOutfitToQuery, getGarmentMockupUrl, getShareOrigin } from "@/lib/utils";
 import { LookbookItem } from "@/lib/types";
 import mockupsData from "@/config/mockups.json";
 import framesData from "@/config/frames.json";
 import { useOutfitStore } from "@/lib/store";
 import { toPng } from "html-to-image";
-import { Download, Share2, Check, Sparkles, ExternalLink, X, Copy } from "lucide-react";
+import { Download, Share2, Check, Sparkles } from "lucide-react";
 import { ShareCommunityModal } from "./ShareCommunityModal";
 import { useQrCode } from "@/lib/use-qr-code";
 import { FrameDecoration } from "./FrameDecoration";
@@ -34,7 +34,6 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [communityModalOpen, setCommunityModalOpen] = useState(false);
-  const [qrModalOpen, setQrModalOpen] = useState(false);
 
   const garment = mockupsData.garments.find((g) => g.id === outfit.garmentId) || mockupsData.garments[0];
   const color = mockupsData.colors.find((c) => c.id === outfit.colorId) || mockupsData.colors[0];
@@ -85,7 +84,7 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
   React.useEffect(() => {
     if (typeof window !== "undefined") {
       const query = encodeOutfitToQuery(outfit, frameId, displayImage, activeShareId);
-      const baseOrigin = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+      const baseOrigin = getShareOrigin();
       setShareUrl(`${baseOrigin}/share?${query}`);
     }
   }, [outfit, frameId, displayImage, activeShareId]);
@@ -140,7 +139,7 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
     }
 
     const query = encodeOutfitToQuery(outfit, frameId, displayImage, currentId || undefined);
-    const origin = process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== "undefined" ? window.location.origin : "");
+    const origin = getShareOrigin();
     const currentShareUrl = `${origin}/share?${query}`;
 
     navigator.clipboard.writeText(currentShareUrl).then(() => {
@@ -271,24 +270,19 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
               </span>
             </div>
 
-            {/* QR Code Container - Strictly sized to 48px to prevent mobile blowout, clickable to view enlarged */}
+            {/* QR Code Container - Enforced Crisp & Unclipped for Phone Cameras */}
             <div className="flex flex-col items-center flex-shrink-0">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setQrModalOpen(true);
-                }}
-                className="w-12 h-12 bg-white p-1 rounded-xl shadow-lg border-2 border-bronze-gold/70 flex items-center justify-center overflow-hidden flex-shrink-0 hover:scale-105 active:scale-95 transition-transform cursor-pointer group/qr"
-                style={{ width: "48px", height: "48px", minWidth: "48px", minHeight: "48px", maxWidth: "48px", maxHeight: "48px" }}
-                title="Nhấn để phóng to mã QR & xem liên kết riêng tư (không cần đăng cộng đồng)"
+              <div
+                className="w-13 h-13 sm:w-14 sm:h-14 bg-white p-1 rounded-md shadow-md border border-bronze-gold/40 flex items-center justify-center flex-shrink-0"
+                style={{ width: "54px", height: "54px", minWidth: "54px", minHeight: "54px" }}
+                title="Quét mã QR để mở & remix bản phối trên điện thoại"
               >
                 {qrCodeUrl ? (
                   <img
                     src={qrCodeUrl}
                     alt="Quét mã QR để remix bản phối"
-                    className="w-full h-full object-contain pointer-events-none group-hover/qr:opacity-90"
-                    style={{ width: "40px", height: "40px", maxWidth: "40px", maxHeight: "40px" }}
+                    className="w-full h-full object-contain pointer-events-none"
+                    style={{ imageRendering: "pixelated" }}
                   />
                 ) : (
                   <div className="w-full h-full bg-[#1A1A1A] rounded flex items-center justify-center">
@@ -297,7 +291,7 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
                     </span>
                   </div>
                 )}
-              </button>
+              </div>
               <span className="font-mono text-[7px] text-paper-cream/75 uppercase tracking-widest mt-0.5 whitespace-nowrap">
                 QUÉT REMIX
               </span>
@@ -318,162 +312,49 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
         </div>
       )}
 
-      {/* Action Buttons & QR Independence Controls */}
+      {/* Action Buttons */}
       <div className="flex flex-col gap-2.5 w-full max-w-[340px] sm:max-w-[380px]">
-        {/* QR Ready Status Banner */}
-        <div className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-surface-pure border border-border-bronze-light/70 text-[11px] shadow-2xs">
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-guardrail-pass opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-guardrail-pass"></span>
-            </span>
-            <span className="font-semibold text-text-charcoal">Mã QR hoạt động riêng tư</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => setQrModalOpen(true)}
-            className="text-vermilion-red hover:underline font-mono text-[10px] font-bold flex items-center gap-1"
-          >
-            <span>Phóng to mã</span>
-            <ExternalLink className="w-2.5 h-2.5" />
-          </button>
-        </div>
-
-        {/* Primary CTA: Tải thẻ ảnh 9:16 (Bao gồm QR Code hoạt động độc lập) */}
+        {/* Primary CTA: Chia sẻ lên Cộng đồng */}
         <button
-          onClick={handleDownload}
-          disabled={downloading}
-          className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-vermilion-red via-primary to-vermilion-red hover:opacity-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-95 disabled:opacity-50"
+          onClick={() => setCommunityModalOpen(true)}
+          className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-vermilion-red via-primary to-vermilion-red hover:opacity-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-95 group"
         >
-          <Download className={`w-4 h-4 text-paper-cream ${downloading ? "animate-bounce" : ""}`} />
-          <span>{downloading ? "Đang xuất thẻ..." : "Tải Thẻ PNG 9:16 (Kèm Mã QR)"}</span>
+          <Sparkles className="w-4 h-4 text-bronze-gold group-hover:rotate-12 transition-transform" />
+          <span>Chia Sẻ Lên Thư Viện Cộng Đồng</span>
+          <span className="text-[10px] font-mono bg-white/20 px-2 py-0.5 rounded-full ml-1 font-semibold">
+            Live
+          </span>
         </button>
 
-        {/* Secondary Row: Chép Link QR & Xem Mã QR */}
+        {/* Secondary Actions: Tải PNG & Chép Link */}
         <div className="flex items-center gap-2.5 w-full">
           <button
+            onClick={handleDownload}
+            disabled={downloading}
+            className="flex-1 py-2.5 px-3 rounded-xl bg-paper-cream hover:bg-surface-pure border border-border-bronze-light text-text-charcoal font-semibold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all active:scale-95 disabled:opacity-50"
+          >
+            <Download className={`w-3.5 h-3.5 text-vermilion-red ${downloading ? "animate-bounce" : ""}`} />
+            <span>{downloading ? "Đang xuất..." : "Tải PNG (9:16)"}</span>
+          </button>
+
+          <button
             onClick={handleCopyShareLink}
-            className="flex-1 py-2.5 px-3 rounded-xl bg-surface-pure hover:bg-paper-cream border border-border-bronze-light text-text-charcoal font-semibold text-xs flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-95"
+            className="flex-1 py-2.5 px-3 rounded-xl bg-surface-pure hover:bg-paper-cream border border-border-bronze-light text-text-charcoal font-semibold text-xs flex items-center justify-center gap-1.5 transition-all shadow-2xs"
           >
             {copied ? (
               <>
                 <Check className="w-3.5 h-3.5 text-guardrail-pass stroke-[3]" />
-                <span className="text-guardrail-pass font-bold">Đã chép link!</span>
+                <span className="text-guardrail-pass font-bold">Đã chép!</span>
               </>
             ) : (
               <>
                 <Share2 className="w-3.5 h-3.5 text-bronze-gold" />
-                <span>Sao chép Link QR</span>
+                <span>Sao chép Link</span>
               </>
             )}
           </button>
-
-          <button
-            type="button"
-            onClick={() => setQrModalOpen(true)}
-            className="flex-1 py-2.5 px-3 rounded-xl bg-surface-pure hover:bg-paper-cream border border-border-bronze-light text-text-charcoal font-semibold text-xs flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-95"
-          >
-            <span className="material-symbols-outlined text-[16px] text-vermilion-red">qr_code_2</span>
-            <span>Mở Mã QR Lớn</span>
-          </button>
-        </div>
-
-        {/* Community Showcase Button: Optional public sharing */}
-        <div className="pt-0.5 flex flex-col gap-1">
-          <button
-            onClick={() => setCommunityModalOpen(true)}
-            className="w-full py-2.5 px-3 rounded-xl bg-paper-cream hover:bg-surface-container border border-dashed border-bronze-gold/70 text-text-charcoal font-medium text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 group shadow-2xs"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-bronze-gold group-hover:rotate-12 transition-transform" />
-            <span>Đăng Lên Thư Viện Cộng Đồng (Công khai)</span>
-            <span className="text-[10px] font-mono text-text-warm-gray ml-1">(Tùy chọn)</span>
-          </button>
-          <p className="text-[10.5px] text-center text-text-warm-gray leading-tight">
-            Mã QR hoạt động ngay không cần đăng cộng đồng. Chỉ đăng khi bạn muốn giới thiệu trong Thư viện chung.
-          </p>
         </div>
       </div>
-
-      {/* Interactive QR Code Modal */}
-      {qrModalOpen && (
-        <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200"
-          onClick={() => setQrModalOpen(false)}
-        >
-          <div
-            className="relative w-full max-w-sm bg-[#FAF7F2] rounded-3xl p-6 shadow-2xl border border-bronze-gold/50 flex flex-col items-center gap-4 text-center z-[10000] animate-in zoom-in-95 duration-200"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setQrModalOpen(false)}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-paper-cream hover:bg-black/10 flex items-center justify-center text-text-warm-gray transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            <div className="w-10 h-10 rounded-2xl bg-vermilion-red flex items-center justify-center text-white shadow-md">
-              <span className="material-symbols-outlined text-[22px]">qr_code_2</span>
-            </div>
-
-            <div>
-              <h3 className="font-serif font-bold text-base sm:text-lg text-text-charcoal">
-                Mã QR Bản Phối Di Sản
-              </h3>
-              <p className="text-xs text-text-warm-gray mt-1 leading-relaxed">
-                Quét bằng điện thoại để xem trực tiếp thẻ 9:16 và ảnh của bạn. Hoạt động độc lập, không bắt buộc đăng lên Thư viện Cộng đồng.
-              </p>
-            </div>
-
-            {/* Large QR Display */}
-            <div className="w-52 h-52 bg-white p-3 rounded-2xl shadow-lg border-2 border-bronze-gold/60 flex items-center justify-center overflow-hidden">
-              {qrCodeUrl ? (
-                <img src={qrCodeUrl} alt="QR Code" className="w-full h-full object-contain" />
-              ) : (
-                <span className="material-symbols-outlined text-4xl text-text-warm-gray animate-pulse">
-                  qr_code
-                </span>
-              )}
-            </div>
-
-            {/* Share Link Field */}
-            <div className="w-full flex items-center gap-1.5 bg-paper-cream p-2 rounded-xl border border-border-bronze-light/60">
-              <input
-                readOnly
-                value={shareUrl}
-                className="text-xs bg-transparent text-text-charcoal flex-1 truncate font-mono outline-none px-1"
-              />
-              <button
-                onClick={handleCopyShareLink}
-                className="px-2.5 py-1 bg-surface-pure hover:bg-white text-text-charcoal rounded-lg font-semibold text-xs border border-border-bronze-light flex items-center gap-1 transition-colors flex-shrink-0 shadow-2xs"
-              >
-                {copied ? <Check className="w-3 h-3 text-guardrail-pass stroke-[3]" /> : <Copy className="w-3 h-3 text-bronze-gold" />}
-                <span>{copied ? "Đã chép" : "Chép"}</span>
-              </button>
-            </div>
-
-            {/* Action buttons */}
-            <div className="w-full flex items-center gap-2 pt-1">
-              {shareUrl && (
-                <a
-                  href={shareUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 py-2.5 px-3 rounded-xl bg-surface-pure hover:bg-paper-cream border border-border-bronze-light text-text-charcoal font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-2xs"
-                >
-                  <ExternalLink className="w-3.5 h-3.5 text-vermilion-red" />
-                  <span>Mở xem thử</span>
-                </a>
-              )}
-              <button
-                onClick={() => setQrModalOpen(false)}
-                className="flex-1 py-2.5 px-3 rounded-xl bg-vermilion-red text-white font-bold text-xs hover:opacity-95 transition-opacity shadow-sm"
-              >
-                Hoàn tất
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Community Share Modal */}
       <ShareCommunityModal
