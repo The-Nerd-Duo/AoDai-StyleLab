@@ -237,7 +237,7 @@ export async function onRequestPost(context: { request: Request; env: any }) {
       author,
       authorInitial: isAnon ? "Ẩ" : author.charAt(0).toUpperCase(),
       isAnonymous: isAnon,
-      likes: 1,
+      likes: 0,
       shares: 0,
       category: body.category || "y2k",
       img: body.img || null,

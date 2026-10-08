@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS lookbooks (
   author TEXT,
   authorInitial TEXT,
   isAnonymous INTEGER DEFAULT 0,
-  likes INTEGER DEFAULT 1,
+  likes INTEGER DEFAULT 0,
   shares INTEGER DEFAULT 0,
   category TEXT DEFAULT 'y2k',
   img TEXT,

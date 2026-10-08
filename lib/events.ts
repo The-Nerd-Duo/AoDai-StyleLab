@@ -18,9 +18,9 @@ if (process.env.NODE_ENV !== "production") {
 lookbookEvents.setMaxListeners(200);
 
 export type LookbookEventPayload =
-  | { type: "NEW_LOOKBOOK"; data: LookbookItem }
-  | { type: "UPDATE_LIKES"; data: { id: string; likes: number } }
-  | { type: "UPDATE_SHARES"; data: { id: string; shares: number } };
+  | { type: "NEW_LOOKBOOK"; data: LookbookItem; senderId?: string }
+  | { type: "UPDATE_LIKES"; data: { id: string; likes: number }; senderId?: string }
+  | { type: "UPDATE_SHARES"; data: { id: string; shares: number }; senderId?: string };
 
 export function emitLookbookEvent(payload: LookbookEventPayload) {
   lookbookEvents.emit("change", payload);
