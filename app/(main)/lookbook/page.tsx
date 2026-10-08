@@ -307,7 +307,7 @@ export default function LookbookPage() {
     let shareUrl = `${origin}/share?id=${item.id}`;
 
     if (item.outfit) {
-      const query = encodeOutfitToQuery(item.outfit, item.frameId, item.img);
+      const query = encodeOutfitToQuery(item.outfit, item.frameId, item.img, item.id);
       shareUrl = `${origin}/share?${query}`;
     }
 

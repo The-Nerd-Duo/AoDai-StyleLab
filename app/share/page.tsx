@@ -8,6 +8,7 @@ import { LookbookCard } from "@/components/lookbook/LookbookCard";
 import { decodeOutfitFromQuery } from "@/lib/utils";
 import { useOutfitStore } from "@/lib/store";
 import { Sparkles, Palette } from "lucide-react";
+import { getPrivateShareLocally, getLocalLookbooks } from "@/lib/lookbook-storage";
 
 function ShareContent() {
   const searchParams = useSearchParams();
@@ -21,18 +22,42 @@ function ShareContent() {
 
   const { outfit, frameId, imageUrl, shareId } = decodeOutfitFromQuery(paramsObject);
   const [resolvedImage, setResolvedImage] = useState<string | null>(imageUrl);
+  const [isLoading, setIsLoading] = useState<boolean>(Boolean(shareId && !imageUrl));
 
   // If a shareId was provided, fetch the full card from Cloudflare D1/KV to load the AI photo
   useEffect(() => {
     if (shareId && !resolvedImage) {
+      let isMounted = true;
+      setIsLoading(true);
+
       fetch(`/api/lookbook/${shareId}`)
         .then((res) => (res.ok ? res.json() : null))
         .then((json) => {
+          if (!isMounted) return;
           if (json?.data?.img) {
             setResolvedImage(json.data.img);
+          } else {
+            // Local fallback for same browser / offline / local development
+            const local = getPrivateShareLocally(shareId) || getLocalLookbooks().find((i) => i.id === shareId);
+            if (local?.img) {
+              setResolvedImage(local.img);
+            }
           }
         })
-        .catch(() => {});
+        .catch(() => {
+          if (!isMounted) return;
+          const local = getPrivateShareLocally(shareId) || getLocalLookbooks().find((i) => i.id === shareId);
+          if (local?.img) {
+            setResolvedImage(local.img);
+          }
+        })
+        .finally(() => {
+          if (isMounted) setIsLoading(false);
+        });
+
+      return () => {
+        isMounted = false;
+      };
     }
   }, [shareId, resolvedImage]);
 
@@ -63,7 +88,17 @@ function ShareContent() {
       </div>
 
       {/* Lookbook Render Canvas */}
-      <LookbookCard outfit={outfit} frameId={frameId} imageUrl={resolvedImage || undefined} shareId={shareId} />
+      {isLoading ? (
+        <div className="w-full max-w-[340px] sm:max-w-[380px] aspect-[9/16] rounded-3xl bg-[#0D0C0B] border border-bronze-gold/50 flex flex-col items-center justify-center p-6 text-center shadow-2xl animate-pulse">
+          <div className="w-12 h-12 rounded-2xl bg-white/[0.05] border border-bronze-gold/40 flex items-center justify-center text-bronze-gold mb-3">
+            <Sparkles className="w-6 h-6 text-bronze-gold animate-spin" />
+          </div>
+          <p className="text-paper-cream text-xs font-serif font-bold">Đang tải thẻ Lookbook di sản...</p>
+          <span className="text-[10px] font-mono text-white/50 mt-1">Đang nạp ảnh phối độc bản</span>
+        </div>
+      ) : (
+        <LookbookCard outfit={outfit} frameId={frameId} imageUrl={resolvedImage || undefined} shareId={shareId} />
+      )}
 
       {/* CTA Button to Remix */}
       <div className="pt-2">
