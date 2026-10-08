@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { OutfitState, encodeOutfitToQuery } from "@/lib/utils";
+import { OutfitState, encodeOutfitToQuery, getShareOrigin } from "@/lib/utils";
 import mockupsData from "@/config/mockups.json";
 import framesData from "@/config/frames.json";
 import { Download, Share2, Check, Sparkles } from "lucide-react";
@@ -66,7 +66,7 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
   React.useEffect(() => {
     if (typeof window !== "undefined") {
       const query = encodeOutfitToQuery(outfit, selectedFrame, resultImage, shareId);
-      const baseOrigin = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+      const baseOrigin = getShareOrigin();
       setShareUrl(`${baseOrigin}/share?${query}`);
     }
   }, [outfit, selectedFrame, resultImage, shareId]);
@@ -88,7 +88,7 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
     }
 
     const query = encodeOutfitToQuery(outfit, selectedFrame, resultImage, currentId || undefined);
-    const origin = process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== "undefined" ? window.location.origin : "");
+    const origin = getShareOrigin();
     const currentShareUrl = `${origin}/share?${query}`;
 
     navigator.clipboard.writeText(currentShareUrl).then(() => {
@@ -195,14 +195,16 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
                   </p>
                 </div>
                 <div
-                  className="w-8 h-8 bg-surface-pure p-0.5 rounded-lg shadow-md border border-bronze-gold/50 flex items-center justify-center overflow-hidden flex-shrink-0"
-                  title="Quét mã QR để mở & remix bản phối trên điện thoại (Hoạt động riêng tư, không cần đăng cộng đồng)"
+                  className="w-9 h-9 bg-white p-0.5 rounded-md shadow-md border border-bronze-gold/40 flex items-center justify-center flex-shrink-0"
+                  style={{ width: "36px", height: "36px" }}
+                  title="Quét mã QR để mở & remix bản phối trên điện thoại"
                 >
                   {qrCodeUrl ? (
                     <img
                       src={qrCodeUrl}
                       alt="QR Code"
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-contain pointer-events-none"
+                      style={{ imageRendering: "pixelated" }}
                     />
                   ) : (
                     <div className="w-full h-full bg-text-charcoal rounded-[2px] flex items-center justify-center">

@@ -31,6 +31,28 @@ export function getGarmentMockupUrl(garmentId?: string): string {
   return GARMENT_MOCKUP_MAP[garmentId] || "/mockups/ao-dai-cach-tan.jpg";
 }
 
+export function getShareOrigin(): string {
+  if (typeof window === "undefined") {
+    return process.env.NEXT_PUBLIC_SITE_URL || "https://aodai-stylelab.pages.dev";
+  }
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL;
+  }
+  const hostname = window.location.hostname;
+  // If running on local development (localhost / 127.0.0.1 / private LAN),
+  // fallback to the official public HTTPS domain so mobile phone cameras
+  // (iOS Camera, Zalo, Android) immediately detect a valid link banner.
+  if (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname.startsWith("192.168.") ||
+    hostname.startsWith("10.")
+  ) {
+    return "https://aodai-stylelab.pages.dev";
+  }
+  return window.location.origin;
+}
+
 export function encodeOutfitToQuery(
   state: OutfitState,
   frameId?: string,
@@ -55,7 +77,12 @@ export function encodeOutfitToQuery(
   if (shareId) {
     params.set("id", shareId);
   }
-  if (imageUrl && !imageUrl.startsWith("data:") && !imageUrl.startsWith("blob:")) {
+  if (
+    imageUrl &&
+    !imageUrl.startsWith("data:") &&
+    !imageUrl.startsWith("blob:") &&
+    !imageUrl.startsWith("/mockups/")
+  ) {
     params.set("img", imageUrl);
   }
   return params.toString();
