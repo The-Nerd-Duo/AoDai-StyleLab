@@ -3,7 +3,13 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import genealogyData from "@/config/genealogy.json";
-import { useOutfitStore } from "@/lib/store";
+import { useOutfitStore, DEFAULT_OUTFIT } from "@/lib/store";
+import {
+  getActiveStudioContext,
+  setActiveStudioContext,
+  ActiveStudioContext,
+} from "@/lib/studio-context";
+import { ReplaceConfirmModal } from "@/components/studio/ReplaceConfirmModal";
 import {
   Sparkles,
   Palette,
@@ -59,15 +65,74 @@ export const GarmentGenealogy: React.FC<GarmentGenealogyProps> = ({
   onSelectPattern,
 }) => {
   const router = useRouter();
-  const { updateOutfitField } = useOutfitStore();
+  const { setOutfit, setResultImage, setSelectedFrame } = useOutfitStore();
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [pendingReplacement, setPendingReplacement] = useState<{
+    current: ActiveStudioContext;
+    incoming: ActiveStudioContext;
+    studioGarmentId: string;
+    garmentName: string;
+  } | null>(null);
 
-  const handleTryInStudio = (studioGarmentId: string) => {
+  const executeApplyTrial = (
+    studioGarmentId: string,
+    garmentName: string,
+    incomingContext: ActiveStudioContext
+  ) => {
     const targetId = STUDIO_GARMENT_MAP[studioGarmentId] || studioGarmentId;
-    if (updateOutfitField) {
-      updateOutfitField("garmentId", targetId);
+    
+    // 1. Reset all outfit fields, setting only the trial garment and clearing previous remix selections
+    setOutfit({
+      ...DEFAULT_OUTFIT,
+      garmentId: targetId,
+      accessoryId: "none",
+      accessoryIds: ["none"],
+    });
+
+    // 2. Clear AI image and frame
+    setResultImage(null);
+    setSelectedFrame("frame-default-none");
+
+    // 3. Reset storage so other categories (bối cảnh, phong cách, phụ kiện, màu sắc) from previous remix are cleared
+    if (typeof window !== "undefined") {
+      try {
+        sessionStorage.setItem("vietphuc_chosen_categories", JSON.stringify(["garmentId"]));
+        sessionStorage.setItem("vietphuc_persona_confirmed", "0");
+        sessionStorage.removeItem("vietphuc_result_image");
+        localStorage.removeItem("vietphuc_result_image");
+      } catch {}
     }
-    router.push(`/?g=${encodeURIComponent(targetId)}`);
+
+    setActiveStudioContext(incomingContext);
+    setConfirmModalOpen(false);
+    setPendingReplacement(null);
+    router.push(`/?mode=trial&g=${encodeURIComponent(targetId)}&name=${encodeURIComponent(garmentName)}`);
+  };
+
+  const handleTryInStudio = (studioGarmentId: string, garmentName: string) => {
+    const targetId = STUDIO_GARMENT_MAP[studioGarmentId] || studioGarmentId;
+    const incomingContext: ActiveStudioContext = {
+      type: "trial",
+      title: garmentName,
+      details: garmentName,
+      garmentName,
+      garmentId: targetId,
+    };
+
+    const currentContext = getActiveStudioContext();
+    if (currentContext) {
+      // Prompt modal to confirm replacing active remix/trial
+      setPendingReplacement({
+        current: currentContext,
+        incoming: incomingContext,
+        studioGarmentId,
+        garmentName,
+      });
+      setConfirmModalOpen(true);
+    } else {
+      executeApplyTrial(studioGarmentId, garmentName, incomingContext);
+    }
   };
 
   const handleImageError = (id: string) => {
@@ -218,7 +283,7 @@ export const GarmentGenealogy: React.FC<GarmentGenealogyProps> = ({
                     <div className="flex items-center gap-1.5 ml-auto sm:ml-0">
                       <button
                         type="button"
-                        onClick={() => handleTryInStudio(item.studio_garment_id)}
+                        onClick={() => handleTryInStudio(item.studio_garment_id, item.name)}
                         className="py-1.5 px-3 rounded-lg bg-vermilion-red hover:bg-primary text-white font-bold text-[11px] flex items-center gap-1 shadow-2xs transition-all active:scale-95"
                       >
                         <Palette className="w-3 h-3 text-paper-cream" />
@@ -241,6 +306,25 @@ export const GarmentGenealogy: React.FC<GarmentGenealogyProps> = ({
           );
         })}
       </div>
+
+      {pendingReplacement && (
+        <ReplaceConfirmModal
+          isOpen={confirmModalOpen}
+          currentContext={pendingReplacement.current}
+          incomingContext={pendingReplacement.incoming}
+          onConfirm={() =>
+            executeApplyTrial(
+              pendingReplacement.studioGarmentId,
+              pendingReplacement.garmentName,
+              pendingReplacement.incoming
+            )
+          }
+          onCancel={() => {
+            setConfirmModalOpen(false);
+            setPendingReplacement(null);
+          }}
+        />
+      )}
     </section>
   );
 };

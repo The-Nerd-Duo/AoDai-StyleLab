@@ -18,17 +18,41 @@ import { PersonaSelector } from "./PersonaSelector";
 interface OptionSelectorProps {
   outfit: OutfitState;
   onChange: <K extends keyof OutfitState>(key: K, value: OutfitState[K]) => void;
+  isPersonaConfirmed?: boolean;
+  setIsPersonaConfirmed?: (val: boolean) => void;
+  chosenCategories?: Set<string>;
+  setChosenCategories?: React.Dispatch<React.SetStateAction<Set<string>>>;
+  activeCategory?: "garment" | "color" | "occasion" | "style" | "accessory";
+  setActiveCategory?: (cat: "garment" | "color" | "occasion" | "style" | "accessory") => void;
 }
 
 export const OptionSelector: React.FC<OptionSelectorProps> = ({
   outfit,
   onChange,
+  isPersonaConfirmed: propIsPersonaConfirmed,
+  setIsPersonaConfirmed: propSetIsPersonaConfirmed,
+  chosenCategories: propChosenCategories,
+  setChosenCategories: propSetChosenCategories,
+  activeCategory: propActiveCategory,
+  setActiveCategory: propSetActiveCategory,
 }) => {
-  const [isPersonaConfirmed, setIsPersonaConfirmed] = useState(false);
-  const [chosenCategories, setChosenCategories] = useState<Set<string>>(() => new Set());
-  const [activeCategory, setActiveCategory] = useState<
+  const [internalPersonaConfirmed, setInternalPersonaConfirmed] = useState(false);
+  const [internalChosenCategories, setInternalChosenCategories] = useState<Set<string>>(() => new Set());
+  const [internalActiveCategory, setInternalActiveCategory] = useState<
     "garment" | "color" | "occasion" | "style" | "accessory"
   >("garment");
+
+  const isPersonaConfirmed =
+    propIsPersonaConfirmed !== undefined ? propIsPersonaConfirmed : internalPersonaConfirmed;
+  const setIsPersonaConfirmed = propSetIsPersonaConfirmed || setInternalPersonaConfirmed;
+
+  const chosenCategories =
+    propChosenCategories !== undefined ? propChosenCategories : internalChosenCategories;
+  const setChosenCategories = propSetChosenCategories || setInternalChosenCategories;
+
+  const activeCategory =
+    propActiveCategory !== undefined ? propActiveCategory : internalActiveCategory;
+  const setActiveCategory = propSetActiveCategory || setInternalActiveCategory;
 
   const categories = [
     { id: "garment", label: "Cổ Phục", icon: Shirt },
@@ -73,9 +97,11 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
               Studio Mix &amp; Match
             </h2>
           </div>
-          <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-paper-cream border border-border-bronze-light/60 text-bronze-gold font-bold">
-            {!isPersonaConfirmed ? "Bước 1: Chọn Nhân Vật" : "Bước 2: Phối Cổ Phục"}
-          </span>
+          {!isPersonaConfirmed && (
+            <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-paper-cream border border-border-bronze-light/60 text-bronze-gold font-bold">
+              Chọn Nhân Vật
+            </span>
+          )}
         </div>
       </div>
 
@@ -185,6 +211,7 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
             category={activeCategory}
             outfit={outfit}
             onChange={handleOptionChange}
+            chosenCategories={chosenCategories}
           />
         </div>
       )}

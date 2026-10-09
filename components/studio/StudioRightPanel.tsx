@@ -74,6 +74,7 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
   const qrCodeUrl = useQrCode(hasDisplayImage ? shareUrl : "");
 
   const handleCopyShareLink = async () => {
+    if (!hasDisplayImage) return;
     let currentId = shareId;
     if (!currentId && resultImage && (resultImage.startsWith("data:") || resultImage.startsWith("blob:"))) {
       currentId = (await getOrGeneratePrivateShareId({
@@ -183,7 +184,9 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
 
             {/* Heritage Frame Corner Decorations (z-20, sits above image) */}
             <FrameDecoration
-              theme={frame.theme || "royal"}
+              theme={frame.theme || "hoang_kim"}
+              frameId={frame.id}
+              image={(frame as any).image}
               borderColor={frame.borderColor}
               accentColor={frame.accentColor}
             />
@@ -237,26 +240,40 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
 
         {/* Action Buttons Panel */}
         <div className="flex flex-col gap-2 pt-1">
-          <Link
-            href="/lookbook"
-            onClick={() => {
-              if (resultImage) {
-                try {
-                  sessionStorage.setItem("vietphuc_result_image", resultImage);
-                  localStorage.setItem("vietphuc_result_image", resultImage);
-                } catch {}
-              }
-            }}
-            className="w-full py-3 px-4 bg-gradient-to-r from-vermilion-red to-primary text-white rounded-xl font-sans text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm hover:opacity-95 active:scale-[0.99] transition-all"
-          >
-            <Download className="w-4 h-4" />
-            <span>Xuất Thẻ Lookbook 9:16 + QR</span>
-          </Link>
+          {hasDisplayImage ? (
+            <Link
+              href="/lookbook"
+              onClick={() => {
+                if (resultImage) {
+                  try {
+                    sessionStorage.setItem("vietphuc_result_image", resultImage);
+                    localStorage.setItem("vietphuc_result_image", resultImage);
+                  } catch {}
+                }
+              }}
+              className="w-full py-3 px-4 bg-gradient-to-r from-vermilion-red to-primary text-white rounded-xl font-sans text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm hover:opacity-95 active:scale-[0.99] transition-all"
+            >
+              <Download className="w-4 h-4" />
+              <span>Xuất Thẻ Lookbook + QR</span>
+            </Link>
+          ) : (
+            <button
+              type="button"
+              disabled
+              title="Vui lòng tạo ảnh phối đồ trước khi xuất thẻ Lookbook"
+              className="w-full py-3 px-4 bg-stone-200 text-stone-400 rounded-xl font-sans text-xs sm:text-sm font-bold flex items-center justify-center gap-2 cursor-not-allowed shadow-none"
+            >
+              <Download className="w-4 h-4" />
+              <span>Xuất Thẻ Lookbook + QR</span>
+            </button>
+          )}
 
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={handleCopyShareLink}
-              className="py-2.5 px-3 bg-paper-cream hover:bg-surface-container text-text-charcoal rounded-xl font-mono text-[11px] font-semibold flex items-center justify-center gap-1.5 border border-border-bronze-light/60 transition-colors shadow-xs"
+              disabled={!hasDisplayImage}
+              title={!hasDisplayImage ? "Vui lòng tạo ảnh phối đồ trước khi chia sẻ link" : undefined}
+              className="py-2.5 px-3 bg-paper-cream hover:bg-surface-container text-text-charcoal rounded-xl font-mono text-[11px] font-semibold flex items-center justify-center gap-1.5 border border-border-bronze-light/60 transition-colors shadow-xs disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-paper-cream"
               type="button"
             >
               {copied ? (
@@ -274,14 +291,27 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
 
             <button
               onClick={handleCycleFrame}
-              className="py-2.5 px-3 bg-paper-cream hover:bg-surface-container text-text-charcoal rounded-xl font-mono text-[11px] font-semibold flex items-center justify-center gap-1.5 border border-border-bronze-light/60 transition-colors shadow-xs"
+              disabled={!hasDisplayImage}
+              className={`py-2.5 px-3 rounded-xl font-mono text-[11px] font-semibold flex items-center justify-center gap-1.5 border transition-all shadow-xs ${
+                !hasDisplayImage
+                  ? "bg-paper-cream/50 text-text-warm-gray/40 border-border-bronze-light/30 cursor-not-allowed opacity-60"
+                  : "bg-paper-cream hover:bg-surface-container text-text-charcoal border-border-bronze-light/60 active:scale-95 cursor-pointer"
+              }`}
               type="button"
-              title="Đổi mẫu khung viền 9:16"
+              title={
+                !hasDisplayImage
+                  ? "Vui lòng tạo ảnh phối đồ trước khi đổi khung viền"
+                  : "Đổi mẫu khung viền di sản"
+              }
             >
-              <span className="material-symbols-outlined text-[16px] text-bronze-gold">
-                filter_vintage
+              <span
+                className={`material-symbols-outlined text-[16px] ${
+                  !hasDisplayImage ? "text-text-warm-gray/40" : "text-bronze-gold"
+                }`}
+              >
+                crop_free
               </span>
-              <span>Đổi Viền Thêu</span>
+              <span>Đổi Khung Viền</span>
             </button>
           </div>
         </div>

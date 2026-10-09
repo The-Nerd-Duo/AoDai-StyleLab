@@ -28,6 +28,7 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
   const [loading, setLoading] = useState(false);
 
   const occasion = mockupsData.occasions.find((o) => o.id === outfit.occasionId) || mockupsData.occasions[0];
+  const garment = mockupsData.garments.find((g) => g.id === outfit.garmentId) || mockupsData.garments[0];
 
   const fetchAdvice = async () => {
     setLoading(true);
@@ -87,6 +88,11 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
   };
 
   useEffect(() => {
+    if (!hasGenerated) {
+      setData(null);
+      return;
+    }
+
     // 1. Cập nhật ngay bằng Local Rule Engine để UI phản hồi mượt 0ms khi vuốt
     const local = evaluateCulturalHarmony({
       garmentId: outfit.garmentId,
@@ -105,7 +111,7 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
     }, 650);
 
     return () => clearTimeout(timer);
-  }, [outfit.garmentId, outfit.colorId, outfit.occasionId, outfit.styleId, outfit.accessoryId, outfit.accessoryIds?.join(",")]);
+  }, [hasGenerated, outfit.garmentId, outfit.colorId, outfit.occasionId, outfit.styleId, outfit.accessoryId, outfit.accessoryIds?.join(",")]);
 
   // Convert 100-point score to 5-star rating (e.g., 98 -> 4.9, 90 -> 4.5)
   const starRating = data ? (data.overallScore / 20).toFixed(1) : "4.9";
@@ -124,9 +130,9 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
           </h2>
           <button
             onClick={fetchAdvice}
-            disabled={loading}
-            className="p-1 rounded-lg text-text-warm-gray hover:text-text-charcoal hover:bg-paper-cream transition-colors ml-1"
-            title="Thẩm định lại"
+            disabled={loading || !hasGenerated}
+            className="p-1 rounded-lg text-text-warm-gray hover:text-text-charcoal hover:bg-paper-cream transition-colors ml-1 disabled:opacity-40 disabled:cursor-not-allowed"
+            title={hasGenerated ? "Thẩm định lại" : "Chờ tạo ảnh"}
             type="button"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-vermilion-red" : ""}`} />
@@ -189,7 +195,76 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
         </div>
       )}
 
-      {data && (
+      {!hasGenerated ? (
+        /* Standby State when not evaluated yet */
+        <div className="space-y-3">
+          {/* 3 Standby Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1">
+            {/* Metric 1: Nguồn gốc & Ý nghĩa */}
+            <div className="p-2.5 rounded-xl bg-paper-cream/60 border border-border-bronze-light/50 flex flex-col justify-between space-y-1.5 shadow-xs">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1 truncate max-w-[140px]">
+                  <span className="material-symbols-outlined text-[14px] text-stone-400">
+                    history_edu
+                  </span>
+                  Nguồn gốc &amp; Ý nghĩa
+                </span>
+                <span className="text-[9px] font-mono text-stone-500 font-medium px-1.5 py-0.5 rounded bg-stone-100 border border-stone-200">
+                  Chờ chấm điểm
+                </span>
+              </div>
+              <p className="text-text-warm-gray/70 leading-relaxed text-[11px] line-clamp-3 italic">
+                Chưa có dữ liệu. AI sẽ phân tích nguồn gốc triều đại và ý nghĩa biểu trưng sau khi tạo ảnh.
+              </p>
+            </div>
+
+            {/* Metric 2: Thời tiết & Chất liệu */}
+            <div className="p-2.5 rounded-xl bg-paper-cream/60 border border-border-bronze-light/50 flex flex-col justify-between space-y-1.5 shadow-xs">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[14px] text-stone-400">
+                    thermostat
+                  </span>
+                  Thời tiết &amp; Chất liệu
+                </span>
+                <span className="text-[9px] font-mono text-stone-500 font-medium px-1.5 py-0.5 rounded bg-stone-100 border border-stone-200">
+                  Chờ chấm điểm
+                </span>
+              </div>
+              <p className="text-text-warm-gray/70 leading-relaxed text-[11px] line-clamp-3 italic">
+                Chưa có dữ liệu. AI sẽ phân tích độ phù hợp của chất liệu vải với thời tiết sau khi tạo ảnh.
+              </p>
+            </div>
+
+            {/* Metric 3: Quy chế Di sản */}
+            <div className="p-2.5 rounded-xl bg-paper-cream/60 border border-border-bronze-light/50 flex flex-col justify-between space-y-1.5 shadow-xs">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[14px] text-stone-400">
+                    rule
+                  </span>
+                  Quy chế Di sản
+                </span>
+                <span className="text-[9px] font-mono text-stone-500 font-medium px-1.5 py-0.5 rounded bg-stone-100 border border-stone-200">
+                  Chờ chấm điểm
+                </span>
+              </div>
+              <p className="text-text-warm-gray/70 leading-relaxed text-[11px] line-clamp-3 italic">
+                Chưa có dữ liệu. AI sẽ thẩm định phom dáng cổ phục và quy chuẩn nghi lễ sau khi tạo ảnh.
+              </p>
+            </div>
+          </div>
+
+          {/* Standby Tip */}
+          <div className="p-2.5 rounded-xl bg-paper-cream/50 border border-dashed border-border-bronze-light/60 text-text-warm-gray flex items-start gap-2">
+            <Lightbulb className="w-4 h-4 text-stone-400 flex-shrink-0 mt-0.5" />
+            <p className="text-[11px] leading-relaxed text-text-warm-gray">
+              <strong className="text-text-charcoal font-semibold">Mẹo Phối Đồ Gen Z: </strong>
+              Chưa có mẹo phối đồ. Hãy bấm &quot;Tạo Ảnh Phối Đồ&quot; để AI kích hoạt cố vấn phong cách sáng tạo.
+            </p>
+          </div>
+        </div>
+      ) : data ? (
         <div className="space-y-3">
           {/* Warnings Banner if any */}
           {data.warnings && data.warnings.length > 0 && (
@@ -210,7 +285,25 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
 
           {/* 3 Diagnostic Cards Matching Prototype Design */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1">
-            {/* Metric 1: Thời tiết & Chất liệu */}
+            {/* Metric 1: Nguồn gốc & Ý nghĩa (Left) */}
+            <div className="p-2.5 rounded-xl bg-paper-cream border border-border-bronze-light/50 flex flex-col justify-between space-y-1.5 shadow-xs">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1 truncate max-w-[140px]">
+                  <span className="material-symbols-outlined text-[14px] text-vermilion-red">
+                    history_edu
+                  </span>
+                  Nguồn gốc &amp; Ý nghĩa
+                </span>
+                <span className="text-[9px] font-mono text-bronze-gold font-bold px-1.5 py-0.5 rounded bg-[#F4EFEA] border border-border-bronze-light/40 truncate max-w-[90px]">
+                  {garment.dynasty ? garment.dynasty.split("(")[0].trim() : "DI SẢN"}
+                </span>
+              </div>
+              <p className="text-text-warm-gray leading-relaxed text-[11px] line-clamp-3">
+                {garment.culturalSignificance || garment.story || "Di sản trang phục truyền thống mang đậm bản sắc văn hóa Việt Nam."}
+              </p>
+            </div>
+
+            {/* Metric 2: Thời tiết & Chất liệu (Middle) */}
             <div className="p-2.5 rounded-xl bg-paper-cream border border-border-bronze-light/50 flex flex-col justify-between space-y-1.5 shadow-xs">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1">
@@ -228,25 +321,7 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
               </p>
             </div>
 
-            {/* Metric 2: Bối cảnh & Không gian */}
-            <div className="p-2.5 rounded-xl bg-paper-cream border border-border-bronze-light/50 flex flex-col justify-between space-y-1.5 shadow-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1 truncate max-w-[140px]">
-                  <span className="material-symbols-outlined text-[14px] text-vermilion-red">
-                    nightlife
-                  </span>
-                  {occasion.name.split("&")[0].trim()}
-                </span>
-                <span className="text-[9px] font-mono text-bronze-gold font-bold px-1.5 py-0.5 rounded bg-[#F4EFEA] border border-border-bronze-light/40">
-                  NỔI BẬT
-                </span>
-              </div>
-              <p className="text-text-warm-gray leading-relaxed text-[11px] line-clamp-3">
-                {data.colorHarmonyVerdict}
-              </p>
-            </div>
-
-            {/* Metric 3: Quy chế Di sản */}
+            {/* Metric 3: Quy chế Di sản (Right) */}
             <div className="p-2.5 rounded-xl bg-paper-cream border border-border-bronze-light/50 flex flex-col justify-between space-y-1.5 shadow-xs">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1">
@@ -276,7 +351,7 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
             </div>
           )}
         </div>
-      )}
+      ) : null}
     </div>
   );
 };

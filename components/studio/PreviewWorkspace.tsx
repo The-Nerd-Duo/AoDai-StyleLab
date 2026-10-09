@@ -4,7 +4,12 @@ import React, { useState } from "react";
 import { OutfitState } from "@/lib/utils";
 import mockupsData from "@/config/mockups.json";
 import { generateOutfitPrompt, callFluxWorkerAi } from "@/lib/ai-prompt";
-import { Sparkles, RefreshCw, Maximize2, RotateCcw } from "lucide-react";
+import { Sparkles, RefreshCw, Maximize2, Palette, X } from "lucide-react";
+
+export interface StudioBadgeInfo {
+  type: "remix" | "trial";
+  details: string;
+}
 
 interface PreviewWorkspaceProps {
   outfit: OutfitState;
@@ -14,6 +19,10 @@ interface PreviewWorkspaceProps {
   setLoading?: (loading: boolean) => void;
   onGenerateOutfit?: () => void;
   className?: string;
+  isOptionComplete?: boolean;
+  missingItems?: { key: string; label: string }[];
+  badgeInfo?: StudioBadgeInfo | null;
+  onDismissBadge?: () => void;
 }
 
 export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
@@ -24,6 +33,10 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
   setLoading: externalSetLoading,
   onGenerateOutfit,
   className,
+  isOptionComplete = true,
+  missingItems = [],
+  badgeInfo,
+  onDismissBadge,
 }) => {
   const [internalResultImage, setInternalResultImage] = useState<string | null>(null);
   const [internalLoading, setInternalLoading] = useState(false);
@@ -47,6 +60,9 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
   const style = mockupsData.styles.find((s) => s.id === outfit.styleId) || mockupsData.styles[0];
 
   async function handleGenerateOutfit() {
+    if (isOptionComplete === false) {
+      return;
+    }
     if (onGenerateOutfit) {
       onGenerateOutfit();
       return;
@@ -78,38 +94,76 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
       }`}
     >
       {/* Top Header of Showcase Canvas */}
-      <div className="flex items-center justify-between pb-3 px-1 border-b border-border-bronze-light/40">
-        <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-vermilion-red text-[20px]">
-            view_in_ar
-          </span>
-          <h2 className="font-serif text-sm sm:text-base font-bold text-text-charcoal">
-            Kết Quả Phối Đồ AI (Showcase)
-          </h2>
+      <div className="flex flex-col gap-2 pb-3 px-1 border-b border-border-bronze-light/40">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <span className="material-symbols-outlined text-vermilion-red text-[20px]">
+              view_in_ar
+            </span>
+            <h2 className="font-serif text-sm sm:text-base font-bold text-text-charcoal whitespace-nowrap">
+              Kết Quả Phối Đồ AI
+            </h2>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {hasDisplayImage && (
-            <button
-              onClick={handleResetToEmpty}
-              className="p-1 text-text-warm-gray hover:text-vermilion-red hover:bg-paper-cream rounded-lg transition-colors"
-              title="Đặt lại khung trống"
-              type="button"
+        {/* Khung chữ bên dưới tiêu đề: Hiển thị ĐẦY ĐỦ toàn bộ thông số (KHÔNG bị cắt bớt ...) */}
+        {badgeInfo && (
+          badgeInfo.type === "remix" ? (
+            <div
+              className="flex items-start justify-between gap-2.5 p-2 sm:p-2.5 rounded-xl bg-gradient-to-r from-vermilion-red/10 via-amber-500/10 to-bronze-gold/15 border border-vermilion-red/35 text-xs shadow-2xs w-full animate-in fade-in duration-300"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
-            </button>
-          )}
-          {hasDisplayImage && (
-            <button
-              onClick={() => setFullscreenImage(resultImage)}
-              className="p-1 text-text-warm-gray hover:text-text-charcoal hover:bg-paper-cream rounded-lg transition-colors"
-              title="Xem toàn màn hình"
-              type="button"
+              <div className="flex items-start gap-2 min-w-0 flex-1">
+                <Sparkles className="w-4 h-4 text-vermilion-red flex-shrink-0 mt-0.5 animate-pulse" />
+                <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2 min-w-0 flex-1 flex-wrap">
+                  <span className="font-serif font-bold text-vermilion-red uppercase text-[11px] whitespace-nowrap flex-shrink-0">
+                    Bản remix:
+                  </span>
+                  <span className="text-text-charcoal text-[11.5px] font-medium leading-relaxed break-words">
+                    {badgeInfo.details}
+                  </span>
+                </div>
+              </div>
+              {onDismissBadge && (
+                <button
+                  type="button"
+                  onClick={onDismissBadge}
+                  className="text-text-warm-gray hover:text-white hover:bg-vermilion-red p-1 rounded-lg transition-all flex-shrink-0 cursor-pointer shadow-2xs border border-transparent hover:border-vermilion-red"
+                  title="Bỏ bản remix này & đặt lại toàn bộ lựa chọn"
+                  aria-label="Bỏ bản remix này & đặt lại toàn bộ lựa chọn"
+                >
+                  <X className="w-3.5 h-3.5 stroke-[2.5]" />
+                </button>
+              )}
+            </div>
+          ) : (
+            <div
+              className="flex items-start justify-between gap-2.5 p-2 sm:p-2.5 rounded-xl bg-amber-500/10 border border-amber-600/35 text-xs shadow-2xs w-full animate-in fade-in duration-300"
             >
-              <Maximize2 className="w-4 h-4" />
-            </button>
-          )}
-        </div>
+              <div className="flex items-start gap-2 min-w-0 flex-1">
+                <Palette className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
+                <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2 min-w-0 flex-1 flex-wrap">
+                  <span className="font-serif font-bold text-amber-800 uppercase text-[11px] whitespace-nowrap flex-shrink-0">
+                    Bản thử phối:
+                  </span>
+                  <span className="text-text-charcoal text-[11.5px] font-semibold leading-relaxed break-words">
+                    {badgeInfo.details}
+                  </span>
+                </div>
+              </div>
+              {onDismissBadge && (
+                <button
+                  type="button"
+                  onClick={onDismissBadge}
+                  className="text-text-warm-gray hover:text-white hover:bg-vermilion-red p-1 rounded-lg transition-all flex-shrink-0 cursor-pointer shadow-2xs border border-transparent hover:border-vermilion-red"
+                  title="Bỏ bản thử phối này & đặt lại toàn bộ lựa chọn"
+                  aria-label="Bỏ bản thử phối này & đặt lại toàn bộ lựa chọn"
+                >
+                  <X className="w-3.5 h-3.5 stroke-[2.5]" />
+                </button>
+              )}
+            </div>
+          )
+        )}
       </div>
 
       {/* Main Canvas Display Area */}
@@ -175,13 +229,29 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
       <div className="flex flex-col gap-2 pt-1">
         <button
           onClick={handleGenerateOutfit}
-          disabled={loading}
-          className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-vermilion-red to-primary hover:opacity-95 active:scale-[0.99] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50"
+          disabled={loading || isOptionComplete === false}
+          title={
+            isOptionComplete === false
+              ? `Vui lòng chọn đủ các mục (${missingItems.map((m) => m.label).join(", ")}) để tạo đồ AI`
+              : undefined
+          }
+          className={`w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all ${
+            isOptionComplete === false
+              ? "bg-stone-200 text-stone-500 border border-stone-300 cursor-not-allowed opacity-80"
+              : "bg-gradient-to-r from-vermilion-red to-primary hover:opacity-95 active:scale-[0.99] text-white disabled:opacity-50"
+          }`}
         >
           {loading ? (
             <>
               <RefreshCw className="w-4 h-4 animate-spin text-white" />
               <span>Đang tạo ảnh AI...</span>
+            </>
+          ) : isOptionComplete === false ? (
+            <>
+              <span className="material-symbols-outlined text-[17px]">lock</span>
+              <span>
+                Chưa Chọn Đủ Tùy Chọn ({5 - missingItems.length}/5)
+              </span>
             </>
           ) : (
             <>
@@ -190,6 +260,11 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
             </>
           )}
         </button>
+        {isOptionComplete === false && (
+          <p className="text-[11px] text-center text-amber-800/80 font-medium">
+            * Chọn đủ Nhân vật, Cổ phục, Màu sắc, Bối cảnh, Phong cách để tạo ảnh
+          </p>
+        )}
       </div>
 
       {/* Fullscreen Zoom Modal */}

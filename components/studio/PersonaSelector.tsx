@@ -368,17 +368,9 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
                   {/* Bottom Overlaid Content */}
                   <div className="absolute bottom-0 inset-x-0 p-3.5 flex flex-col justify-end text-white z-10">
                     <div className="mb-1">
-                      <div className="flex items-center gap-1.5 mb-1.5">
-                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-black/60 text-amber-200 border border-amber-400/20 backdrop-blur-xs truncate max-w-[200px]">
-                          {item.highlight}
-                        </span>
-                      </div>
                       <h3 className="font-serif text-base font-bold text-amber-100 leading-snug drop-shadow-sm">
                         {item.name}
                       </h3>
-                      <p className="text-[11px] text-white/85 mt-1 line-clamp-2 leading-relaxed drop-shadow-xs">
-                        {item.description}
-                      </p>
                     </div>
                   </div>
                 </div>
@@ -400,9 +392,7 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
         onClick={onConfirm}
         className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-vermilion-red via-[#d33a29] to-[#bf2e1f] hover:brightness-105 text-white font-serif font-bold text-sm shadow-md hover:shadow-lg transition-all duration-150 flex items-center justify-center gap-2 active:scale-[0.98] ring-1 ring-white/20"
       >
-        <span>
-          Xác nhận {currentPersona.shortName === "Nữ" ? "Nhân Vật Nữ" : "Nhân Vật Nam"} &amp; Sang phần phối đồ
-        </span>
+        <span>Sang phần phối đồ</span>
         <ArrowRight className="w-4 h-4 stroke-[2.5]" />
       </button>
     </div>

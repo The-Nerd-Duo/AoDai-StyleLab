@@ -16,6 +16,7 @@ export interface LookbookItem {
   culturalNote?: string;
   createdAt: string;
   badge?: string;
+  deviceId?: string;
 }
 
 export interface CreateLookbookInput {
@@ -28,6 +29,7 @@ export interface CreateLookbookInput {
   frameId?: string;
   era?: string;
   culturalNote?: string;
+  deviceId?: string;
 }
 
 export interface CulturalAdvisorRequest {
