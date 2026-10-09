@@ -68,7 +68,17 @@ function ShareContent() {
     if (finalImageToRemix) {
       setResultImage(finalImageToRemix);
     }
-    router.push("/");
+    try {
+      sessionStorage.setItem(
+        "vietphuc_studio_context",
+        JSON.stringify({
+          type: "remix",
+          outfit,
+          title: "Bản Phối Chia Sẻ",
+        })
+      );
+    } catch {}
+    router.push("/?mode=remix");
   };
 
   return (

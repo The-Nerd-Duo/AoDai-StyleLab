@@ -1,8 +1,42 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+import mockupsData from "@/config/mockups.json";
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+export function formatRemixOutfitSummary(outfit: OutfitState): string {
+  const garment = mockupsData.garments.find((g) => g.id === outfit.garmentId)?.name || outfit.garmentId;
+  const color = mockupsData.colors.find((c) => c.id === outfit.colorId)?.name || outfit.colorId;
+  const occasion = mockupsData.occasions.find((o) => o.id === outfit.occasionId)?.name || outfit.occasionId;
+  const style = mockupsData.styles.find((s) => s.id === outfit.styleId)?.name || outfit.styleId;
+
+  const accIds =
+    outfit.accessoryIds && outfit.accessoryIds.length > 0
+      ? outfit.accessoryIds.filter((id) => id && id !== "none")
+      : outfit.accessoryId && outfit.accessoryId !== "none"
+      ? [outfit.accessoryId]
+      : [];
+
+  const accNames = accIds
+    .map((id) => mockupsData.accessories.find((a) => a.id === id)?.name)
+    .filter(Boolean) as string[];
+
+  const persona =
+    mockupsData.personas?.find((p) => p.id === outfit.personaId)?.name ||
+    (outfit.personaId === "male-modern" ? "Nam" : "Nữ");
+
+  const parts = [garment, color, occasion, style];
+  if (accNames.length > 0) {
+    parts.push(accNames.join(", "));
+  }
+  if (persona) {
+    parts.push(persona);
+  }
+
+  return parts.filter(Boolean).join(" • ");
 }
 
 export interface OutfitState {

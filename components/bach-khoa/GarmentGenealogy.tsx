@@ -62,12 +62,22 @@ export const GarmentGenealogy: React.FC<GarmentGenealogyProps> = ({
   const { updateOutfitField } = useOutfitStore();
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
 
-  const handleTryInStudio = (studioGarmentId: string) => {
+  const handleTryInStudio = (studioGarmentId: string, garmentName: string) => {
     const targetId = STUDIO_GARMENT_MAP[studioGarmentId] || studioGarmentId;
     if (updateOutfitField) {
       updateOutfitField("garmentId", targetId);
     }
-    router.push(`/?g=${encodeURIComponent(targetId)}`);
+    try {
+      sessionStorage.setItem(
+        "vietphuc_studio_context",
+        JSON.stringify({
+          type: "trial",
+          garmentName,
+          garmentId: targetId,
+        })
+      );
+    } catch {}
+    router.push(`/?mode=trial&g=${encodeURIComponent(targetId)}&name=${encodeURIComponent(garmentName)}`);
   };
 
   const handleImageError = (id: string) => {
@@ -218,7 +228,7 @@ export const GarmentGenealogy: React.FC<GarmentGenealogyProps> = ({
                     <div className="flex items-center gap-1.5 ml-auto sm:ml-0">
                       <button
                         type="button"
-                        onClick={() => handleTryInStudio(item.studio_garment_id)}
+                        onClick={() => handleTryInStudio(item.studio_garment_id, item.name)}
                         className="py-1.5 px-3 rounded-lg bg-vermilion-red hover:bg-primary text-white font-bold text-[11px] flex items-center gap-1 shadow-2xs transition-all active:scale-95"
                       >
                         <Palette className="w-3 h-3 text-paper-cream" />

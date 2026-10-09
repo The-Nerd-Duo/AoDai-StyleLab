@@ -4,11 +4,12 @@ import React, { useState, useEffect } from "react";
 import { Header } from "@/components/shared/Header";
 import { Footer } from "@/components/shared/Footer";
 import { OptionSelector } from "@/components/studio/OptionSelector";
-import { PreviewWorkspace } from "@/components/studio/PreviewWorkspace";
+import { PreviewWorkspace, StudioBadgeInfo } from "@/components/studio/PreviewWorkspace";
 import { CulturalAdvisorCard } from "@/components/studio/CulturalAdvisorCard";
 import { StudioRightPanel } from "@/components/studio/StudioRightPanel";
 import { useOutfitStore } from "@/lib/store";
 import { generateOutfitPrompt, callFluxWorkerAi } from "@/lib/ai-prompt";
+import { formatRemixOutfitSummary } from "@/lib/utils";
 import mockupsData from "@/config/mockups.json";
 
 const REQUIRED_CATEGORIES = [
@@ -22,6 +23,7 @@ const REQUIRED_CATEGORIES = [
 export default function StudioPage() {
   const {
     outfit,
+    setOutfit,
     updateOutfitField,
     resultImage,
     setResultImage,
@@ -35,17 +37,94 @@ export default function StudioPage() {
   const [activeCategory, setActiveCategory] = useState<
     "garment" | "color" | "occasion" | "style" | "accessory"
   >("garment");
+  const [badgeInfo, setBadgeInfo] = useState<StudioBadgeInfo | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
-      const g = params.get("g");
-      if (g && mockupsData.garments.some((item) => item.id === g)) {
-        updateOutfitField("garmentId", g);
-        setChosenCategories((prev) => new Set(prev).add("garmentId"));
+      const mode = params.get("mode");
+
+      if (mode === "remix") {
+        let remixOutfit = outfit;
+        try {
+          const stored = sessionStorage.getItem("vietphuc_studio_context");
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed.type === "remix" && parsed.outfit) {
+              remixOutfit = parsed.outfit;
+              if (setOutfit) {
+                setOutfit(parsed.outfit);
+              }
+            }
+          }
+        } catch {}
+
+        const details = formatRemixOutfitSummary(remixOutfit);
+        setBadgeInfo({
+          type: "remix",
+          details,
+        });
+
+        // Mark all options as selected when remixing
+        setChosenCategories(new Set(["personaId", "garmentId", "colorId", "occasionId", "styleId"]));
+        setIsPersonaConfirmed(true);
+      } else if (mode === "trial") {
+        let garmentName = params.get("name") || "";
+        const g = params.get("g");
+
+        if (!garmentName) {
+          try {
+            const stored = sessionStorage.getItem("vietphuc_studio_context");
+            if (stored) {
+              const parsed = JSON.parse(stored);
+              if (parsed.type === "trial" && parsed.garmentName) {
+                garmentName = parsed.garmentName;
+              }
+            }
+          } catch {}
+        }
+
+        if (!garmentName && g) {
+          garmentName = mockupsData.garments.find((item) => item.id === g)?.name || g;
+        }
+
+        if (g && mockupsData.garments.some((item) => item.id === g)) {
+          updateOutfitField("garmentId", g);
+          setChosenCategories((prev) => new Set(prev).add("garmentId"));
+        }
+
+        setBadgeInfo({
+          type: "trial",
+          details: garmentName || "Cổ phục di sản",
+        });
+      } else {
+        // Normal direct visit: no badge
+        setBadgeInfo(null);
+        try {
+          sessionStorage.removeItem("vietphuc_studio_context");
+        } catch {}
+
+        const g = params.get("g");
+        if (g && mockupsData.garments.some((item) => item.id === g)) {
+          updateOutfitField("garmentId", g);
+          setChosenCategories((prev) => new Set(prev).add("garmentId"));
+        }
       }
     }
-  }, [updateOutfitField]);
+  }, [updateOutfitField, setOutfit]);
+
+  const handleDismissBadge = () => {
+    setBadgeInfo(null);
+    try {
+      sessionStorage.removeItem("vietphuc_studio_context");
+      if (typeof window !== "undefined" && window.history.replaceState) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("mode");
+        url.searchParams.delete("name");
+        window.history.replaceState({}, "", url.pathname + (url.search ? url.search : ""));
+      }
+    } catch {}
+  };
 
   const missingCategories = REQUIRED_CATEGORIES.filter((req) => {
     if (req.key === "personaId") {
@@ -109,6 +188,8 @@ export default function StudioPage() {
                   onGenerateOutfit={handleGenerateOutfit}
                   isOptionComplete={isOptionComplete}
                   missingItems={missingCategories}
+                  badgeInfo={badgeInfo}
+                  onDismissBadge={handleDismissBadge}
                 />
               </div>
 

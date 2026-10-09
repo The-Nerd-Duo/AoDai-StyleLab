@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Header } from "@/components/shared/Header";
 import { Footer } from "@/components/shared/Footer";
 import { LookbookCard } from "@/components/lookbook/LookbookCard";
@@ -31,6 +32,7 @@ import {
 const INITIAL_FALLBACK_ITEMS: LookbookItem[] = [];
 
 export default function LookbookPage() {
+  const router = useRouter();
   const { outfit, selectedFrame, setSelectedFrame, resultImage, setOutfit, setResultImage } = useOutfitStore();
   const [activeCategory, setActiveCategory] = useState("all");
   const [items, setItems] = useState<LookbookItem[]>(INITIAL_FALLBACK_ITEMS);
@@ -500,16 +502,27 @@ export default function LookbookPage() {
 
   // Remix an outfit from community into Studio
   const handleRemixLookbook = (item: LookbookItem) => {
+    const targetOutfit = item.outfit || outfit;
     if (item.outfit) {
       setOutfit(item.outfit);
     }
     if (item.frameId) {
       setSelectedFrame(item.frameId);
     }
-    if (item.img && !item.img.startsWith("/garments/")) {
+    if (item.img) {
       setResultImage(item.img);
     }
-    showToast(`Đã nạp bản phối "${item.title}" vào Studio!`);
+    try {
+      sessionStorage.setItem(
+        "vietphuc_studio_context",
+        JSON.stringify({
+          type: "remix",
+          outfit: targetOutfit,
+          title: item.title,
+        })
+      );
+    } catch {}
+    router.push("/?mode=remix");
   };
 
   // Category Filter

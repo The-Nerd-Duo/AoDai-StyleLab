@@ -4,7 +4,12 @@ import React, { useState } from "react";
 import { OutfitState } from "@/lib/utils";
 import mockupsData from "@/config/mockups.json";
 import { generateOutfitPrompt, callFluxWorkerAi } from "@/lib/ai-prompt";
-import { Sparkles, RefreshCw, Maximize2, RotateCcw } from "lucide-react";
+import { Sparkles, RefreshCw, Maximize2, RotateCcw, Palette, X } from "lucide-react";
+
+export interface StudioBadgeInfo {
+  type: "remix" | "trial";
+  details: string;
+}
 
 interface PreviewWorkspaceProps {
   outfit: OutfitState;
@@ -16,6 +21,8 @@ interface PreviewWorkspaceProps {
   className?: string;
   isOptionComplete?: boolean;
   missingItems?: { key: string; label: string }[];
+  badgeInfo?: StudioBadgeInfo | null;
+  onDismissBadge?: () => void;
 }
 
 export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
@@ -28,6 +35,8 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
   className,
   isOptionComplete = true,
   missingItems = [],
+  badgeInfo,
+  onDismissBadge,
 }) => {
   const [internalResultImage, setInternalResultImage] = useState<string | null>(null);
   const [internalLoading, setInternalLoading] = useState(false);
@@ -85,17 +94,70 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
       }`}
     >
       {/* Top Header of Showcase Canvas */}
-      <div className="flex items-center justify-between pb-3 px-1 border-b border-border-bronze-light/40">
-        <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-vermilion-red text-[20px]">
-            view_in_ar
-          </span>
-          <h2 className="font-serif text-sm sm:text-base font-bold text-text-charcoal">
-            Kết Quả Phối Đồ AI
-          </h2>
+      <div className="flex items-center justify-between pb-3 px-1 border-b border-border-bronze-light/40 gap-2 flex-wrap sm:flex-nowrap">
+        <div className="flex items-center gap-2 min-w-0 flex-1 flex-wrap">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <span className="material-symbols-outlined text-vermilion-red text-[20px]">
+              view_in_ar
+            </span>
+            <h2 className="font-serif text-sm sm:text-base font-bold text-text-charcoal whitespace-nowrap">
+              Kết Quả Phối Đồ AI
+            </h2>
+          </div>
+
+          {/* Khung chữ bên phải ngay cạnh tiêu đề: Bản remix hoặc Bản thử phối */}
+          {badgeInfo && (
+            badgeInfo.type === "remix" ? (
+              <div
+                className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-lg bg-vermilion-red/10 border border-vermilion-red/30 text-xs shadow-2xs max-w-full min-w-0 animate-in fade-in duration-300"
+                title={`Bản remix: ${badgeInfo.details}`}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-vermilion-red flex-shrink-0 animate-pulse" />
+                <span className="font-serif font-bold text-vermilion-red uppercase text-[11px] whitespace-nowrap flex-shrink-0">
+                  Bản remix:
+                </span>
+                <span className="text-text-charcoal text-[11px] font-medium truncate max-w-[180px] sm:max-w-[280px] md:max-w-[360px]">
+                  {badgeInfo.details}
+                </span>
+                {onDismissBadge && (
+                  <button
+                    type="button"
+                    onClick={onDismissBadge}
+                    className="text-text-warm-gray hover:text-vermilion-red ml-0.5 p-0.5 rounded transition-colors flex-shrink-0 cursor-pointer"
+                    title="Đóng thông báo"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div
+                className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-lg bg-amber-500/10 border border-amber-600/30 text-xs shadow-2xs max-w-full min-w-0 animate-in fade-in duration-300"
+                title={`Bản thử phối: ${badgeInfo.details}`}
+              >
+                <Palette className="w-3.5 h-3.5 text-amber-700 flex-shrink-0" />
+                <span className="font-serif font-bold text-amber-800 uppercase text-[11px] whitespace-nowrap flex-shrink-0">
+                  Bản thử phối:
+                </span>
+                <span className="text-text-charcoal text-[11px] font-semibold truncate max-w-[180px] sm:max-w-[280px] md:max-w-[360px]">
+                  {badgeInfo.details}
+                </span>
+                {onDismissBadge && (
+                  <button
+                    type="button"
+                    onClick={onDismissBadge}
+                    className="text-text-warm-gray hover:text-vermilion-red ml-0.5 p-0.5 rounded transition-colors flex-shrink-0 cursor-pointer"
+                    title="Đóng thông báo"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+            )
+          )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           {hasDisplayImage && (
             <button
               onClick={handleResetToEmpty}
