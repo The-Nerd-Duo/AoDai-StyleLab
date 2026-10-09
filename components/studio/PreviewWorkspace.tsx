@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { OutfitState } from "@/lib/utils";
 import mockupsData from "@/config/mockups.json";
 import { generateOutfitPrompt, callFluxWorkerAi } from "@/lib/ai-prompt";
-import { Sparkles, RefreshCw, Maximize2, RotateCcw, Palette, X } from "lucide-react";
+import { Sparkles, RefreshCw, Maximize2, Palette, X } from "lucide-react";
 
 export interface StudioBadgeInfo {
   type: "remix" | "trial";
@@ -94,8 +94,8 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
       }`}
     >
       {/* Top Header of Showcase Canvas */}
-      <div className="flex items-center justify-between pb-3 px-1 border-b border-border-bronze-light/40 gap-2 flex-wrap sm:flex-nowrap">
-        <div className="flex items-center gap-2 min-w-0 flex-1 flex-wrap">
+      <div className="flex flex-col gap-2 pb-3 px-1 border-b border-border-bronze-light/40">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 flex-shrink-0">
             <span className="material-symbols-outlined text-vermilion-red text-[20px]">
               view_in_ar
@@ -104,81 +104,66 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
               Kết Quả Phối Đồ AI
             </h2>
           </div>
-
-          {/* Khung chữ bên phải ngay cạnh tiêu đề: Bản remix hoặc Bản thử phối */}
-          {badgeInfo && (
-            badgeInfo.type === "remix" ? (
-              <div
-                className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-lg bg-vermilion-red/10 border border-vermilion-red/30 text-xs shadow-2xs max-w-full min-w-0 animate-in fade-in duration-300"
-                title={`Bản remix: ${badgeInfo.details}`}
-              >
-                <Sparkles className="w-3.5 h-3.5 text-vermilion-red flex-shrink-0 animate-pulse" />
-                <span className="font-serif font-bold text-vermilion-red uppercase text-[11px] whitespace-nowrap flex-shrink-0">
-                  Bản remix:
-                </span>
-                <span className="text-text-charcoal text-[11px] font-medium truncate max-w-[180px] sm:max-w-[280px] md:max-w-[360px]">
-                  {badgeInfo.details}
-                </span>
-                {onDismissBadge && (
-                  <button
-                    type="button"
-                    onClick={onDismissBadge}
-                    className="text-text-warm-gray hover:text-vermilion-red ml-0.5 p-0.5 rounded transition-colors flex-shrink-0 cursor-pointer"
-                    title="Đóng thông báo"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                )}
-              </div>
-            ) : (
-              <div
-                className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-lg bg-amber-500/10 border border-amber-600/30 text-xs shadow-2xs max-w-full min-w-0 animate-in fade-in duration-300"
-                title={`Bản thử phối: ${badgeInfo.details}`}
-              >
-                <Palette className="w-3.5 h-3.5 text-amber-700 flex-shrink-0" />
-                <span className="font-serif font-bold text-amber-800 uppercase text-[11px] whitespace-nowrap flex-shrink-0">
-                  Bản thử phối:
-                </span>
-                <span className="text-text-charcoal text-[11px] font-semibold truncate max-w-[180px] sm:max-w-[280px] md:max-w-[360px]">
-                  {badgeInfo.details}
-                </span>
-                {onDismissBadge && (
-                  <button
-                    type="button"
-                    onClick={onDismissBadge}
-                    className="text-text-warm-gray hover:text-vermilion-red ml-0.5 p-0.5 rounded transition-colors flex-shrink-0 cursor-pointer"
-                    title="Đóng thông báo"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                )}
-              </div>
-            )
-          )}
         </div>
 
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {hasDisplayImage && (
-            <button
-              onClick={handleResetToEmpty}
-              className="p-1 text-text-warm-gray hover:text-vermilion-red hover:bg-paper-cream rounded-lg transition-colors"
-              title="Đặt lại khung trống"
-              type="button"
+        {/* Khung chữ bên dưới tiêu đề: Hiển thị ĐẦY ĐỦ toàn bộ thông số (KHÔNG bị cắt bớt ...) */}
+        {badgeInfo && (
+          badgeInfo.type === "remix" ? (
+            <div
+              className="flex items-start justify-between gap-2.5 p-2 sm:p-2.5 rounded-xl bg-gradient-to-r from-vermilion-red/10 via-amber-500/10 to-bronze-gold/15 border border-vermilion-red/35 text-xs shadow-2xs w-full animate-in fade-in duration-300"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
-            </button>
-          )}
-          {hasDisplayImage && (
-            <button
-              onClick={() => setFullscreenImage(resultImage)}
-              className="p-1 text-text-warm-gray hover:text-text-charcoal hover:bg-paper-cream rounded-lg transition-colors"
-              title="Xem toàn màn hình"
-              type="button"
+              <div className="flex items-start gap-2 min-w-0 flex-1">
+                <Sparkles className="w-4 h-4 text-vermilion-red flex-shrink-0 mt-0.5 animate-pulse" />
+                <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2 min-w-0 flex-1 flex-wrap">
+                  <span className="font-serif font-bold text-vermilion-red uppercase text-[11px] whitespace-nowrap flex-shrink-0">
+                    Bản remix:
+                  </span>
+                  <span className="text-text-charcoal text-[11.5px] font-medium leading-relaxed break-words">
+                    {badgeInfo.details}
+                  </span>
+                </div>
+              </div>
+              {onDismissBadge && (
+                <button
+                  type="button"
+                  onClick={onDismissBadge}
+                  className="text-text-warm-gray hover:text-white hover:bg-vermilion-red p-1 rounded-lg transition-all flex-shrink-0 cursor-pointer shadow-2xs border border-transparent hover:border-vermilion-red"
+                  title="Bỏ bản remix này & đặt lại toàn bộ lựa chọn"
+                  aria-label="Bỏ bản remix này & đặt lại toàn bộ lựa chọn"
+                >
+                  <X className="w-3.5 h-3.5 stroke-[2.5]" />
+                </button>
+              )}
+            </div>
+          ) : (
+            <div
+              className="flex items-start justify-between gap-2.5 p-2 sm:p-2.5 rounded-xl bg-amber-500/10 border border-amber-600/35 text-xs shadow-2xs w-full animate-in fade-in duration-300"
             >
-              <Maximize2 className="w-4 h-4" />
-            </button>
-          )}
-        </div>
+              <div className="flex items-start gap-2 min-w-0 flex-1">
+                <Palette className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
+                <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2 min-w-0 flex-1 flex-wrap">
+                  <span className="font-serif font-bold text-amber-800 uppercase text-[11px] whitespace-nowrap flex-shrink-0">
+                    Bản thử phối:
+                  </span>
+                  <span className="text-text-charcoal text-[11.5px] font-semibold leading-relaxed break-words">
+                    {badgeInfo.details}
+                  </span>
+                </div>
+              </div>
+              {onDismissBadge && (
+                <button
+                  type="button"
+                  onClick={onDismissBadge}
+                  className="text-text-warm-gray hover:text-white hover:bg-vermilion-red p-1 rounded-lg transition-all flex-shrink-0 cursor-pointer shadow-2xs border border-transparent hover:border-vermilion-red"
+                  title="Bỏ bản thử phối này & đặt lại toàn bộ lựa chọn"
+                  aria-label="Bỏ bản thử phối này & đặt lại toàn bộ lựa chọn"
+                >
+                  <X className="w-3.5 h-3.5 stroke-[2.5]" />
+                </button>
+              )}
+            </div>
+          )
+        )}
       </div>
 
       {/* Main Canvas Display Area */}

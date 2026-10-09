@@ -5,15 +5,26 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Header } from "@/components/shared/Header";
 import { Footer } from "@/components/shared/Footer";
 import { LookbookCard } from "@/components/lookbook/LookbookCard";
-import { decodeOutfitFromQuery } from "@/lib/utils";
+import { decodeOutfitFromQuery, formatRemixOutfitSummary } from "@/lib/utils";
 import { useOutfitStore } from "@/lib/store";
 import { Sparkles, Palette } from "lucide-react";
 import { getPrivateShareLocally, getLocalLookbooks } from "@/lib/lookbook-storage";
+import {
+  getActiveStudioContext,
+  setActiveStudioContext,
+  ActiveStudioContext,
+} from "@/lib/studio-context";
+import { ReplaceConfirmModal } from "@/components/studio/ReplaceConfirmModal";
 
 function ShareContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { setOutfit, setSelectedFrame, setResultImage, resultImage } = useOutfitStore();
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [pendingReplacement, setPendingReplacement] = useState<{
+    current: ActiveStudioContext;
+    incoming: ActiveStudioContext;
+  } | null>(null);
 
   const paramsObject: { [key: string]: string | string[] | undefined } = {};
   searchParams.forEach((value, key) => {
@@ -61,24 +72,39 @@ function ShareContent() {
     }
   }, [shareId, resolvedImage]);
 
-  const handleRemixThisOutfit = () => {
+  const executeRemix = (incomingContext: ActiveStudioContext) => {
     setOutfit(outfit);
     setSelectedFrame(frameId);
     const finalImageToRemix = resolvedImage || resultImage;
     if (finalImageToRemix) {
       setResultImage(finalImageToRemix);
     }
-    try {
-      sessionStorage.setItem(
-        "vietphuc_studio_context",
-        JSON.stringify({
-          type: "remix",
-          outfit,
-          title: "Bản Phối Chia Sẻ",
-        })
-      );
-    } catch {}
+    setActiveStudioContext(incomingContext);
+    setConfirmModalOpen(false);
+    setPendingReplacement(null);
     router.push("/?mode=remix");
+  };
+
+  const handleRemixThisOutfit = () => {
+    const summary = formatRemixOutfitSummary(outfit);
+    const incomingContext: ActiveStudioContext = {
+      type: "remix",
+      title: "Bản Phối Chia Sẻ",
+      details: summary,
+      outfit,
+      frameId,
+    };
+
+    const currentContext = getActiveStudioContext();
+    if (currentContext) {
+      setPendingReplacement({
+        current: currentContext,
+        incoming: incomingContext,
+      });
+      setConfirmModalOpen(true);
+    } else {
+      executeRemix(incomingContext);
+    }
   };
 
   return (
@@ -120,6 +146,19 @@ function ShareContent() {
           <span>Tự Remix Lại Bản Phối Này Trong Studio</span>
         </button>
       </div>
+
+      {pendingReplacement && (
+        <ReplaceConfirmModal
+          isOpen={confirmModalOpen}
+          currentContext={pendingReplacement.current}
+          incomingContext={pendingReplacement.incoming}
+          onConfirm={() => executeRemix(pendingReplacement.incoming)}
+          onCancel={() => {
+            setConfirmModalOpen(false);
+            setPendingReplacement(null);
+          }}
+        />
+      )}
     </div>
   );
 }

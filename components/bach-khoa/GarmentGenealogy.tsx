@@ -5,6 +5,12 @@ import { useRouter } from "next/navigation";
 import genealogyData from "@/config/genealogy.json";
 import { useOutfitStore } from "@/lib/store";
 import {
+  getActiveStudioContext,
+  setActiveStudioContext,
+  ActiveStudioContext,
+} from "@/lib/studio-context";
+import { ReplaceConfirmModal } from "@/components/studio/ReplaceConfirmModal";
+import {
   Sparkles,
   Palette,
   ChevronRight,
@@ -61,23 +67,52 @@ export const GarmentGenealogy: React.FC<GarmentGenealogyProps> = ({
   const router = useRouter();
   const { updateOutfitField } = useOutfitStore();
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [pendingReplacement, setPendingReplacement] = useState<{
+    current: ActiveStudioContext;
+    incoming: ActiveStudioContext;
+    studioGarmentId: string;
+    garmentName: string;
+  } | null>(null);
 
-  const handleTryInStudio = (studioGarmentId: string, garmentName: string) => {
+  const executeApplyTrial = (
+    studioGarmentId: string,
+    garmentName: string,
+    incomingContext: ActiveStudioContext
+  ) => {
     const targetId = STUDIO_GARMENT_MAP[studioGarmentId] || studioGarmentId;
     if (updateOutfitField) {
       updateOutfitField("garmentId", targetId);
     }
-    try {
-      sessionStorage.setItem(
-        "vietphuc_studio_context",
-        JSON.stringify({
-          type: "trial",
-          garmentName,
-          garmentId: targetId,
-        })
-      );
-    } catch {}
+    setActiveStudioContext(incomingContext);
+    setConfirmModalOpen(false);
+    setPendingReplacement(null);
     router.push(`/?mode=trial&g=${encodeURIComponent(targetId)}&name=${encodeURIComponent(garmentName)}`);
+  };
+
+  const handleTryInStudio = (studioGarmentId: string, garmentName: string) => {
+    const targetId = STUDIO_GARMENT_MAP[studioGarmentId] || studioGarmentId;
+    const incomingContext: ActiveStudioContext = {
+      type: "trial",
+      title: garmentName,
+      details: garmentName,
+      garmentName,
+      garmentId: targetId,
+    };
+
+    const currentContext = getActiveStudioContext();
+    if (currentContext) {
+      // Prompt modal to confirm replacing active remix/trial
+      setPendingReplacement({
+        current: currentContext,
+        incoming: incomingContext,
+        studioGarmentId,
+        garmentName,
+      });
+      setConfirmModalOpen(true);
+    } else {
+      executeApplyTrial(studioGarmentId, garmentName, incomingContext);
+    }
   };
 
   const handleImageError = (id: string) => {
@@ -251,6 +286,25 @@ export const GarmentGenealogy: React.FC<GarmentGenealogyProps> = ({
           );
         })}
       </div>
+
+      {pendingReplacement && (
+        <ReplaceConfirmModal
+          isOpen={confirmModalOpen}
+          currentContext={pendingReplacement.current}
+          incomingContext={pendingReplacement.incoming}
+          onConfirm={() =>
+            executeApplyTrial(
+              pendingReplacement.studioGarmentId,
+              pendingReplacement.garmentName,
+              pendingReplacement.incoming
+            )
+          }
+          onCancel={() => {
+            setConfirmModalOpen(false);
+            setPendingReplacement(null);
+          }}
+        />
+      )}
     </section>
   );
 };
