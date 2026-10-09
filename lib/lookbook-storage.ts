@@ -60,6 +60,38 @@ export function getLocalLookbooks(): LookbookItem[] {
   }
 }
 
+export function getDeviceId(): string {
+  if (typeof window === "undefined") return "server";
+  try {
+    let id = localStorage.getItem("vietphuc_device_id");
+    if (!id) {
+      id = "dev_" + Math.random().toString(36).substring(2, 9) + "_" + Date.now().toString(36);
+      localStorage.setItem("vietphuc_device_id", id);
+    }
+    return id;
+  } catch {
+    return "dev_default";
+  }
+}
+
+export function getMyLookbookIds(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem("vietphuc_my_lookbook_ids");
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function isMyLookbook(item: LookbookItem): boolean {
+  if (!item) return false;
+  const currentDeviceId = getDeviceId();
+  if (item.deviceId && item.deviceId === currentDeviceId) return true;
+  const myIds = getMyLookbookIds();
+  return myIds.includes(item.id);
+}
+
 export function saveLocalLookbook(input: CreateLookbookInput): LookbookItem {
   const current = getLocalLookbooks();
   const isAnon = !!input.isAnonymous;
@@ -67,6 +99,7 @@ export function saveLocalLookbook(input: CreateLookbookInput): LookbookItem {
     ? "Khách Ẩn Danh"
     : (input.author && input.author.trim()) || "Đồng Sáng Tạo";
   const authorInitial = isAnon ? "Ẩ" : authorName.charAt(0).toUpperCase();
+  const currentDeviceId = getDeviceId();
 
   const newItem: LookbookItem = {
     id: `lookbook-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
@@ -84,12 +117,20 @@ export function saveLocalLookbook(input: CreateLookbookInput): LookbookItem {
     culturalNote: input.culturalNote,
     createdAt: new Date().toISOString(),
     badge: "Mới đăng",
+    deviceId: input.deviceId || currentDeviceId,
   };
 
   const updated = [newItem, ...current];
   if (typeof window !== "undefined") {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+
+      // Track into my lookbook ids
+      const myIds = getMyLookbookIds();
+      if (!myIds.includes(newItem.id)) {
+        localStorage.setItem("vietphuc_my_lookbook_ids", JSON.stringify([newItem.id, ...myIds]));
+      }
+
       const bc = new BroadcastChannel("vietphuc_lookbook_channel");
       bc.postMessage({ type: "NEW_LOOKBOOK", data: newItem });
       bc.close();

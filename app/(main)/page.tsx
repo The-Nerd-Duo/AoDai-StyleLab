@@ -11,6 +11,14 @@ import { useOutfitStore } from "@/lib/store";
 import { generateOutfitPrompt, callFluxWorkerAi } from "@/lib/ai-prompt";
 import mockupsData from "@/config/mockups.json";
 
+const REQUIRED_CATEGORIES = [
+  { key: "personaId", label: "Nhân vật", categoryId: "persona" },
+  { key: "garmentId", label: "Cổ phục", categoryId: "garment" },
+  { key: "colorId", label: "Màu sắc", categoryId: "color" },
+  { key: "occasionId", label: "Bối cảnh", categoryId: "occasion" },
+  { key: "styleId", label: "Phong cách", categoryId: "style" },
+] as const;
+
 export default function StudioPage() {
   const {
     outfit,
@@ -22,6 +30,11 @@ export default function StudioPage() {
   } = useOutfitStore();
 
   const [loading, setLoading] = useState(false);
+  const [isPersonaConfirmed, setIsPersonaConfirmed] = useState(false);
+  const [chosenCategories, setChosenCategories] = useState<Set<string>>(() => new Set());
+  const [activeCategory, setActiveCategory] = useState<
+    "garment" | "color" | "occasion" | "style" | "accessory"
+  >("garment");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -29,11 +42,25 @@ export default function StudioPage() {
       const g = params.get("g");
       if (g && mockupsData.garments.some((item) => item.id === g)) {
         updateOutfitField("garmentId", g);
+        setChosenCategories((prev) => new Set(prev).add("garmentId"));
       }
     }
   }, [updateOutfitField]);
 
+  const missingCategories = REQUIRED_CATEGORIES.filter((req) => {
+    if (req.key === "personaId") {
+      return !isPersonaConfirmed || !chosenCategories.has("personaId");
+    }
+    return !chosenCategories.has(req.key);
+  });
+
+  const isOptionComplete = missingCategories.length === 0;
+
   async function handleGenerateOutfit() {
+    if (!isOptionComplete) {
+      alert("Vui lòng chọn đầy đủ các mục (Nhân vật, Cổ phục, Màu sắc, Bối cảnh, Phong cách) trước khi tạo đồ!");
+      return;
+    }
     setLoading(true);
     try {
       const prompt = generateOutfitPrompt(outfit);
@@ -55,10 +82,16 @@ export default function StudioPage() {
         {/* MAIN STUDIO DASHBOARD */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
           {/* LEFT COLUMN: Mix & Match Matrix (col-span-4) */}
-          <div className="lg:col-span-4 flex flex-col gap-5 order-2 lg:order-1">
+          <div id="mix-match-selector" className="lg:col-span-4 flex flex-col gap-5 order-2 lg:order-1">
             <OptionSelector
               outfit={outfit}
               onChange={updateOutfitField}
+              isPersonaConfirmed={isPersonaConfirmed}
+              setIsPersonaConfirmed={setIsPersonaConfirmed}
+              chosenCategories={chosenCategories}
+              setChosenCategories={setChosenCategories}
+              activeCategory={activeCategory}
+              setActiveCategory={setActiveCategory}
             />
           </div>
 
@@ -74,6 +107,8 @@ export default function StudioPage() {
                   setResultImage={setResultImage}
                   loading={loading}
                   onGenerateOutfit={handleGenerateOutfit}
+                  isOptionComplete={isOptionComplete}
+                  missingItems={missingCategories}
                 />
               </div>
 

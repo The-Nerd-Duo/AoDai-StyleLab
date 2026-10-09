@@ -85,18 +85,34 @@ interface StackedDeckCarouselProps {
   category: "garment" | "color" | "accessory" | "occasion" | "style";
   outfit: OutfitState;
   onChange: <K extends keyof OutfitState>(key: K, value: OutfitState[K]) => void;
+  chosenCategories?: Set<string>;
 }
 
 export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
   category,
   outfit,
   onChange,
+  chosenCategories,
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartX, setDragStartX] = useState(0);
   const [dragDeltaX, setDragDeltaX] = useState(0);
   const [pressedItemId, setPressedItemId] = useState<string | null>(null);
+
+  const isCategoryChosen = React.useCallback(
+    (cat: string) => {
+      if (!chosenCategories) return true;
+      if (cat === "garment") return chosenCategories.has("garmentId");
+      if (cat === "color") return chosenCategories.has("colorId");
+      if (cat === "occasion") return chosenCategories.has("occasionId");
+      if (cat === "style") return chosenCategories.has("styleId");
+      if (cat === "accessory")
+        return chosenCategories.has("accessory") || chosenCategories.has("accessoryIds");
+      return false;
+    },
+    [chosenCategories]
+  );
 
   const containerRef = useRef<HTMLDivElement>(null);
   const hasDraggedRef = useRef(false);
@@ -581,13 +597,13 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
           const isPressed = pressedItemId === item.id;
           const isSelected =
             category === "garment"
-              ? outfit.garmentId === item.id
+              ? isCategoryChosen("garment") && outfit.garmentId === item.id
               : category === "color"
-              ? outfit.colorId === item.id
+              ? isCategoryChosen("color") && outfit.colorId === item.id
               : category === "occasion"
-              ? outfit.occasionId === item.id
+              ? isCategoryChosen("occasion") && outfit.occasionId === item.id
               : category === "style"
-              ? outfit.styleId === item.id
+              ? isCategoryChosen("style") && outfit.styleId === item.id
               : false;
 
           // Render card content based on category
@@ -620,12 +636,11 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
               >
                 {/* CATEGORY 1: GARMENT CARD */}
                 {category === "garment" && (() => {
-                  const isSelected = outfit.garmentId === item.id;
+                  const isSelected = isCategoryChosen("garment") && outfit.garmentId === item.id;
                   const imgUrl =
                     GARMENT_IMAGES[item.id] ||
                     GARMENT_IMAGES[item.id.replace("ao-", "")] ||
                     DEFAULT_GARMENT_FALLBACK;
-                  const promptKeyword = GARMENT_PROMPT_MAP[item.id] || "";
 
                   return (
                     <div className="relative w-full h-full overflow-hidden pointer-events-none">
@@ -659,7 +674,7 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
                           </span>
                         ) : (
                           <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/50 text-white/90 border border-white/20 font-medium shadow-xs backdrop-blur-xs">
-                            {item.tag}
+                            {isFront && !isCategoryChosen("garment") ? "Chưa mặc" : item.tag}
                           </span>
                         )}
                       </div>
@@ -667,11 +682,6 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
                       {/* Bottom Overlaid Content */}
                       <div className="absolute bottom-0 inset-x-0 p-3.5 flex flex-col justify-end text-white z-10">
                         <div className="mb-1">
-                          <div className="flex items-center gap-1.5 mb-1.5">
-                            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-black/60 text-amber-200 border border-amber-400/20 backdrop-blur-xs truncate max-w-[180px]">
-                              {promptKeyword}
-                            </span>
-                          </div>
                           <h3 className="font-serif text-base font-bold text-amber-100 leading-snug drop-shadow-sm">
                             {item.name}
                           </h3>
@@ -686,7 +696,7 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
 
                 {/* CATEGORY 2: COLOR CARD */}
                 {category === "color" && (() => {
-                  const isSelected = outfit.colorId === item.id;
+                  const isSelected = isCategoryChosen("color") && outfit.colorId === item.id;
 
                   return (
                     <div
@@ -709,7 +719,7 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
                           </span>
                         ) : (
                           <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-white/90 border border-white/20 font-semibold shadow-xs">
-                            {item.hex}
+                            {isFront && !isCategoryChosen("color") ? "Chưa dùng" : item.hex}
                           </span>
                         )}
                       </div>
@@ -745,7 +755,7 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
 
                 {/* CATEGORY 4: OCCASION CARD */}
                 {category === "occasion" && (() => {
-                  const isSelected = outfit.occasionId === item.id;
+                  const isSelected = isCategoryChosen("occasion") && outfit.occasionId === item.id;
                   const imgUrl =
                     OCCASION_IMAGES[item.id] ||
                     DEFAULT_OCCASION_FALLBACK;
@@ -802,7 +812,7 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
 
                 {/* CATEGORY 5: STYLE CARD */}
                 {category === "style" && (() => {
-                  const isSelected = outfit.styleId === item.id;
+                  const isSelected = isCategoryChosen("style") && outfit.styleId === item.id;
                   const imgUrl =
                     STYLE_IMAGES[item.id] ||
                     DEFAULT_STYLE_FALLBACK;

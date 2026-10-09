@@ -6,7 +6,7 @@ import { OutfitState } from "@/lib/utils";
 import mockupsData from "@/config/mockups.json";
 import framesData from "@/config/frames.json";
 import { X, Sparkles, User, UserX, Check, AlertCircle, Share2, Layers } from "lucide-react";
-import { saveLocalLookbook, getLocalLookbooks } from "@/lib/lookbook-storage";
+import { saveLocalLookbook, getLocalLookbooks, getDeviceId } from "@/lib/lookbook-storage";
 import { compressImageForUpload, savePrivateShareLocally } from "@/lib/share-service";
 
 interface ShareCommunityModalProps {
@@ -126,6 +126,7 @@ export const ShareCommunityModal: React.FC<ShareCommunityModalProps> = ({
         frameId,
         era: garment.dynasty || "Việt Phục",
         culturalNote: garment.culturalSignificance,
+        deviceId: getDeviceId(),
       };
 
       let newItem: any = null;

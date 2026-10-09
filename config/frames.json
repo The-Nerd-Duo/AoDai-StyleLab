@@ -2,7 +2,7 @@
   {
     "id": "frame-default-none",
     "name": "Mặc Định (Không Dùng Khung)",
-    "description": "Hiển thị ảnh nguyên bản tinh giản, thuần khiết không viền hoa văn trang trí.",
+    "description": "Hiển thị ảnh nguyên bản tinh giản, thuần khiết.",
     "theme": "none",
     "borderColor": "transparent",
     "secondaryBorderColor": "transparent",
@@ -14,7 +14,7 @@
   {
     "id": "frame-heritage-vermilion",
     "name": "Chu Sa Hoàng Kim (Cung Đình)",
-    "description": "Viền kép chu sa lộng lẫy, 4 góc hoa văn mây cuộn hoàng triều Đại Việt và ấn triện son truyền thống.",
+    "description": "Viền chu sa và mây cuộn hoàng triều cung đình.",
     "theme": "royal",
     "borderColor": "#C5A059",
     "secondaryBorderColor": "#BA2D27",
@@ -26,7 +26,7 @@
   {
     "id": "frame-minimal-gold",
     "name": "Tạp Chí Thời Trang (Haute Couture)",
-    "description": "Đường viền chỉ vàng mảnh mai, typography thời trang cao cấp, khoảng thở thanh tao phong cách tạp chí quốc tế.",
+    "description": "Đường viền chỉ vàng thanh lịch, cao cấp.",
     "theme": "editorial",
     "borderColor": "#D4AF37",
     "secondaryBorderColor": "#FFFFFF33",
@@ -38,7 +38,7 @@
   {
     "id": "frame-cyber-indochine",
     "name": "Cyber Indochine (Neo-Heritage)",
-    "description": "Viền dạ quang neon cyberpunk, các góc HUD vi mạch tương lai hòa quyện cùng biểu tượng hoa sen Á Đông.",
+    "description": "Viền dạ quang neon vi mạch hiện đại.",
     "theme": "cyber",
     "borderColor": "#2DD4BF",
     "secondaryBorderColor": "#0D9488",
@@ -50,7 +50,7 @@
   {
     "id": "frame-vintage-stamp",
     "name": "Bưu Thiếp Đông Dương (Indochine Postal)",
-    "description": "Viền tem thư răng cưa hoài niệm, dấu mộc bưu chính Hà Nội - Sài Gòn trên nền chất liệu giấy điệp hoài cổ.",
+    "description": "Viền tem răng cưa và dấu mộc hoài cổ.",
     "theme": "vintage",
     "borderColor": "#92400E",
     "secondaryBorderColor": "#D97706",
@@ -62,7 +62,7 @@
   {
     "id": "frame-museum-curator",
     "name": "Giám Tuyển Sơn Mài (Museum Collector)",
-    "description": "Khung sơn mài đen tuyền viền thếp vàng cổ kính, phong thái cổ vật trưng bày tại viện bảo tàng quốc gia.",
+    "description": "Sơn mài đen tuyền viền thếp vàng quý phái.",
     "theme": "curator",
     "borderColor": "#C5A059",
     "secondaryBorderColor": "#1A1A1A",

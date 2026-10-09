@@ -368,11 +368,6 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
                   {/* Bottom Overlaid Content */}
                   <div className="absolute bottom-0 inset-x-0 p-3.5 flex flex-col justify-end text-white z-10">
                     <div className="mb-1">
-                      <div className="flex items-center gap-1.5 mb-1.5">
-                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-black/60 text-amber-200 border border-amber-400/20 backdrop-blur-xs truncate max-w-[200px]">
-                          {item.highlight}
-                        </span>
-                      </div>
                       <h3 className="font-serif text-base font-bold text-amber-100 leading-snug drop-shadow-sm">
                         {item.name}
                       </h3>

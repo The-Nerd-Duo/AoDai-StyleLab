@@ -28,6 +28,7 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
   const [loading, setLoading] = useState(false);
 
   const occasion = mockupsData.occasions.find((o) => o.id === outfit.occasionId) || mockupsData.occasions[0];
+  const garment = mockupsData.garments.find((g) => g.id === outfit.garmentId) || mockupsData.garments[0];
 
   const fetchAdvice = async () => {
     setLoading(true);
@@ -199,7 +200,25 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
         <div className="space-y-3">
           {/* 3 Standby Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1">
-            {/* Metric 1: Thời tiết & Chất liệu */}
+            {/* Metric 1: Nguồn gốc & Ý nghĩa */}
+            <div className="p-2.5 rounded-xl bg-paper-cream/60 border border-border-bronze-light/50 flex flex-col justify-between space-y-1.5 shadow-xs">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1 truncate max-w-[140px]">
+                  <span className="material-symbols-outlined text-[14px] text-stone-400">
+                    history_edu
+                  </span>
+                  Nguồn gốc &amp; Ý nghĩa
+                </span>
+                <span className="text-[9px] font-mono text-stone-500 font-medium px-1.5 py-0.5 rounded bg-stone-100 border border-stone-200">
+                  Chờ chấm điểm
+                </span>
+              </div>
+              <p className="text-text-warm-gray/70 leading-relaxed text-[11px] line-clamp-3 italic">
+                Chưa có dữ liệu. AI sẽ phân tích nguồn gốc triều đại và ý nghĩa biểu trưng sau khi tạo ảnh.
+              </p>
+            </div>
+
+            {/* Metric 2: Thời tiết & Chất liệu */}
             <div className="p-2.5 rounded-xl bg-paper-cream/60 border border-border-bronze-light/50 flex flex-col justify-between space-y-1.5 shadow-xs">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1">
@@ -214,24 +233,6 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
               </div>
               <p className="text-text-warm-gray/70 leading-relaxed text-[11px] line-clamp-3 italic">
                 Chưa có dữ liệu. AI sẽ phân tích độ phù hợp của chất liệu vải với thời tiết sau khi tạo ảnh.
-              </p>
-            </div>
-
-            {/* Metric 2: Bối cảnh & Không gian */}
-            <div className="p-2.5 rounded-xl bg-paper-cream/60 border border-border-bronze-light/50 flex flex-col justify-between space-y-1.5 shadow-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1 truncate max-w-[140px]">
-                  <span className="material-symbols-outlined text-[14px] text-stone-400">
-                    nightlife
-                  </span>
-                  {occasion.name.split("&")[0].trim()}
-                </span>
-                <span className="text-[9px] font-mono text-stone-500 font-medium px-1.5 py-0.5 rounded bg-stone-100 border border-stone-200">
-                  Chờ chấm điểm
-                </span>
-              </div>
-              <p className="text-text-warm-gray/70 leading-relaxed text-[11px] line-clamp-3 italic">
-                Chưa có dữ liệu. AI sẽ đánh giá mức độ tương thích giữa trang phục và bối cảnh sự kiện sau khi tạo ảnh.
               </p>
             </div>
 
@@ -284,7 +285,25 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
 
           {/* 3 Diagnostic Cards Matching Prototype Design */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1">
-            {/* Metric 1: Thời tiết & Chất liệu */}
+            {/* Metric 1: Nguồn gốc & Ý nghĩa (Left) */}
+            <div className="p-2.5 rounded-xl bg-paper-cream border border-border-bronze-light/50 flex flex-col justify-between space-y-1.5 shadow-xs">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1 truncate max-w-[140px]">
+                  <span className="material-symbols-outlined text-[14px] text-vermilion-red">
+                    history_edu
+                  </span>
+                  Nguồn gốc &amp; Ý nghĩa
+                </span>
+                <span className="text-[9px] font-mono text-bronze-gold font-bold px-1.5 py-0.5 rounded bg-[#F4EFEA] border border-border-bronze-light/40 truncate max-w-[90px]">
+                  {garment.dynasty ? garment.dynasty.split("(")[0].trim() : "DI SẢN"}
+                </span>
+              </div>
+              <p className="text-text-warm-gray leading-relaxed text-[11px] line-clamp-3">
+                {garment.culturalSignificance || garment.story || "Di sản trang phục truyền thống mang đậm bản sắc văn hóa Việt Nam."}
+              </p>
+            </div>
+
+            {/* Metric 2: Thời tiết & Chất liệu (Middle) */}
             <div className="p-2.5 rounded-xl bg-paper-cream border border-border-bronze-light/50 flex flex-col justify-between space-y-1.5 shadow-xs">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1">
@@ -302,25 +321,7 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
               </p>
             </div>
 
-            {/* Metric 2: Bối cảnh & Không gian */}
-            <div className="p-2.5 rounded-xl bg-paper-cream border border-border-bronze-light/50 flex flex-col justify-between space-y-1.5 shadow-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1 truncate max-w-[140px]">
-                  <span className="material-symbols-outlined text-[14px] text-vermilion-red">
-                    nightlife
-                  </span>
-                  {occasion.name.split("&")[0].trim()}
-                </span>
-                <span className="text-[9px] font-mono text-bronze-gold font-bold px-1.5 py-0.5 rounded bg-[#F4EFEA] border border-border-bronze-light/40">
-                  NỔI BẬT
-                </span>
-              </div>
-              <p className="text-text-warm-gray leading-relaxed text-[11px] line-clamp-3">
-                {data.colorHarmonyVerdict}
-              </p>
-            </div>
-
-            {/* Metric 3: Quy chế Di sản */}
+            {/* Metric 3: Quy chế Di sản (Right) */}
             <div className="p-2.5 rounded-xl bg-paper-cream border border-border-bronze-light/50 flex flex-col justify-between space-y-1.5 shadow-xs">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1">

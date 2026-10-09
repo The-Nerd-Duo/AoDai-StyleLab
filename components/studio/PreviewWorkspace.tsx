@@ -14,6 +14,8 @@ interface PreviewWorkspaceProps {
   setLoading?: (loading: boolean) => void;
   onGenerateOutfit?: () => void;
   className?: string;
+  isOptionComplete?: boolean;
+  missingItems?: { key: string; label: string }[];
 }
 
 export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
@@ -24,6 +26,8 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
   setLoading: externalSetLoading,
   onGenerateOutfit,
   className,
+  isOptionComplete = true,
+  missingItems = [],
 }) => {
   const [internalResultImage, setInternalResultImage] = useState<string | null>(null);
   const [internalLoading, setInternalLoading] = useState(false);
@@ -47,6 +51,9 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
   const style = mockupsData.styles.find((s) => s.id === outfit.styleId) || mockupsData.styles[0];
 
   async function handleGenerateOutfit() {
+    if (isOptionComplete === false) {
+      return;
+    }
     if (onGenerateOutfit) {
       onGenerateOutfit();
       return;
@@ -84,7 +91,7 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
             view_in_ar
           </span>
           <h2 className="font-serif text-sm sm:text-base font-bold text-text-charcoal">
-            Kết Quả Phối Đồ AI (Showcase)
+            Kết Quả Phối Đồ AI
           </h2>
         </div>
 
@@ -175,13 +182,29 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
       <div className="flex flex-col gap-2 pt-1">
         <button
           onClick={handleGenerateOutfit}
-          disabled={loading}
-          className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-vermilion-red to-primary hover:opacity-95 active:scale-[0.99] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50"
+          disabled={loading || isOptionComplete === false}
+          title={
+            isOptionComplete === false
+              ? `Vui lòng chọn đủ các mục (${missingItems.map((m) => m.label).join(", ")}) để tạo đồ AI`
+              : undefined
+          }
+          className={`w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all ${
+            isOptionComplete === false
+              ? "bg-stone-200 text-stone-500 border border-stone-300 cursor-not-allowed opacity-80"
+              : "bg-gradient-to-r from-vermilion-red to-primary hover:opacity-95 active:scale-[0.99] text-white disabled:opacity-50"
+          }`}
         >
           {loading ? (
             <>
               <RefreshCw className="w-4 h-4 animate-spin text-white" />
               <span>Đang tạo ảnh AI...</span>
+            </>
+          ) : isOptionComplete === false ? (
+            <>
+              <span className="material-symbols-outlined text-[17px]">lock</span>
+              <span>
+                Chưa Chọn Đủ Tùy Chọn ({5 - missingItems.length}/5)
+              </span>
             </>
           ) : (
             <>
@@ -190,6 +213,11 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
             </>
           )}
         </button>
+        {isOptionComplete === false && (
+          <p className="text-[11px] text-center text-amber-800/80 font-medium">
+            * Chọn đủ Nhân vật, Cổ phục, Màu sắc, Bối cảnh, Phong cách để tạo ảnh
+          </p>
+        )}
       </div>
 
       {/* Fullscreen Zoom Modal */}

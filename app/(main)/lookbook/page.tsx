@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Header } from "@/components/shared/Header";
 import { Footer } from "@/components/shared/Footer";
 import { LookbookCard } from "@/components/lookbook/LookbookCard";
-import { FrameSelector } from "@/components/lookbook/FrameSelector";
 import { useOutfitStore } from "@/lib/store";
 import { LookbookItem } from "@/lib/types";
 import { encodeOutfitToQuery } from "@/lib/utils";
@@ -15,6 +14,7 @@ import {
   toggleLocalLike,
   updateLocalLookbookLikes,
   incrementLocalShare,
+  isMyLookbook,
 } from "@/lib/lookbook-storage";
 import {
   Sparkles,
@@ -25,6 +25,7 @@ import {
   ExternalLink,
   Layers,
   Sparkle,
+  User,
 } from "lucide-react";
 
 const INITIAL_FALLBACK_ITEMS: LookbookItem[] = [];
@@ -513,6 +514,9 @@ export default function LookbookPage() {
 
   // Category Filter
   const filteredCommunity = items.filter((item) => {
+    if (activeCategory === "mine") {
+      return isMyLookbook(item);
+    }
     if (activeCategory === "favorites") {
       return userLikedIds.has(item.id);
     }
@@ -523,6 +527,7 @@ export default function LookbookPage() {
   // Calculate category item counts
   const categoryCounts = {
     all: items.length,
+    mine: items.filter((i) => isMyLookbook(i)).length,
     favorites: items.filter((i) => userLikedIds.has(i.id)).length,
     "pho-co": items.filter((i) => i.category === "pho-co").length,
     "cung-dinh": items.filter((i) => i.category === "cung-dinh").length,
@@ -561,7 +566,7 @@ export default function LookbookPage() {
                   }`}
               />
               <span className="text-[11px] font-medium text-text-charcoal">
-                {isLiveConnected ? "Đồng bộ trực tiếp" : "Đang kết nối live..."}
+                {isLiveConnected ? "Live" : "Đang kết nối live..."}
               </span>
             </div>
           </div>
@@ -579,10 +584,11 @@ export default function LookbookPage() {
                 </span>
               </div>
 
-              {/* Dynamic Lookbook Card with Community Share & PNG Download */}
+              {/* Dynamic Lookbook Card with Swipeable Frame, Community Share & PNG Download */}
               <LookbookCard
                 outfit={outfit}
                 frameId={selectedFrame}
+                onFrameChange={setSelectedFrame}
                 imageUrl={resultImage}
                 onShareSuccess={(newCard) => {
                   setActiveCategory("all");
@@ -610,12 +616,6 @@ export default function LookbookPage() {
                   }, 8000);
                 }}
               />
-
-              {/* Dynamic Frame Selector */}
-              <FrameSelector
-                selectedFrameId={selectedFrame}
-                onSelectFrame={setSelectedFrame}
-              />
             </div>
 
             {/* Right Column (7 cols): Community Lookbook Gallery */}
@@ -641,6 +641,16 @@ export default function LookbookPage() {
                     }`}
                 >
                   Tất cả ({categoryCounts.all})
+                </button>
+                <button
+                  onClick={() => setActiveCategory("mine")}
+                  className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all flex items-center gap-1.5 ${activeCategory === "mine"
+                      ? "bg-vermilion-red text-white shadow-xs"
+                      : "bg-surface-pure hover:bg-paper-cream text-text-warm-gray border border-border-bronze-light/50"
+                    }`}
+                >
+                  <User className="w-3.5 h-3.5" />
+                  <span>Của tôi ({categoryCounts.mine})</span>
                 </button>
                 <button
                   onClick={() => setActiveCategory("favorites")}
@@ -800,6 +810,14 @@ export default function LookbookPage() {
                           )}
 
                           <div className="absolute inset-0 bg-gradient-to-t from-text-charcoal via-transparent to-transparent pointer-events-none" />
+
+                          {/* Huy hiệu Của bạn (Recognize items created on current device) */}
+                          {isMyLookbook(item) && (
+                            <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-vermilion-red/90 backdrop-blur-xs text-white text-[9px] font-mono font-bold shadow-md z-10 flex items-center gap-1 border border-white/30">
+                              <User className="w-2.5 h-2.5" />
+                              Của bạn
+                            </span>
+                          )}
 
                           {/* Nút Tim (Floating Save Heart Button) */}
                           <button

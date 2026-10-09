@@ -289,14 +289,27 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
 
             <button
               onClick={handleCycleFrame}
-              className="py-2.5 px-3 bg-paper-cream hover:bg-surface-container text-text-charcoal rounded-xl font-mono text-[11px] font-semibold flex items-center justify-center gap-1.5 border border-border-bronze-light/60 transition-colors shadow-xs"
+              disabled={!hasDisplayImage}
+              className={`py-2.5 px-3 rounded-xl font-mono text-[11px] font-semibold flex items-center justify-center gap-1.5 border transition-all shadow-xs ${
+                !hasDisplayImage
+                  ? "bg-paper-cream/50 text-text-warm-gray/40 border-border-bronze-light/30 cursor-not-allowed opacity-60"
+                  : "bg-paper-cream hover:bg-surface-container text-text-charcoal border-border-bronze-light/60 active:scale-95 cursor-pointer"
+              }`}
               type="button"
-              title="Đổi mẫu khung viền"
+              title={
+                !hasDisplayImage
+                  ? "Vui lòng tạo ảnh phối đồ trước khi đổi khung viền"
+                  : "Đổi mẫu khung viền di sản"
+              }
             >
-              <span className="material-symbols-outlined text-[16px] text-bronze-gold">
-                filter_vintage
+              <span
+                className={`material-symbols-outlined text-[16px] ${
+                  !hasDisplayImage ? "text-text-warm-gray/40" : "text-bronze-gold"
+                }`}
+              >
+                crop_free
               </span>
-              <span>Đổi Viền Thêu</span>
+              <span>Đổi Khung Viền</span>
             </button>
           </div>
         </div>

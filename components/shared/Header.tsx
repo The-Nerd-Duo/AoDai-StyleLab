@@ -39,14 +39,9 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCompare, hasCompareOutfit 
         {/* Brand & Responsible AI Badge */}
         <div className="flex items-center gap-3 sm:gap-4">
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="flex flex-col">
-              <span className="font-serif font-bold text-lg sm:text-xl text-vermilion-red tracking-tight leading-none group-hover:opacity-90 transition-opacity">
-                AoDai StyleLab
-              </span>
-              <span className="font-mono text-[9px] uppercase tracking-widest text-bronze-gold font-bold">
-                Cyber-Heritage v3.0
-              </span>
-            </div>
+            <span className="font-serif font-extrabold text-2xl sm:text-[26px] text-vermilion-red tracking-tight leading-none group-hover:opacity-90 transition-opacity">
+              AoDai StyleLab
+            </span>
           </Link>
         </div>
 
