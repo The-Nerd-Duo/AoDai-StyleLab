@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LookbookCard } from "@/components/lookbook/LookbookCard";
+import { FrameDecoration } from "@/components/lookbook/FrameDecoration";
 import { useOutfitStore } from "@/lib/store";
 import { LookbookItem } from "@/lib/types";
 import { encodeOutfitToQuery, formatRemixOutfitSummary } from "@/lib/utils";
@@ -674,6 +675,16 @@ export const LookbookWorkspace: React.FC = () => {
                 Tất cả ({categoryCounts.all})
               </button>
               <button
+                onClick={() => setActiveCategory("mine")}
+                className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all flex items-center gap-1.5 ${activeCategory === "mine"
+                  ? "bg-vermilion-red text-white shadow-xs"
+                  : "bg-surface-pure hover:bg-paper-cream text-text-warm-gray border border-border-bronze-light/50"
+                  }`}
+              >
+                <User className={`w-3.5 h-3.5 ${activeCategory === "mine" ? "text-white" : "text-bronze-gold"}`} />
+                <span>Của tôi ({categoryCounts.mine})</span>
+              </button>
+              <button
                 onClick={() => setActiveCategory("favorites")}
                 className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all flex items-center gap-1.5 ${activeCategory === "favorites"
                   ? "bg-vermilion-red text-white shadow-xs"
@@ -768,7 +779,7 @@ export const LookbookWorkspace: React.FC = () => {
                   return (
                     <div
                       key={item.id}
-                      className={`group relative rounded-2xl overflow-hidden bg-surface-pure border border-border-bronze-light shadow-xs hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col ${isNewlyAdded ? "ring-2 ring-emerald-400 ring-offset-2 animate-bounce" : ""
+                      className={`group relative rounded-2xl overflow-hidden bg-surface-pure border border-border-bronze-light shadow-xs hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col ${isNewlyAdded ? "ring-2 ring-emerald-400 ring-offset-2" : ""
                         }`}
                     >
                       {/* Card Visual / Image Canvas */}
@@ -817,11 +828,16 @@ export const LookbookWorkspace: React.FC = () => {
                           </div>
                         )}
 
-                        <div className="absolute inset-0 bg-gradient-to-t from-text-charcoal via-transparent to-transparent pointer-events-none" />
+                        {/* Frame Decoration Overlay */}
+                        {item.frameId && (
+                          <FrameDecoration frameId={item.frameId} />
+                        )}
+
+                        <div className="absolute inset-0 bg-gradient-to-t from-text-charcoal/80 via-transparent to-transparent pointer-events-none z-10" />
 
                         {/* Huy hiệu Của bạn */}
                         {isMyLookbook(item) && (
-                          <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-vermilion-red/90 backdrop-blur-xs text-white text-[9px] font-mono font-bold shadow-md z-10 flex items-center gap-1 border border-white/30">
+                          <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-vermilion-red/90 backdrop-blur-xs text-white text-[9px] font-mono font-bold shadow-md z-25 flex items-center gap-1 border border-white/30">
                             <User className="w-2.5 h-2.5" />
                             Của bạn
                           </span>
@@ -833,7 +849,7 @@ export const LookbookWorkspace: React.FC = () => {
                             e.stopPropagation();
                             handleToggleLike(item.id);
                           }}
-                          className={`absolute top-2.5 right-2.5 w-7 h-7 rounded-full flex items-center justify-center transition-all shadow-md z-10 active:scale-90 ${isLiked
+                          className={`absolute top-2.5 right-2.5 w-7 h-7 rounded-full flex items-center justify-center transition-all shadow-md z-25 active:scale-90 cursor-pointer ${isLiked
                             ? "bg-vermilion-red text-white scale-105 ring-2 ring-white/50"
                             : "bg-text-charcoal/70 hover:bg-vermilion-red text-white"
                             }`}
@@ -847,11 +863,11 @@ export const LookbookWorkspace: React.FC = () => {
                         </button>
 
                         {/* CTA Overlay on Hover: Remix */}
-                        <div className="absolute inset-0 bg-text-charcoal/60 backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2.5 p-4 z-20">
+                        <div className="absolute inset-0 bg-text-charcoal/60 backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2.5 p-4 z-30">
                           <button
                             type="button"
                             onClick={() => handleRemixLookbook(item)}
-                            className="w-full py-2.5 px-3 rounded-xl bg-vermilion-red hover:bg-primary text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg transition-transform active:scale-95"
+                            className="w-full py-2.5 px-3 rounded-xl bg-vermilion-red hover:bg-primary text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg transition-transform active:scale-95 cursor-pointer"
                           >
                             <Sparkles className="w-3.5 h-3.5" />
                             <span>Remix bản phối này</span>
@@ -859,7 +875,7 @@ export const LookbookWorkspace: React.FC = () => {
                         </div>
 
                         {/* Bottom Tag on Card Image */}
-                        <div className="absolute bottom-2.5 left-2.5 right-2.5 z-10 flex flex-col gap-0.5 pointer-events-none">
+                        <div className="absolute bottom-2.5 left-2.5 right-2.5 z-25 flex flex-col gap-0.5 pointer-events-none">
                           <span className="text-[10px] text-bronze-gold font-mono uppercase tracking-wider font-semibold">
                             {item.era}
                           </span>
