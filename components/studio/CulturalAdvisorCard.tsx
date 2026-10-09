@@ -299,7 +299,7 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
                 </span>
               </div>
               <p className="text-text-warm-gray leading-relaxed text-[11px] line-clamp-3">
-                {garment.culturalSignificance || garment.story || "Di sản trang phục truyền thống mang đậm bản sắc văn hóa Việt Nam."}
+                {garment.culturalSignificance || garment.description || "Di sản trang phục truyền thống mang đậm bản sắc văn hóa Việt Nam."}
               </p>
             </div>
 
