@@ -51,7 +51,7 @@ export interface OutfitState {
 
 export const GARMENT_MOCKUP_MAP: Record<string, string> = {
   "ao-dai-cach-tan": "/mockups/ao-dai-cach-tan.jpg",
-  "ao-dai-truyen-thong": "/mockups/ao-dai_heritage.webp",
+  "ao-dai-truyen-thong": "/mockups/ao-dai-truyen-thong.jpg",
   "ao-ngu-than-tay-chen": "/mockups/ngu-than_heritage.webp",
   "ao-tac-ngu-than-tay-thung": "/mockups/ao-tac.jpg",
   "ao-tu-than": "/mockups/ao-tu-than.jpg",

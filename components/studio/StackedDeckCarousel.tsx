@@ -20,7 +20,7 @@ import {
 
 export const GARMENT_IMAGES: Record<string, string> = {
   "ao-dai-cach-tan": "/mockups/ao-dai-cach-tan.jpg",
-  "ao-dai-truyen-thong": "/mockups/ao-dai_heritage.webp",
+  "ao-dai-truyen-thong": "/mockups/ao-dai-truyen-thong.jpg",
   "ao-ngu-than-tay-chen": "/mockups/ngu-than_heritage.webp",
   "ao-tac-ngu-than-tay-thung": "/mockups/ao-tac.jpg",
   "ao-tu-than": "/mockups/ao-tu-than.jpg",
@@ -55,31 +55,25 @@ export const OCCASION_IMAGES: Record<string, string> = {
     "https://images.unsplash.com/photo-1563354860-799d15199ac3?auto=format&fit=crop&w=700&q=80",
   "wedding-party":
     "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80",
-  "temple-heritage":
-    "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=600&q=80",
-  "school-presentation":
-    "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=600&q=80",
+  "temple-heritage": "/occasions/temple-heritage.jpg",
+  "school-presentation": "/occasions/school-presentation.jpg",
   "y2k-party":
     "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=600&q=80",
 };
 
 export const STYLE_IMAGES: Record<string, string> = {
-  "y2k-neo":
-    "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=600&q=80",
-  streetwear:
-    "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=600&q=80",
-  "minimal-chic":
-    "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=600&q=80",
-  "cyber-retro": "/patterns/cyberpunk-dong-a.jpg",
-  "vintage-academia":
-    "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80",
+  "y2k-neo": "/styles/y2k-neo.jpg",
+  streetwear: "/styles/streetwear.jpg",
+  "minimal-chic": "/styles/minimal-chic.jpg",
+  "cyber-retro": "/styles/cyber-retro.jpg",
+  "vintage-academia": "/styles/vintage-academia.jpg",
 };
 
 const DEFAULT_GARMENT_FALLBACK = "/mockups/ao-dai_heritage.webp";
 const DEFAULT_ACCESSORY_FALLBACK = "/accessories/tote-coi.jpg";
 const DEFAULT_OCCASION_FALLBACK =
   "https://images.unsplash.com/photo-1563354860-799d15199ac3?auto=format&fit=crop&w=700&q=80";
-const DEFAULT_STYLE_FALLBACK = "/patterns/cyberpunk-dong-a.jpg";
+const DEFAULT_STYLE_FALLBACK = "/styles/cyber-retro.jpg";
 
 interface StackedDeckCarouselProps {
   category: "garment" | "color" | "accessory" | "occasion" | "style";

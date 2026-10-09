@@ -14,6 +14,7 @@ import {
   X,
   MessageSquare,
   Diamond,
+  MapPin,
 } from "lucide-react";
 import { answerHeritageQuestion } from "@/lib/assistant-engine";
 
@@ -60,7 +61,7 @@ const HERITAGE_MOTIFS = [
     tagColor: "bg-text-charcoal",
     desc: "Mẫu thức cổ sơ nhất của người Việt, sải cánh dài bay ngược chiều kim đồng hồ quanh mặt trời, tượng trưng cho khát vọng chinh phục vũ trụ và cội nguồn Bách Việt.",
     position: "Vị trí: Cổ áo, viền dải lụa",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAQ1vxuAux-cjVr7nKaQ3TtLVR2kOL8rbWJWyFBj8P3jLaN2vgLYIuqgf8hj80_ZPjA6GfE3mme5M0pmzmqgISzTAgoBv-mqialJ_tJWUQcsmq880tzPTWGeXGETk6mIWIscFz-jXN6wac7Jhlmm9NlWqEOg-lvxX_W42p7GzD4hftjlUozOYEJuP0J-U0ErHBNJbTGHXlIX3NEspsh9Za7Dd7NHDSmkJ-ybcoblnybyF7WgSmdf5za",
+    img: "/patterns/chim-lac.jpg",
   },
   {
     id: "hoa-sen",
@@ -87,7 +88,7 @@ const HERITAGE_MOTIFS = [
     tagColor: "bg-vermilion-red",
     desc: "Rồng ẩn hiện trong mây trời cuồn cuộn với bờm dài, móng vuốt uy phong, tượng trưng cho thiên mệnh chính trực và sự hưng thịnh của vương triều.",
     position: "Vị trí: Bổ tử, ngực áo quan lại",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDfu-tpuDfvaQ46mro3c5K7eq4OsUd5iIrVn9W1qq6UwQq-6hfu4am-9hiajPvtp36sjRpf30uS0jK8bntwg82cgAy9mdXGdWnVmNAo8mMMcOjl0tM2iakWTCqIF9fGIFFHlfFsXrv4uXxym_qkxnd8XeWBTS14daNkV34gEsk6dqhcBQViuRIFpPgGAAktHsIs_aW0b_3MsAQt27qMcTSIxZZBQMk2j_Y7VSu9aijdrVeYk4Ds6-nN",
+    img: "/patterns/may-rong.jpg",
   },
   {
     id: "cuc-gam",
@@ -96,7 +97,7 @@ const HERITAGE_MOTIFS = [
     tagColor: "bg-bronze-gold",
     desc: "Cúc gấm đại diện cho đức hạnh người quân tử, trường thọ viên mãn và sự điềm đạm thanh cao trong hệ giá trị lễ nghi Á Đông.",
     position: "Vị trí: Gấu áo, cổ áo",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAM2rEcIVKz5_H2cYNTCRo5Al1FQFstocHTvA8ou9INHSSAKO0JnzzD_3tmDPVQS4i8Hoo767WVsL8Pjd9Go26pFwv-qLhuHwCWG2wWrFNqzkWf_ffZ73mtJJzgoutTgjB_2xxgqZam0lDL9GPRmAkErbQZwOjoovMDkX_4URKP7QJ3MjsNKfYLU7mfIblguS1jmkN2B6PgaN00CSe1aXaOa9biu4XSapXmr6aQJpJ2Avc5xrUvRlnw",
+    img: "/patterns/cuc-gam.jpg",
   },
   {
     id: "thuy-ba",
@@ -105,7 +106,7 @@ const HERITAGE_MOTIFS = [
     tagColor: "bg-vermilion-red",
     desc: "Những cột sóng dâng cao vỗ vào mỏm đá ngầm, tượng trưng cho sự chở che giang sơn thái bình, sự phồn thực và uy lực bền bỉ của giang sơn xã tắc.",
     position: "Vị trí: Gấu áo Ngũ Thân & Cung bào",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDfu-tpuDfvaQ46mro3c5K7eq4OsUd5iIrVn9W1qq6UwQq-6hfu4am-9hiajPvtp36sjRpf30uS0jK8bntwg82cgAy9mdXGdWnVmNAo8mMMcOjl0tM2iakWTCqIF9fGIFFHlfFsXrv4uXxym_qkxnd8XeWBTS14daNkV34gEsk6dqhcBQViuRIFpPgGAAktHsIs_aW0b_3MsAQt27qMcTSIxZZBQMk2j_Y7VSu9aijdrVeYk4Ds6-nN",
+    img: "/patterns/thuy-ba.jpg",
   },
   {
     id: "chuc-tho",
@@ -114,7 +115,7 @@ const HERITAGE_MOTIFS = [
     tagColor: "bg-bronze-gold",
     desc: "Đồ án chữ Thọ cách điệu hình tròn hoặc vuông, phối kết cùng vân mây và dơi đỏ (ngũ phúc), biểu trưng cho phúc lộc và sự trường tồn miên viễn.",
     position: "Vị trí: Thân áo Ngũ Thân, mặt vải gấm",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAAyn-r9F6DSZZ7S-D9Ro1_1xlPNOvFPZN5aB7AbD3-WXwHf2tU1Dk28LvY7Dh3xiHVxWEvcuGNS2RHP5AJqd15Y07M8fYw9tYtF8ncYtOTxY_lxZ8nUzdyqeQgvcTEwR7nz397RyskS5HHC8qYs0gMc5xRl9QBpLq23iFJh3m8GNDsGH__e_r-TGR3NuZJuz2RHJZ02R57OY-3JVvbgXzA-MC2mvi-rrF7cbUyxaTWfclQQv0Tb-Tt",
+    img: "/patterns/chuc-tho.jpg",
   },
   {
     id: "phuong-mua",
@@ -123,7 +124,7 @@ const HERITAGE_MOTIFS = [
     tagColor: "bg-vermilion-red",
     desc: "Hình tượng chim phụng xòe cánh mềm mại ngậm hoa cúc, biểu trưng cho vẻ đẹp quý phái, đức hạnh và quyền uy của Hoàng hậu, Công chúa.",
     position: "Vị trí: Ngực áo Nhật Bình, dải cổ",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAQ1vxuAux-cjVr7nKaQ3TtLVR2kOL8rbWJWyFBj8P3jLaN2vgLYIuqgf8hj80_ZPjA6GfE3mme5M0pmzmqgISzTAgoBv-mqialJ_tJWUQcsmq880tzPTWGeXGETk6mIWIscFz-jXN6wac7Jhlmm9NlWqEOg-lvxX_W42p7GzD4hftjlUozOYEJuP0J-U0ErHBNJbTGHXlIX3NEspsh9Za7Dd7NHDSmkJ-ybcoblnybyF7WgSmdf5za",
+    img: "/patterns/phuong-mua.jpg",
   },
   {
     id: "ngu-sac",
@@ -132,7 +133,7 @@ const HERITAGE_MOTIFS = [
     tagColor: "bg-text-charcoal",
     desc: "Năm dải lụa màu (xanh, vàng, trắng, đỏ, lục/đen) tương ứng với Ngũ hành (Kim, Mộc, Thủy, Hỏa, Thổ), biểu trưng cho trật tự vũ trụ và sự hài hòa thịnh vượng.",
     position: "Vị trí: Tay áo Nhật Bình",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDfu-tpuDfvaQ46mro3c5K7eq4OsUd5iIrVn9W1qq6UwQq-6hfu4am-9hiajPvtp36sjRpf30uS0jK8bntwg82cgAy9mdXGdWnVmNAo8mMMcOjl0tM2iakWTCqIF9fGIFFHlfFsXrv4uXxym_qkxnd8XeWBTS14daNkV34gEsk6dqhcBQViuRIFpPgGAAktHsIs_aW0b_3MsAQt27qMcTSIxZZBQMk2j_Y7VSu9aijdrVeYk4Ds6-nN",
+    img: "/patterns/ngu-sac.jpg",
   },
   {
     id: "cyber-pattern",
@@ -141,7 +142,7 @@ const HERITAGE_MOTIFS = [
     tagColor: "bg-primary",
     desc: "Đường nét vi mạch neon kết hợp họa tiết kỷ hà truyền thống, thể hiện tinh thần cách tân thời thượng của thế hệ trẻ hướng tới tương lai.",
     position: "Vị trí: Tà áo dài cách tân Gen Z",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAAyn-r9F6DSZZ7S-D9Ro1_1xlPNOvFPZN5aB7AbD3-WXwHf2tU1Dk28LvY7Dh3xiHVxWEvcuGNS2RHP5AJqd15Y07M8fYw9tYtF8ncYtOTxY_lxZ8nUzdyqeQgvcTEwR7nz397RyskS5HHC8qYs0gMc5xRl9QBpLq23iFJh3m8GNDsGH__e_r-TGR3NuZJuz2RHJZ02R57OY-3JVvbgXzA-MC2mvi-rrF7cbUyxaTWfclQQv0Tb-Tt",
+    img: "/patterns/cyber-pattern.jpg",
   },
 ];
 
@@ -346,7 +347,7 @@ export default function BachKhoaPage() {
             </div>
 
             {/* Grid Đồ Án Hoa Văn */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
               {HERITAGE_MOTIFS.map((motif) => {
                 const isHighlighted = highlightedMotifId === motif.id;
 
@@ -354,13 +355,13 @@ export default function BachKhoaPage() {
                   <div
                     key={motif.id}
                     id={`motif-${motif.id}`}
-                    className={`bg-[#FFFFFF] rounded-2xl p-4 shadow-sm border space-y-3 transition-all duration-500 flex flex-col justify-between ${isHighlighted
+                    className={`bg-[#FFFFFF] rounded-2xl p-4 sm:p-5 shadow-sm border space-y-4 transition-all duration-500 flex flex-col justify-between ${isHighlighted
                         ? "border-vermilion-red ring-2 ring-vermilion-red/50 shadow-lg scale-[1.02] bg-vermilion-red/5"
                         : "border-border-bronze-light/60 hover:translate-y-[-2px] hover:shadow-md hover:border-bronze-gold/70"
                       }`}
                   >
-                    <div className="space-y-3">
-                      <div className="relative h-44 rounded-xl overflow-hidden bg-paper-cream border border-border-bronze-light/40 group">
+                    <div className="space-y-3.5">
+                      <div className="relative h-44 sm:h-48 rounded-xl overflow-hidden bg-paper-cream border border-border-bronze-light/40 group">
                         <img
                           src={motif.img}
                           alt={motif.name}
@@ -374,19 +375,28 @@ export default function BachKhoaPage() {
                       </div>
 
                       <div className="space-y-1.5">
-                        <h4 className="font-serif text-[14px] font-bold text-text-charcoal leading-snug">
+                        <h4 className="font-serif text-[15px] font-bold text-text-charcoal leading-snug">
                           {motif.name}
                         </h4>
-                        <p className="text-xs text-text-warm-gray leading-relaxed line-clamp-3">
+                        <p className="text-xs text-text-warm-gray leading-relaxed">
                           {motif.desc}
                         </p>
                       </div>
+
+                      {/* Khối thông tin Vị trí ứng dụng */}
+                      <div className="flex items-start gap-1.5 p-2.5 rounded-xl bg-paper-cream/60 border border-border-bronze-light/40 text-[11px] text-text-charcoal leading-relaxed">
+                        <MapPin className="w-3.5 h-3.5 text-bronze-gold shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-semibold text-bronze-gold">Vị trí: </span>
+                          <span className="text-text-charcoal/90">
+                            {motif.position.replace(/^Vị trí:\s*/, "")}
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="pt-2 border-t border-border-bronze-light/30 flex items-center justify-between text-xs">
-                      <span className="text-bronze-gold text-[11px] font-semibold">
-                        {motif.position}
-                      </span>
+                    {/* Nút bấm Hỏi AI */}
+                    <div className="pt-3 border-t border-border-bronze-light/30">
                       <button
                         type="button"
                         onClick={() => {
@@ -395,10 +405,10 @@ export default function BachKhoaPage() {
                             `Đồ án hoa văn '${motif.name}' có ý nghĩa biểu tượng gì trong văn hóa cổ phục Việt và cách ứng dụng đúng vào thiết kế hiện đại?`
                           );
                         }}
-                        className="text-vermilion-red font-semibold hover:underline text-[11px] flex items-center gap-0.5"
+                        className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-vermilion-red via-[#d33a2a] to-bronze-gold text-white font-sans text-xs font-semibold flex items-center justify-center gap-1.5 shadow-xs hover:shadow-md hover:brightness-105 active:scale-[0.98] transition-all group/btn cursor-pointer"
                       >
-                        <Sparkles className="w-3 h-3 text-bronze-gold" />
-                        <span>Hỏi AI ý nghĩa →</span>
+                        <Sparkles className="w-3.5 h-3.5 text-paper-cream group-hover/btn:rotate-12 transition-transform" />
+                        <span>Hỏi AI</span>
                       </button>
                     </div>
                   </div>
