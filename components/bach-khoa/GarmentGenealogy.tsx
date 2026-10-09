@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import genealogyData from "@/config/genealogy.json";
 import { useOutfitStore, DEFAULT_OUTFIT } from "@/lib/store";
+import { OutfitState } from "@/lib/utils";
 import {
   getActiveStudioContext,
   setActiveStudioContext,

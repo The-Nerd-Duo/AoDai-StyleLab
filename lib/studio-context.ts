@@ -1,6 +1,7 @@
 import { OutfitState, formatRemixOutfitSummary } from "./utils";
 
 export { formatRemixOutfitSummary };
+export type { OutfitState };
 
 export interface ActiveStudioContext {
   type: "remix" | "trial";
