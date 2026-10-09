@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LookbookCard } from "@/components/lookbook/LookbookCard";
@@ -278,6 +278,21 @@ export const LookbookWorkspace: React.FC = () => {
               );
               const merged = [...localPending, ...safeFilteredData];
 
+              // Prevent redundant re-renders while user is scrolling if data hasn't changed
+              if (
+                prev.length === merged.length &&
+                prev.every(
+                  (p, idx) =>
+                    p.id === merged[idx]?.id &&
+                    p.likes === merged[idx]?.likes &&
+                    p.shares === merged[idx]?.shares &&
+                    p.img === merged[idx]?.img &&
+                    p.frameId === merged[idx]?.frameId
+                )
+              ) {
+                return prev;
+              }
+
               try {
                 localStorage.setItem("vietphuc_community_lookbooks", JSON.stringify(merged));
               } catch { }
@@ -503,26 +518,30 @@ export const LookbookWorkspace: React.FC = () => {
     }
   };
 
-  const filteredCommunity = items.filter((item) => {
-    if (activeCategory === "mine") {
-      return isMyLookbook(item);
-    }
-    if (activeCategory === "favorites") {
-      return userLikedIds.has(item.id);
-    }
-    if (activeCategory === "all") return true;
-    return item.category === activeCategory;
-  });
+  const filteredCommunity = useMemo(() => {
+    return items.filter((item) => {
+      if (activeCategory === "mine") {
+        return isMyLookbook(item);
+      }
+      if (activeCategory === "favorites") {
+        return userLikedIds.has(item.id);
+      }
+      if (activeCategory === "all") return true;
+      return item.category === activeCategory;
+    });
+  }, [items, activeCategory, userLikedIds]);
 
-  const categoryCounts = {
-    all: items.length,
-    mine: items.filter((i) => isMyLookbook(i)).length,
-    favorites: items.filter((i) => userLikedIds.has(i.id)).length,
-    "pho-co": items.filter((i) => i.category === "pho-co").length,
-    "cung-dinh": items.filter((i) => i.category === "cung-dinh").length,
-    y2k: items.filter((i) => i.category === "y2k").length,
-    "da-tiec": items.filter((i) => i.category === "da-tiec").length,
-  };
+  const categoryCounts = useMemo(() => {
+    return {
+      all: items.length,
+      mine: items.filter((i) => isMyLookbook(i)).length,
+      favorites: items.filter((i) => userLikedIds.has(i.id)).length,
+      "pho-co": items.filter((i) => i.category === "pho-co").length,
+      "cung-dinh": items.filter((i) => i.category === "cung-dinh").length,
+      y2k: items.filter((i) => i.category === "y2k").length,
+      "da-tiec": items.filter((i) => i.category === "da-tiec").length,
+    };
+  }, [items, userLikedIds]);
 
   return (
     <main className="flex-1 flex flex-col">
@@ -562,7 +581,7 @@ export const LookbookWorkspace: React.FC = () => {
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-4 flex-1">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Left Column (5 cols, sticky): Lookbook Card Editor */}
-          <div className="lg:col-span-5 flex flex-col gap-5 lg:sticky lg:top-20">
+          <div className="lg:col-span-5 flex flex-col gap-3 lg:sticky lg:top-20 self-start lg:max-h-[calc(100vh-5.5rem)] lg:overflow-y-auto scrollbar-none">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-text-charcoal font-serif flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4 text-bronze-gold" />
@@ -603,26 +622,25 @@ export const LookbookWorkspace: React.FC = () => {
             />
           </div>
 
-          {/* Right Column (7 cols): Community Gallery - Independent scroll with frozen header */}
-          <div className="lg:col-span-7 flex flex-col h-[650px] sm:h-[720px] lg:h-[calc(100vh-140px)] lg:min-h-[640px] lg:max-h-[860px] lg:sticky lg:top-20">
-            {/* Frozen / Pinned Header Section: Khám phá Lookbook Di sản + Category Filter Pills */}
-            <div className="flex-shrink-0 flex flex-col gap-3 pb-3 bg-[#F8F5F0] z-10">
-              {/* Community Header Banner */}
-              <div className="bg-surface-pure rounded-2xl p-4 shadow-sm border border-border-bronze-light/60 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-paper-cream border border-bronze-gold/30 flex items-center justify-center text-bronze-gold flex-shrink-0">
-                  <span className="material-symbols-outlined text-[20px] text-bronze-gold">explore</span>
-                </div>
-                <div>
-                  <h2 className="font-serif font-bold text-base sm:text-lg text-text-charcoal leading-tight">
-                    Khám phá Lookbook Di sản Gen Z
-                  </h2>
-                  <p className="text-xs text-text-warm-gray mt-0.5">
-                    Được chia sẻ bởi cộng đồng người yêu trang phục truyền thống
-                  </p>
-                </div>
+          {/* Right Column (7 cols): Community Gallery - Natural smooth window scroll */}
+          <div className="lg:col-span-7 flex flex-col min-w-0">
+            {/* Community Header Banner */}
+            <div className="bg-surface-pure rounded-2xl p-4 shadow-sm border border-border-bronze-light/60 flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-paper-cream border border-bronze-gold/30 flex items-center justify-center text-bronze-gold flex-shrink-0">
+                <span className="material-symbols-outlined text-[20px] text-bronze-gold">explore</span>
               </div>
+              <div>
+                <h2 className="font-serif font-bold text-base sm:text-lg text-text-charcoal leading-tight">
+                  Khám phá Lookbook Di sản Gen Z
+                </h2>
+                <p className="text-xs text-text-warm-gray mt-0.5">
+                  Được chia sẻ bởi cộng đồng người yêu trang phục truyền thống
+                </p>
+              </div>
+            </div>
 
-              {/* Category Filter Pills */}
+            {/* Category Filter Pills - Sticky right beneath Header */}
+            <div className="sticky top-16 z-20 bg-[#F8F5F0]/95 backdrop-blur-md pt-1 pb-3 -mx-1 px-1">
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-nowrap">
                 <button
                   onClick={() => setActiveCategory("all")}
@@ -692,8 +710,8 @@ export const LookbookWorkspace: React.FC = () => {
               </div>
             </div>
 
-            {/* Scrollable Lookbook Cards Area with Dedicated Vertical Scrollbar */}
-            <div className="flex-1 overflow-y-auto overscroll-contain pt-2 pr-1.5 pb-6 lookbook-scrollbar">
+            {/* Lookbook Cards Area: Cuộn tự nhiên theo toàn trang */}
+            <div className="pt-2 pb-8">
               {/* Cards Grid */}
               {loading ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -741,6 +759,7 @@ export const LookbookWorkspace: React.FC = () => {
                     return (
                       <div
                         key={item.id}
+                        style={{ contentVisibility: "auto", containIntrinsicSize: "280px 420px" }}
                         className={`group relative rounded-2xl overflow-hidden bg-surface-pure border border-border-bronze-light shadow-xs hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col ${isNewlyAdded ? "ring-2 ring-emerald-400 ring-offset-2" : ""
                           }`}
                       >
@@ -752,6 +771,7 @@ export const LookbookWorkspace: React.FC = () => {
                               alt={item.title}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                               loading="lazy"
+                              decoding="async"
                             />
                           ) : (
                             /* Fallback Styled Visual for seeded items without photos */

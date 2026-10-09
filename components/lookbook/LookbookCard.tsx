@@ -42,11 +42,11 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
   const [communityModalOpen, setCommunityModalOpen] = useState(false);
 
   // Measure card width for accurate transforms
-  const [cardWidth, setCardWidth] = useState(350);
+  const [cardWidth, setCardWidth] = useState(260);
   useEffect(() => {
     const updateWidth = () => {
       if (cardRef.current) {
-        setCardWidth(cardRef.current.offsetWidth || 350);
+        setCardWidth(cardRef.current.offsetWidth || 260);
       }
     };
     updateWidth();
@@ -94,7 +94,7 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
   // Slowed-down, smooth 650ms transition so the user can distinctly perceive the frame motion
   const handleNextClick = useCallback(() => {
     if (isBusyRef.current) return;
-    const width = cardRef.current?.offsetWidth || cardWidth || 350;
+    const width = cardRef.current?.offsetWidth || cardWidth || 260;
     isBusyRef.current = true;
     setIsInstantReset(false);
     setIsTransitioning(true);
@@ -117,7 +117,7 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
 
   const handlePrevClick = useCallback(() => {
     if (isBusyRef.current) return;
-    const width = cardRef.current?.offsetWidth || cardWidth || 350;
+    const width = cardRef.current?.offsetWidth || cardWidth || 260;
     isBusyRef.current = true;
     setIsInstantReset(false);
     setIsTransitioning(true);
@@ -161,7 +161,7 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
   const handleTouchEnd = () => {
     if (!isDragging || isBusyRef.current) return;
     setIsDragging(false);
-    const width = cardRef.current?.offsetWidth || cardWidth || 350;
+    const width = cardRef.current?.offsetWidth || cardWidth || 260;
 
     if (dragOffset < -45) {
       isBusyRef.current = true;
@@ -230,7 +230,7 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
   const handleMouseUp = () => {
     if (!isDragging || isBusyRef.current) return;
     setIsDragging(false);
-    const width = cardRef.current?.offsetWidth || cardWidth || 350;
+    const width = cardRef.current?.offsetWidth || cardWidth || 260;
 
     if (dragOffset < -45) {
       isBusyRef.current = true;
@@ -412,10 +412,10 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
 
   if (!displayImage) {
     return (
-      <div className="flex flex-col items-center gap-4 w-full">
+      <div className="flex flex-col items-center gap-2.5 w-full">
         {/* Placeholder: Khung màu đen/nâu heritage đồng bộ với Khung trưng bày, 4 góc họa tiết đồng */}
         <div
-          className="relative w-full max-w-[280px] xs:max-w-[310px] sm:max-w-[350px] aspect-[9/16] rounded-2xl overflow-hidden flex flex-col items-center justify-center p-6 text-center select-none bg-[#1F1714] border border-bronze-gold/30 shadow-xl backdrop-blur-xs transition-all"
+          className="relative w-full max-w-[240px] xs:max-w-[250px] sm:max-w-[260px] aspect-[9/16] rounded-2xl overflow-hidden flex flex-col items-center justify-center p-5 text-center select-none bg-[#1F1714] border border-bronze-gold/30 shadow-xl backdrop-blur-xs transition-all"
         >
           {/* Subtle Ambient Glow */}
           <div
@@ -424,49 +424,49 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
           />
 
           {/* Corner decorative accents */}
-          <div className="absolute top-3.5 left-3.5 w-3.5 h-3.5 border-t-2 border-l-2 border-bronze-gold/40 pointer-events-none" />
-          <div className="absolute top-3.5 right-3.5 w-3.5 h-3.5 border-t-2 border-r-2 border-bronze-gold/40 pointer-events-none" />
-          <div className="absolute bottom-3.5 left-3.5 w-3.5 h-3.5 border-b-2 border-l-2 border-bronze-gold/40 pointer-events-none" />
-          <div className="absolute bottom-3.5 right-3.5 w-3.5 h-3.5 border-b-2 border-r-2 border-bronze-gold/40 pointer-events-none" />
+          <div className="absolute top-3 left-3 w-3 h-3 border-t-2 border-l-2 border-bronze-gold/40 pointer-events-none" />
+          <div className="absolute top-3 right-3 w-3 h-3 border-t-2 border-r-2 border-bronze-gold/40 pointer-events-none" />
+          <div className="absolute bottom-3 left-3 w-3 h-3 border-b-2 border-l-2 border-bronze-gold/40 pointer-events-none" />
+          <div className="absolute bottom-3 right-3 w-3 h-3 border-b-2 border-r-2 border-bronze-gold/40 pointer-events-none" />
 
           {/* Minimalist Glowing Icon Box */}
-          <div className="relative z-10 w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/[0.05] border border-white/10 backdrop-blur-md flex items-center justify-center text-bronze-gold mb-3 shadow-inner">
-            <Sparkles className="w-7 h-7 sm:w-8 sm:h-8 text-bronze-gold/90" />
+          <div className="relative z-10 w-12 h-12 rounded-xl bg-white/[0.05] border border-white/10 backdrop-blur-md flex items-center justify-center text-bronze-gold mb-2.5 shadow-inner">
+            <Sparkles className="w-6 h-6 text-bronze-gold/90" />
           </div>
 
-          <h3 className="relative z-10 font-serif text-base sm:text-lg font-bold text-paper-cream tracking-wide mb-1.5">
+          <h3 className="relative z-10 font-serif text-sm sm:text-base font-bold text-paper-cream tracking-wide mb-1">
             Hiện đang chưa có ảnh
           </h3>
 
-          <p className="relative z-10 text-xs text-white/60 max-w-[210px] leading-relaxed mb-4">
+          <p className="relative z-10 text-[11px] text-white/60 max-w-[190px] leading-relaxed mb-3.5">
             Thẻ Lookbook chưa khả dụng vì bạn chưa tạo ảnh phối đồ AI. Hãy tạo ảnh trong Studio để mở khóa thẻ!
           </p>
 
           <Link
             href="/"
-            className="relative z-10 px-4 py-2 rounded-xl bg-gradient-to-r from-vermilion-red to-primary hover:opacity-95 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md transition-all hover:scale-105 active:scale-95 cursor-pointer ring-1 ring-white/20"
+            className="relative z-10 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-vermilion-red to-primary hover:opacity-95 text-white text-[11px] font-semibold flex items-center gap-1.5 shadow-md transition-all hover:scale-105 active:scale-95 cursor-pointer ring-1 ring-white/20"
           >
-            <Sparkles className="w-3.5 h-3.5 text-bronze-gold" />
+            <Sparkles className="w-3 h-3 text-bronze-gold" />
             <span>Đến Studio Tạo Ảnh Ngay →</span>
           </Link>
         </div>
 
         {/* Action Buttons in disabled state */}
-        <div className="flex flex-col gap-2.5 w-full max-w-[340px] sm:max-w-[380px] opacity-50">
+        <div className="flex flex-col gap-2 w-full max-w-[280px] sm:max-w-[300px] opacity-50">
           <button
             disabled
             title="Vui lòng tạo ảnh phối đồ trước khi chia sẻ"
-            className="w-full py-3 px-4 rounded-xl bg-stone-200 text-stone-500 font-bold text-xs flex items-center justify-center gap-2 cursor-not-allowed"
+            className="w-full py-2.5 px-3 rounded-xl bg-stone-200 text-stone-500 font-bold text-xs flex items-center justify-center gap-1.5 cursor-not-allowed"
           >
-            <Sparkles className="w-4 h-4 text-stone-400" />
+            <Sparkles className="w-3.5 h-3.5 text-stone-400" />
             <span>Chia Sẻ Lên Thư Viện Cộng Đồng</span>
           </button>
 
-          <div className="flex items-center gap-2.5 w-full">
+          <div className="flex items-center gap-2 w-full">
             <button
               disabled
               title="Vui lòng tạo ảnh phối đồ trước khi tải ảnh"
-              className="flex-1 py-2.5 px-3 rounded-xl bg-paper-cream border border-stone-200 text-stone-400 font-semibold text-xs flex items-center justify-center gap-1.5 cursor-not-allowed"
+              className="flex-1 py-2 px-2.5 rounded-xl bg-paper-cream border border-stone-200 text-stone-400 font-semibold text-[11px] flex items-center justify-center gap-1 cursor-not-allowed"
             >
               <Download className="w-3.5 h-3.5 text-stone-400" />
               <span>Tải Thẻ PNG</span>
@@ -475,7 +475,7 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
             <button
               disabled
               title="Vui lòng tạo ảnh phối đồ trước khi sao chép liên kết"
-              className="flex-1 py-2.5 px-3 rounded-xl bg-surface-pure border border-stone-200 text-stone-400 font-semibold text-xs flex items-center justify-center gap-1.5 cursor-not-allowed"
+              className="flex-1 py-2 px-2.5 rounded-xl bg-surface-pure border border-stone-200 text-stone-400 font-semibold text-[11px] flex items-center justify-center gap-1 cursor-not-allowed"
             >
               <Share2 className="w-3.5 h-3.5 text-stone-400" />
               <span>Sao chép Link</span>
@@ -487,19 +487,19 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
   }
 
   return (
-    <div className="flex flex-col items-center gap-4 w-full">
-      {/* 3D Depth Card Stage with Floating Navigation Arrows OUTSIDE the Card (matching StackedDeckCarousel) */}
-      <div className="flex items-center justify-center gap-2.5 xs:gap-3 sm:gap-5 w-full">
+    <div className="flex flex-col items-center gap-2.5 w-full">
+      {/* 3D Depth Card Stage with Floating Navigation Arrows OUTSIDE the Card */}
+      <div className="flex items-center justify-center gap-2 xs:gap-2.5 sm:gap-3.5 w-full">
         {/* Left Arrow Button OUTSIDE the card */}
         <button
           type="button"
           onClick={handlePrevClick}
           disabled={isTransitioning}
-          className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/95 hover:bg-paper-cream backdrop-blur-md border border-border-bronze-light shadow-md flex items-center justify-center text-text-charcoal hover:text-vermilion-red hover:scale-110 active:scale-90 transition-all focus:outline-none cursor-pointer flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/95 hover:bg-paper-cream backdrop-blur-md border border-border-bronze-light shadow-md flex items-center justify-center text-text-charcoal hover:text-vermilion-red hover:scale-110 active:scale-90 transition-all focus:outline-none cursor-pointer flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
           aria-label="Khung viền trước"
           title="Khung viền trước"
         >
-          <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.5]" />
+          <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
         </button>
 
         {/* Lookbook 9:16 Render Canvas Container (Clean, NO buttons inside!) */}
@@ -512,7 +512,7 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
-          className="relative w-full max-w-[280px] xs:max-w-[310px] sm:max-w-[350px] aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl flex flex-col justify-end select-none bg-[#0D0C0B] cursor-grab active:cursor-grabbing touch-pan-y flex-shrink-0"
+          className="relative w-full max-w-[240px] xs:max-w-[250px] sm:max-w-[260px] aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl flex flex-col justify-end select-none bg-[#0D0C0B] cursor-grab active:cursor-grabbing touch-pan-y flex-shrink-0"
           style={{
             border: `2px solid ${currentFrame.borderColor && currentFrame.borderColor !== "transparent"
                 ? currentFrame.borderColor
@@ -551,16 +551,16 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
                 className="absolute inset-0 opacity-25 blur-3xl pointer-events-none"
                 style={{ backgroundColor: color.hex }}
               />
-              <div className="relative z-10 w-14 h-14 rounded-2xl bg-white/[0.05] border border-white/10 backdrop-blur-md flex items-center justify-center text-bronze-gold mb-3 shadow-inner">
-                <Sparkles className="w-7 h-7 text-bronze-gold/90" />
+              <div className="relative z-10 w-12 h-12 rounded-2xl bg-white/[0.05] border border-white/10 backdrop-blur-md flex items-center justify-center text-bronze-gold mb-2.5 shadow-inner">
+                <Sparkles className="w-6 h-6 text-bronze-gold/90" />
               </div>
-              <h4 className="relative z-10 font-serif text-base font-bold text-paper-cream tracking-wide">
+              <h4 className="relative z-10 font-serif text-sm font-bold text-paper-cream tracking-wide">
                 Khung Trưng Bày Di Sản
               </h4>
-              <p className="relative z-10 text-[11px] text-white/55 mt-1.5 max-w-[210px] leading-relaxed">
+              <p className="relative z-10 text-[10px] text-white/55 mt-1 max-w-[190px] leading-relaxed">
                 Chưa có ảnh phối đồ AI. Hãy tạo ảnh trong Studio để hoàn thiện thẻ Lookbook.
               </p>
-              <span className="relative z-10 mt-3.5 px-3 py-0.5 rounded-full bg-white/[0.07] text-paper-cream/80 text-[9px] font-mono border border-white/10">
+              <span className="relative z-10 mt-3 px-2.5 py-0.5 rounded-full bg-white/[0.07] text-paper-cream/80 text-[8.5px] font-mono border border-white/10">
                 HERITAGE READY
               </span>
             </div>
@@ -622,22 +622,22 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
           </div>
 
           {/* Layer 2: Floating Bottom Narrative & QR Tray (Layer z-30, Inset Safe Margins) */}
-          <div className="absolute bottom-0 inset-x-0 z-30 flex items-center justify-between gap-3 px-6 pb-10 sm:px-7 sm:pb-12 text-white pointer-events-none">
-            <div className="flex flex-col gap-1 min-w-0 flex-1">
-              <div className="flex items-center gap-1.5 flex-nowrap overflow-hidden">
+          <div className="absolute bottom-0 inset-x-0 z-30 flex items-center justify-between gap-2 px-3.5 pb-4 sm:px-4 sm:pb-4 text-white pointer-events-none">
+            <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+              <div className="flex items-center gap-1 flex-nowrap overflow-hidden">
                 <span
-                  className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border border-white/30 shadow-xs flex-shrink-0"
+                  className="w-2 h-2 rounded-full border border-white/30 shadow-xs flex-shrink-0"
                   style={{ backgroundColor: color.hex }}
                 />
-                <span className="text-[10px] sm:text-[11px] text-paper-cream font-medium tracking-wide truncate">
+                <span className="text-[9px] sm:text-[10px] text-paper-cream font-medium tracking-wide truncate">
                   {color.name}
                 </span>
-                <span className="text-[8px] sm:text-[8.5px] font-mono text-bronze-gold bg-black/50 backdrop-blur-xs px-1.5 py-0.5 rounded uppercase border border-white/10 font-semibold flex-shrink-0">
+                <span className="text-[7.5px] sm:text-[8px] font-mono text-bronze-gold bg-black/50 backdrop-blur-xs px-1.5 py-0.5 rounded uppercase border border-white/10 font-semibold flex-shrink-0">
                   {style.name}
                 </span>
               </div>
 
-              <h3 className="font-serif text-[15px] sm:text-base font-bold text-white tracking-wide leading-snug drop-shadow-md truncate">
+              <h3 className="font-serif text-[13px] sm:text-[14px] font-bold text-white tracking-wide leading-snug drop-shadow-md truncate">
                 {garment.name}
               </h3>
             </div>
@@ -649,8 +649,8 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
                 className="flex flex-col items-center flex-shrink-0 pointer-events-auto"
               >
                 <div
-                  className="w-11 h-11 sm:w-11 sm:h-11 bg-white p-1 rounded-md shadow-lg border border-bronze-gold/40 flex items-center justify-center flex-shrink-0"
-                  style={{ width: "42px", height: "42px", minWidth: "42px", minHeight: "42px" }}
+                  className="bg-white p-0.5 rounded shadow-lg border border-bronze-gold/40 flex items-center justify-center flex-shrink-0"
+                  style={{ width: "36px", height: "36px", minWidth: "36px", minHeight: "36px" }}
                   title="Quét mã QR để xem & remix"
                 >
                   {qrCodeUrl ? (
@@ -662,13 +662,13 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
                     />
                   ) : (
                     <div className="w-full h-full bg-[#1A1A1A] rounded flex items-center justify-center">
-                      <span className="material-symbols-outlined text-[15px] text-white">
+                      <span className="material-symbols-outlined text-[13px] text-white">
                         qr_code
                       </span>
                     </div>
                   )}
                 </div>
-                <span className="font-mono text-[7px] text-paper-cream/80 uppercase tracking-widest mt-0.5 whitespace-nowrap font-bold">
+                <span className="font-mono text-[6.5px] text-paper-cream/80 uppercase tracking-widest mt-0.5 whitespace-nowrap font-bold">
                   QUÉT XEM
                 </span>
               </div>
@@ -681,20 +681,20 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
           type="button"
           onClick={handleNextClick}
           disabled={isTransitioning}
-          className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/95 hover:bg-paper-cream backdrop-blur-md border border-border-bronze-light shadow-md flex items-center justify-center text-text-charcoal hover:text-vermilion-red hover:scale-110 active:scale-90 transition-all focus:outline-none cursor-pointer flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/95 hover:bg-paper-cream backdrop-blur-md border border-border-bronze-light shadow-md flex items-center justify-center text-text-charcoal hover:text-vermilion-red hover:scale-110 active:scale-90 transition-all focus:outline-none cursor-pointer flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
           aria-label="Khung viền kế tiếp"
           title="Khung viền kế tiếp"
         >
-          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.5]" />
+          <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
         </button>
       </div>
 
-      {/* Frame Switcher Control Bar Under Card (Matching StackedDeckCarousel style) */}
-      <div className="flex flex-col items-center gap-1.5 w-full max-w-[340px] sm:max-w-[380px]">
+      {/* Frame Switcher: Integrated Single-Row Capsule Bar */}
+      <div className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-full bg-surface-pure border border-border-bronze-light/70 shadow-2xs w-full max-w-[280px] sm:max-w-[300px]">
         {/* Current Frame Title Badge */}
-        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-surface-pure border border-border-bronze-light/60 shadow-2xs">
+        <div className="flex items-center gap-1.5 min-w-0 flex-1">
           <span
-            className="w-2.5 h-2.5 rounded-full border border-black/20 flex-shrink-0"
+            className="w-2 h-2 rounded-full border border-black/20 flex-shrink-0"
             style={{
               backgroundColor:
                 currentFrame.borderColor && currentFrame.borderColor !== "transparent"
@@ -702,16 +702,16 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
                   : "#D1D5DB",
             }}
           />
-          <span className="text-xs font-serif font-bold text-text-charcoal truncate">
+          <span className="text-[11px] font-serif font-bold text-text-charcoal truncate">
             {currentFrame.name}
           </span>
-          <span className="text-[10px] font-mono text-bronze-gold font-bold ml-0.5">
+          <span className="text-[9px] font-mono text-bronze-gold font-bold flex-shrink-0">
             ({activeIndex + 1}/{framesData.length})
           </span>
         </div>
 
         {/* 6 Indicator Dots */}
-        <div className="flex items-center justify-center gap-1.5 pt-0.5">
+        <div className="flex items-center gap-1 flex-shrink-0">
           {framesData.map((f, idx) => (
             <button
               key={f.id}
@@ -720,20 +720,15 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
                 if (isBusyRef.current || idx === activeIndex) return;
                 changeFrameByIndex(idx);
               }}
-              className={`transition-all duration-300 rounded-full cursor-pointer ${idx === activeIndex
-                  ? "w-6 h-1.5 bg-vermilion-red shadow-xs"
+              className={`transition-all duration-300 rounded-full cursor-pointer ${
+                idx === activeIndex
+                  ? "w-4 h-1.5 bg-vermilion-red shadow-xs"
                   : "w-1.5 h-1.5 bg-border-bronze-light hover:bg-bronze-gold hover:scale-125"
-                }`}
+              }`}
               aria-label={`Chọn ${f.name}`}
               title={f.name}
             />
           ))}
-        </div>
-
-        {/* Swipe Guidance Hint */}
-        <div className="flex items-center justify-center gap-1 text-[10px] text-text-warm-gray font-medium pt-0.5">
-          <ArrowLeftRight className="w-3 h-3 text-bronze-gold animate-pulse" />
-          <span>Bấm mũi tên hoặc kéo vuốt để trượt đổi khung viền</span>
         </div>
       </div>
 
@@ -741,16 +736,16 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
         <div className="text-center">
           <Link
             href="/"
-            className="text-xs text-vermilion-red hover:underline font-semibold flex items-center gap-1 justify-center"
+            className="text-[11px] text-vermilion-red hover:underline font-semibold flex items-center gap-1 justify-center"
           >
-            <Sparkles className="w-3.5 h-3.5" />
+            <Sparkles className="w-3 h-3" />
             <span>Chưa tạo ảnh AI? Quay lại Studio để tạo ảnh riêng →</span>
           </Link>
         </div>
       )}
 
       {/* Action Buttons */}
-      <div className="flex flex-col gap-2.5 w-full max-w-[340px] sm:max-w-[380px]">
+      <div className="flex flex-col gap-2 w-full max-w-[280px] sm:max-w-[300px]">
         {/* Primary CTA: Chia sẻ lên Cộng đồng */}
         <button
           onClick={() => {
@@ -759,17 +754,17 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
           }}
           disabled={!displayImage}
           title={!displayImage ? "Vui lòng tạo ảnh phối đồ trước khi chia sẻ" : undefined}
-          className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-vermilion-red via-primary to-vermilion-red hover:opacity-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-95 group disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+          className="w-full py-2.5 px-3.5 rounded-xl bg-gradient-to-r from-vermilion-red via-primary to-vermilion-red hover:opacity-95 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm hover:shadow-md transition-all active:scale-95 group disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 cursor-pointer"
         >
-          <Sparkles className="w-4 h-4 text-bronze-gold group-hover:rotate-12 transition-transform" />
+          <Sparkles className="w-3.5 h-3.5 text-bronze-gold group-hover:rotate-12 transition-transform" />
           <span>Chia Sẻ Lên Thư Viện Cộng Đồng</span>
-          <span className="text-[10px] font-mono bg-white/20 px-2 py-0.5 rounded-full ml-1 font-semibold">
+          <span className="text-[9px] font-mono bg-white/20 px-1.5 py-0.5 rounded-full ml-0.5 font-semibold">
             Live
           </span>
         </button>
 
         {/* Secondary Actions: Tải PNG & Chép Link */}
-        <div className="flex items-center gap-2.5 w-full">
+        <div className="flex items-center gap-2 w-full">
           <button
             onClick={() => {
               if (!displayImage) return;
@@ -777,7 +772,7 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
             }}
             disabled={!displayImage || downloading}
             title={!displayImage ? "Vui lòng tạo ảnh phối đồ trước khi tải ảnh" : undefined}
-            className="flex-1 py-2.5 px-3 rounded-xl bg-paper-cream hover:bg-surface-pure border border-border-bronze-light text-text-charcoal font-semibold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 cursor-pointer"
+            className="flex-1 py-2 px-2.5 rounded-xl bg-paper-cream hover:bg-surface-pure border border-border-bronze-light text-text-charcoal font-semibold text-[11px] flex items-center justify-center gap-1 shadow-2xs transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 cursor-pointer"
           >
             <Download className={`w-3.5 h-3.5 text-vermilion-red ${downloading ? "animate-bounce" : ""}`} />
             <span>{downloading ? "Đang xuất..." : "Tải Thẻ PNG"}</span>
@@ -787,7 +782,7 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
             onClick={handleCopyShareLink}
             disabled={!displayImage}
             title={!displayImage ? "Vui lòng tạo ảnh phối đồ trước khi sao chép liên kết" : undefined}
-            className="flex-1 py-2.5 px-3 rounded-xl bg-surface-pure hover:bg-paper-cream border border-border-bronze-light text-text-charcoal font-semibold text-xs flex items-center justify-center gap-1.5 transition-all shadow-2xs disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 py-2 px-2.5 rounded-xl bg-surface-pure hover:bg-paper-cream border border-border-bronze-light text-text-charcoal font-semibold text-[11px] flex items-center justify-center gap-1 transition-all shadow-2xs disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             {copied ? (
               <>
