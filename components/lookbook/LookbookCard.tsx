@@ -91,7 +91,7 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
   const qrCodeUrl = useQrCode(displayImage ? shareUrl : "");
 
   const handleDownload = async () => {
-    if (!cardRef.current) return;
+    if (!displayImage || !cardRef.current) return;
     setDownloading(true);
     try {
       // Ensure private share ID is prepared if we have an AI image so the exported QR code is 100% active
@@ -126,6 +126,7 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
   };
 
   const handleCopyShareLink = async () => {
+    if (!displayImage) return;
     let currentId = activeShareId;
     if (!currentId && displayImage && (displayImage.startsWith("data:") || displayImage.startsWith("blob:"))) {
       currentId = (await getOrGeneratePrivateShareId({
@@ -187,7 +188,7 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
               <Sparkles className="w-7 h-7 text-bronze-gold/90" />
             </div>
             <h4 className="relative z-10 font-serif text-base font-bold text-paper-cream tracking-wide">
-              Khung Trưng Bày 9:16
+              Khung Trưng Bày Di Sản
             </h4>
             <p className="relative z-10 text-[11px] text-white/55 mt-1.5 max-w-[210px] leading-relaxed">
               Chưa có ảnh phối đồ AI. Hãy tạo ảnh trong Studio để hoàn thiện thẻ Lookbook.
@@ -301,7 +302,7 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
         </div>
       </div>
 
-      {!resultImage && (
+      {!displayImage && (
         <div className="text-center">
           <Link
             href="/"
@@ -317,8 +318,13 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
       <div className="flex flex-col gap-2.5 w-full max-w-[340px] sm:max-w-[380px]">
         {/* Primary CTA: Chia sẻ lên Cộng đồng */}
         <button
-          onClick={() => setCommunityModalOpen(true)}
-          className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-vermilion-red via-primary to-vermilion-red hover:opacity-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-95 group"
+          onClick={() => {
+            if (!displayImage) return;
+            setCommunityModalOpen(true);
+          }}
+          disabled={!displayImage}
+          title={!displayImage ? "Vui lòng tạo ảnh phối đồ trước khi chia sẻ" : undefined}
+          className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-vermilion-red via-primary to-vermilion-red hover:opacity-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-95 group disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
         >
           <Sparkles className="w-4 h-4 text-bronze-gold group-hover:rotate-12 transition-transform" />
           <span>Chia Sẻ Lên Thư Viện Cộng Đồng</span>
@@ -331,16 +337,19 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
         <div className="flex items-center gap-2.5 w-full">
           <button
             onClick={handleDownload}
-            disabled={downloading}
-            className="flex-1 py-2.5 px-3 rounded-xl bg-paper-cream hover:bg-surface-pure border border-border-bronze-light text-text-charcoal font-semibold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all active:scale-95 disabled:opacity-50"
+            disabled={!displayImage || downloading}
+            title={!displayImage ? "Vui lòng tạo ảnh phối đồ trước khi tải ảnh" : undefined}
+            className="flex-1 py-2.5 px-3 rounded-xl bg-paper-cream hover:bg-surface-pure border border-border-bronze-light text-text-charcoal font-semibold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
           >
             <Download className={`w-3.5 h-3.5 text-vermilion-red ${downloading ? "animate-bounce" : ""}`} />
-            <span>{downloading ? "Đang xuất..." : "Tải PNG (9:16)"}</span>
+            <span>{downloading ? "Đang xuất..." : "Tải Thẻ PNG"}</span>
           </button>
 
           <button
             onClick={handleCopyShareLink}
-            className="flex-1 py-2.5 px-3 rounded-xl bg-surface-pure hover:bg-paper-cream border border-border-bronze-light text-text-charcoal font-semibold text-xs flex items-center justify-center gap-1.5 transition-all shadow-2xs"
+            disabled={!displayImage}
+            title={!displayImage ? "Vui lòng tạo ảnh phối đồ trước khi sao chép liên kết" : undefined}
+            className="flex-1 py-2.5 px-3 rounded-xl bg-surface-pure hover:bg-paper-cream border border-border-bronze-light text-text-charcoal font-semibold text-xs flex items-center justify-center gap-1.5 transition-all shadow-2xs disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {copied ? (
               <>

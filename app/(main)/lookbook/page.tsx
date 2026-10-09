@@ -550,11 +550,8 @@ export default function LookbookPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h1 className="font-serif font-bold text-xl sm:text-2xl text-text-charcoal tracking-tight flex items-center gap-2">
-                  <span>Bộ sưu tập Lookbook Di sản 9:16</span>
-                </h1>
-              <p className="text-xs text-text-warm-gray mt-0.5">
-                Tạo thẻ định danh di sản của bạn hoặc khám phá và tương tác cùng cộng đồng
-              </p>
+                <span>Bộ sưu tập Lookbook Di sản</span>
+              </h1>
             </div>
 
             {/* Live Status Badge */}
@@ -631,9 +628,6 @@ export default function LookbookPage() {
                   <h2 className="font-serif font-bold text-base text-text-charcoal leading-tight">
                     Khám phá Lookbook Di sản Gen Z
                   </h2>
-                  <p className="text-[11px] text-text-warm-gray mt-0.5">
-                    Được chia sẻ bởi cộng đồng người yêu trang phục truyền thống
-                  </p>
                 </div>
               </div>
 
@@ -783,7 +777,6 @@ export default function LookbookPage() {
 
                               <div className="relative z-10 flex items-center justify-between text-[9px] font-mono text-bronze-gold">
                                 <span>{garmentMeta?.dynasty || item.era}</span>
-                                <span>9:16</span>
                               </div>
 
                               <div className="relative z-10 text-center my-auto flex flex-col items-center">

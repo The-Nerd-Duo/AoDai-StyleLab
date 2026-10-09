@@ -19,7 +19,7 @@ export const FrameSelector: React.FC<FrameSelectorProps> = ({
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-vermilion-red" />
           <h3 className="text-sm font-bold text-text-charcoal font-serif">
-            Khung Viền Di Sản &amp; Tạp Chí 9:16
+            Khung Viền Di Sản &amp; Tạp Chí
           </h3>
         </div>
         <span className="text-[11px] text-text-warm-gray font-mono">{framesData.length} phong cách độc bản</span>
@@ -64,7 +64,7 @@ export const FrameSelector: React.FC<FrameSelectorProps> = ({
                 <span className="uppercase font-semibold tracking-wider">
                   {f.theme === "none" ? "Không Khung" : f.theme}
                 </span>
-                <span className="text-text-warm-gray/80">9:16 Editorial</span>
+                <span className="text-text-warm-gray/80">Editorial</span>
               </div>
             </button>
           );
