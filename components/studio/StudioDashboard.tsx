@@ -63,7 +63,7 @@ export const StudioDashboard: React.FC = () => {
       try {
         const stored = sessionStorage.getItem("vietphuc_persona_confirmed");
         if (stored !== null) return stored === "1";
-      } catch {}
+      } catch { }
     }
     return false;
   });
@@ -75,8 +75,8 @@ export const StudioDashboard: React.FC = () => {
         return new Set(["personaId", "garmentId", "colorId", "occasionId", "styleId"]);
       }
       if (active?.type === "trial") {
-        // For trial, ONLY the trial garment is applied! Persona and all other categories are chosen by the user.
-        return new Set(["garmentId"]);
+        // Trial mode focuses the garment in carousel, but does not pre-select it
+        return new Set();
       }
       try {
         const stored = sessionStorage.getItem("vietphuc_chosen_categories");
@@ -86,7 +86,7 @@ export const StudioDashboard: React.FC = () => {
             return new Set<string>(parsed);
           }
         }
-      } catch {}
+      } catch { }
     }
     return new Set();
   });
@@ -102,7 +102,7 @@ export const StudioDashboard: React.FC = () => {
 
       if (active.type === "trial") {
         setIsPersonaConfirmed(false);
-        setChosenCategories(new Set(["garmentId"]));
+        setChosenCategories(new Set());
         setActiveCategory("garment");
         if (setResultImage && resultImage) {
           setResultImage(null);
@@ -129,7 +129,7 @@ export const StudioDashboard: React.FC = () => {
         "vietphuc_chosen_categories",
         JSON.stringify(Array.from(chosenCategories))
       );
-    } catch {}
+    } catch { }
   }, [chosenCategories]);
 
   useEffect(() => {
@@ -139,7 +139,7 @@ export const StudioDashboard: React.FC = () => {
         "vietphuc_persona_confirmed",
         isPersonaConfirmed ? "1" : "0"
       );
-    } catch {}
+    } catch { }
   }, [isPersonaConfirmed]);
 
   // When clicking 'x': ABANDON the remix/trial and reset ALL current selections back to default
@@ -157,7 +157,7 @@ export const StudioDashboard: React.FC = () => {
         sessionStorage.removeItem("vietphuc_persona_confirmed");
         sessionStorage.removeItem("vietphuc_result_image");
         localStorage.removeItem("vietphuc_result_image");
-      } catch {}
+      } catch { }
       if (window.history.replaceState) {
         window.history.replaceState({}, "", window.location.pathname);
       }
@@ -181,9 +181,6 @@ export const StudioDashboard: React.FC = () => {
   };
 
   const missingCategories = REQUIRED_CATEGORIES.filter((req) => {
-    if (req.key === "personaId") {
-      return !isPersonaConfirmed || !chosenCategories.has("personaId");
-    }
     return !chosenCategories.has(req.key);
   });
 

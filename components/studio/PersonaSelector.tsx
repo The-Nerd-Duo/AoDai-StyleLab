@@ -74,6 +74,7 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
 
   // Sync activeIndex with selectedPersonaId on mount/change
   useEffect(() => {
+    if (!selectedPersonaId) return;
     const idx = PERSONAS.findIndex((p) => p.id === selectedPersonaId);
     if (idx !== -1 && idx !== activeIndex) {
       setActiveIndex(idx);
@@ -306,7 +307,7 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
           const offset = getOffset(index);
           const style = getCardTransform(offset);
           const isFront = offset === 0;
-          const isSelected = selectedPersonaId === item.id && isFront;
+          const isSelected = Boolean(selectedPersonaId && selectedPersonaId === item.id && isFront);
           const isPressed = pressedItemId === item.id;
 
           return (
@@ -323,17 +324,15 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
                     ? "transform 0.08s ease-out, filter 0.08s ease-out, box-shadow 0.08s ease-out"
                     : "transform 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.15), filter 0.2s ease, box-shadow 0.2s ease, border-color 0.15s ease",
                 }}
-                className={`w-full h-full rounded-2xl bg-surface-pure border-2 flex flex-col overflow-hidden select-none cursor-pointer group ${
-                  isFront
+                className={`w-full h-full rounded-2xl bg-surface-pure border-2 flex flex-col overflow-hidden select-none cursor-pointer group ${isFront
                     ? isSelected
                       ? "border-vermilion-red/80 shadow-xl ring-2 ring-vermilion-red/25"
                       : "border-border-bronze-light shadow-md hover:border-bronze-gold/60"
                     : "border-border-bronze-light/70 shadow-md hover:border-bronze-gold/60 opacity-85 hover:opacity-95"
-                } ${
-                  isPressed
+                  } ${isPressed
                     ? "scale-[0.96] translate-y-1.5 shadow-sm ring-2 ring-vermilion-red/60 brightness-95"
                     : "active:scale-[0.97] active:translate-y-1"
-                }`}
+                  }`}
               >
                 <div className="relative w-full h-full overflow-hidden pointer-events-none">
                   {/* Full Vertical Image */}
@@ -360,7 +359,7 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
                       </span>
                     ) : (
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/50 text-white/90 border border-white/20 font-medium shadow-xs backdrop-blur-xs">
-                        {item.vibe.split(",")[0]}
+                        {isFront && !selectedPersonaId ? "Chưa chọn" : item.vibe.split(",")[0]}
                       </span>
                     )}
                   </div>
@@ -383,16 +382,21 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
       {/* Swipe Guidance Hint */}
       <div className="flex items-center justify-center gap-1.5 text-[10px] text-text-warm-gray font-medium">
         <ArrowLeftRight className="w-3 h-3 text-bronze-gold animate-pulse" />
-        <span>Vuốt ngang để tự động chọn diện mạo Nam hoặc Nữ</span>
+        <span>Nhấn vào thẻ hoặc vuốt ngang để chọn diện mạo Nam hoặc Nữ</span>
       </div>
 
       {/* Primary CTA Confirm Button */}
       <button
         type="button"
+        disabled={!selectedPersonaId}
         onClick={onConfirm}
-        className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-vermilion-red via-[#d33a29] to-[#bf2e1f] hover:brightness-105 text-white font-serif font-bold text-sm shadow-md hover:shadow-lg transition-all duration-150 flex items-center justify-center gap-2 active:scale-[0.98] ring-1 ring-white/20"
+        className={`w-full py-3 px-4 rounded-xl font-serif font-bold text-sm shadow-md transition-all duration-150 flex items-center justify-center gap-2 ring-1 ${
+          selectedPersonaId
+            ? "bg-gradient-to-r from-vermilion-red via-[#d33a29] to-[#bf2e1f] hover:brightness-105 text-white shadow-md hover:shadow-lg active:scale-[0.98] ring-white/20 cursor-pointer"
+            : "bg-stone-200 dark:bg-stone-800 text-stone-400 border border-stone-300/40 cursor-not-allowed opacity-60"
+        }`}
       >
-        <span>Sang phần phối đồ</span>
+        <span>{selectedPersonaId ? "Sang phần phối đồ" : "Vui lòng chọn nhân vật trước"}</span>
         <ArrowRight className="w-4 h-4 stroke-[2.5]" />
       </button>
     </div>

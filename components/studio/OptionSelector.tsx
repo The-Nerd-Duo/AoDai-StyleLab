@@ -104,14 +104,14 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
       {!isPersonaConfirmed ? (
         <div className="animate-fadeIn">
           <PersonaSelector
-            selectedPersonaId={outfit.personaId || "female-modern"}
+            selectedPersonaId={chosenCategories.has("personaId") ? outfit.personaId : ""}
             onSelectPersona={(id) => {
               onChange("personaId", id);
               setChosenCategories((prev) => new Set(prev).add("personaId"));
             }}
             onConfirm={() => {
+              if (!chosenCategories.has("personaId")) return;
               setIsPersonaConfirmed(true);
-              setChosenCategories((prev) => new Set(prev).add("personaId"));
             }}
           />
         </div>
@@ -134,7 +134,9 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
               <span>
                 {outfit.personaId === "female-modern"
                   ? "Nhân vật: Nữ"
-                  : "Nhân vật: Nam"}
+                  : outfit.personaId === "male-modern"
+                    ? "Nhân vật: Nam"
+                    : "Nhân vật: Chưa chọn"}
               </span>
             </div>
           </div>
@@ -149,11 +151,10 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
                   key={cat.id}
                   type="button"
                   onClick={() => setActiveCategory(cat.id as any)}
-                  className={`flex flex-col items-center justify-center py-2 px-0.5 sm:px-1 rounded-lg text-center transition-all duration-150 active:scale-95 active:translate-y-0.5 ${
-                    isActive
+                  className={`flex flex-col items-center justify-center py-2 px-0.5 sm:px-1 rounded-lg text-center transition-all duration-150 active:scale-95 active:translate-y-0.5 ${isActive
                       ? "bg-vermilion-red text-white shadow-xs font-bold"
                       : "text-text-warm-gray hover:text-text-charcoal hover:bg-surface-pure font-medium"
-                  }`}
+                    }`}
                 >
                   <Icon className="w-4 h-4 mb-1 shrink-0" />
                   <span className="text-[10px] sm:text-xs leading-tight font-semibold">

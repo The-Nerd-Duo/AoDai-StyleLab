@@ -205,19 +205,32 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
               </div>
             </div>
           ) : (
-            /* Synchronized empty state matching Lookbook tab: Không có khung, hơi mờ, ở giữa ghi "Hiện đang chưa có ảnh" */
+            /* Trạng thái chờ tạo ảnh AI trong bảng Studio: Đồng bộ màu nâu heritage ấm áp như thẻ bên bộ sưu tập */
             <div
-              className="relative w-full max-w-[210px] sm:max-w-[220px] aspect-[9/16] max-h-[440px] rounded-xl overflow-hidden flex flex-col items-center justify-center p-4 text-center select-none bg-paper-cream/80 border-2 border-dashed border-border-bronze-light/80 shadow-xs backdrop-blur-xs opacity-75 transition-all"
+              className="relative w-full max-w-[210px] sm:max-w-[220px] aspect-[9/16] max-h-[440px] rounded-2xl overflow-hidden flex flex-col items-center justify-center p-4 text-center select-none bg-[#1F1714] border border-bronze-gold/30 shadow-xl backdrop-blur-xs transition-all"
             >
-              <div className="w-12 h-12 rounded-2xl bg-surface-pure border border-border-bronze-light/80 flex items-center justify-center text-bronze-gold mb-2.5 shadow-inner">
-                <Sparkles className="w-6 h-6 text-bronze-gold/75" />
+              {/* Subtle Ambient Glow matching current color */}
+              <div
+                className="absolute inset-0 opacity-20 blur-3xl pointer-events-none"
+                style={{ backgroundColor: color.hex }}
+              />
+
+              {/* Corner decorative accents */}
+              <div className="absolute top-2.5 left-2.5 w-3 h-3 border-t-2 border-l-2 border-bronze-gold/40 pointer-events-none" />
+              <div className="absolute top-2.5 right-2.5 w-3 h-3 border-t-2 border-r-2 border-bronze-gold/40 pointer-events-none" />
+              <div className="absolute bottom-2.5 left-2.5 w-3 h-3 border-b-2 border-l-2 border-bronze-gold/40 pointer-events-none" />
+              <div className="absolute bottom-2.5 right-2.5 w-3 h-3 border-b-2 border-r-2 border-bronze-gold/40 pointer-events-none" />
+
+              {/* Minimalist Glowing Icon Box */}
+              <div className="relative z-10 w-12 h-12 rounded-2xl bg-white/[0.05] border border-white/10 backdrop-blur-md flex items-center justify-center text-bronze-gold mb-2.5 shadow-inner">
+                <Sparkles className="w-6 h-6 text-bronze-gold/90" />
               </div>
 
-              <h3 className="font-serif text-sm font-bold text-text-charcoal tracking-wide mb-1">
+              <h3 className="relative z-10 font-serif text-sm font-bold text-paper-cream tracking-wide mb-1">
                 Hiện đang chưa có ảnh
               </h3>
 
-              <p className="text-[11px] text-text-warm-gray leading-relaxed max-w-[170px]">
+              <p className="relative z-10 text-[11px] text-white/60 leading-relaxed max-w-[170px]">
                 Nhấn nút &ldquo;Tạo Ảnh Phối Đồ AI&rdquo; để tạo và mở khóa thẻ Lookbook.
               </p>
             </div>
@@ -234,7 +247,7 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
                   try {
                     sessionStorage.setItem("vietphuc_result_image", resultImage);
                     localStorage.setItem("vietphuc_result_image", resultImage);
-                  } catch {}
+                  } catch { }
                 }
               }}
               className="w-full py-3 px-4 bg-gradient-to-r from-vermilion-red to-primary text-white rounded-xl font-sans text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm hover:opacity-95 active:scale-[0.99] transition-all"
@@ -278,11 +291,10 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
             <button
               onClick={handleCycleFrame}
               disabled={!hasDisplayImage}
-              className={`py-2.5 px-3 rounded-xl font-mono text-[11px] font-semibold flex items-center justify-center gap-1.5 border transition-all shadow-xs ${
-                !hasDisplayImage
+              className={`py-2.5 px-3 rounded-xl font-mono text-[11px] font-semibold flex items-center justify-center gap-1.5 border transition-all shadow-xs ${!hasDisplayImage
                   ? "bg-paper-cream/50 text-text-warm-gray/40 border-border-bronze-light/30 cursor-not-allowed opacity-60"
                   : "bg-paper-cream hover:bg-surface-container text-text-charcoal border-border-bronze-light/60 active:scale-95 cursor-pointer"
-              }`}
+                }`}
               type="button"
               title={
                 !hasDisplayImage
@@ -291,9 +303,8 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
               }
             >
               <span
-                className={`material-symbols-outlined text-[16px] ${
-                  !hasDisplayImage ? "text-text-warm-gray/40" : "text-bronze-gold"
-                }`}
+                className={`material-symbols-outlined text-[16px] ${!hasDisplayImage ? "text-text-warm-gray/40" : "text-bronze-gold"
+                  }`}
               >
                 crop_free
               </span>

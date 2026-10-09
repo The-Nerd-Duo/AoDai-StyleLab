@@ -97,7 +97,7 @@ export const GarmentGenealogy: React.FC<GarmentGenealogyProps> = ({
     // 3. Reset storage so other categories (bối cảnh, phong cách, phụ kiện, màu sắc) from previous remix are cleared
     if (typeof window !== "undefined") {
       try {
-        sessionStorage.setItem("vietphuc_chosen_categories", JSON.stringify(["garmentId"]));
+        sessionStorage.setItem("vietphuc_chosen_categories", JSON.stringify([]));
         sessionStorage.setItem("vietphuc_persona_confirmed", "0");
         sessionStorage.removeItem("vietphuc_result_image");
         localStorage.removeItem("vietphuc_result_image");

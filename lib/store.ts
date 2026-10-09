@@ -66,7 +66,7 @@ function persistState(state: StoreState) {
       // Store in sessionStorage (high capacity for base64 images per tab)
       try {
         sessionStorage.setItem(RESULT_IMAGE_KEY, state.resultImage);
-      } catch {}
+      } catch { }
 
       // Also store in localStorage (cross-tab/reboot persistence)
       try {
@@ -78,7 +78,7 @@ function persistState(state: StoreState) {
       try {
         sessionStorage.removeItem(RESULT_IMAGE_KEY);
         localStorage.removeItem(RESULT_IMAGE_KEY);
-      } catch {}
+      } catch { }
     }
   } catch (err) {
     console.warn("Storage sync error:", err);
@@ -132,7 +132,7 @@ function initFromStorage() {
           savedImage = active.img;
         }
       }
-    } catch {}
+    } catch { }
 
     // If not in remix with image, check saved result image
     if (!savedImage) {
@@ -143,7 +143,7 @@ function initFromStorage() {
         if (storedImg && storedImg.trim()) {
           savedImage = storedImg;
         }
-      } catch {}
+      } catch { }
     }
 
     currentStoreState = {
@@ -251,7 +251,7 @@ export function useOutfitStore() {
           };
           reader.readAsDataURL(blob);
         })
-        .catch(() => {});
+        .catch(() => { });
     }
   }, []);
 

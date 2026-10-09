@@ -413,28 +413,40 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
   if (!displayImage) {
     return (
       <div className="flex flex-col items-center gap-4 w-full">
-        {/* Placeholder: Không có khung, không có mũi tên, hơi mờ để thể hiện chưa khả dụng */}
+        {/* Placeholder: Khung màu đen/nâu heritage đồng bộ với Khung trưng bày, 4 góc họa tiết đồng */}
         <div
-          className="relative w-full max-w-[280px] xs:max-w-[310px] sm:max-w-[350px] aspect-[9/16] rounded-2xl overflow-hidden flex flex-col items-center justify-center p-6 text-center select-none bg-paper-cream/80 border-2 border-dashed border-border-bronze-light/80 shadow-xs backdrop-blur-xs opacity-75 transition-all"
+          className="relative w-full max-w-[280px] xs:max-w-[310px] sm:max-w-[350px] aspect-[9/16] rounded-2xl overflow-hidden flex flex-col items-center justify-center p-6 text-center select-none bg-[#1F1714] border border-bronze-gold/30 shadow-xl backdrop-blur-xs transition-all"
         >
-          {/* Subtle icon box */}
-          <div className="w-16 h-16 rounded-2xl bg-surface-pure border border-border-bronze-light/80 flex items-center justify-center text-bronze-gold mb-3 shadow-inner">
-            <Sparkles className="w-8 h-8 text-bronze-gold/75" />
+          {/* Subtle Ambient Glow */}
+          <div
+            className="absolute inset-0 opacity-20 blur-3xl pointer-events-none"
+            style={{ backgroundColor: color.hex }}
+          />
+
+          {/* Corner decorative accents */}
+          <div className="absolute top-3.5 left-3.5 w-3.5 h-3.5 border-t-2 border-l-2 border-bronze-gold/40 pointer-events-none" />
+          <div className="absolute top-3.5 right-3.5 w-3.5 h-3.5 border-t-2 border-r-2 border-bronze-gold/40 pointer-events-none" />
+          <div className="absolute bottom-3.5 left-3.5 w-3.5 h-3.5 border-b-2 border-l-2 border-bronze-gold/40 pointer-events-none" />
+          <div className="absolute bottom-3.5 right-3.5 w-3.5 h-3.5 border-b-2 border-r-2 border-bronze-gold/40 pointer-events-none" />
+
+          {/* Minimalist Glowing Icon Box */}
+          <div className="relative z-10 w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/[0.05] border border-white/10 backdrop-blur-md flex items-center justify-center text-bronze-gold mb-3 shadow-inner">
+            <Sparkles className="w-7 h-7 sm:w-8 sm:h-8 text-bronze-gold/90" />
           </div>
 
-          <h3 className="font-serif text-base sm:text-lg font-bold text-text-charcoal tracking-wide mb-1.5">
+          <h3 className="relative z-10 font-serif text-base sm:text-lg font-bold text-paper-cream tracking-wide mb-1.5">
             Hiện đang chưa có ảnh
           </h3>
 
-          <p className="text-xs text-text-warm-gray max-w-[210px] leading-relaxed mb-4">
+          <p className="relative z-10 text-xs text-white/60 max-w-[210px] leading-relaxed mb-4">
             Thẻ Lookbook chưa khả dụng vì bạn chưa tạo ảnh phối đồ AI. Hãy tạo ảnh trong Studio để mở khóa thẻ!
           </p>
 
           <Link
             href="/"
-            className="px-4 py-2 rounded-xl bg-vermilion-red hover:bg-primary text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            className="relative z-10 px-4 py-2 rounded-xl bg-gradient-to-r from-vermilion-red to-primary hover:opacity-95 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md transition-all hover:scale-105 active:scale-95 cursor-pointer ring-1 ring-white/20"
           >
-            <Sparkles className="w-3.5 h-3.5" />
+            <Sparkles className="w-3.5 h-3.5 text-bronze-gold" />
             <span>Đến Studio Tạo Ảnh Ngay →</span>
           </Link>
         </div>
