@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import genealogyData from "@/config/genealogy.json";
-import { useOutfitStore } from "@/lib/store";
+import { useOutfitStore, DEFAULT_OUTFIT } from "@/lib/store";
 import {
   getActiveStudioContext,
   setActiveStudioContext,
@@ -65,7 +65,7 @@ export const GarmentGenealogy: React.FC<GarmentGenealogyProps> = ({
   onSelectPattern,
 }) => {
   const router = useRouter();
-  const { updateOutfitField } = useOutfitStore();
+  const { setOutfit, setResultImage, setSelectedFrame } = useOutfitStore();
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [pendingReplacement, setPendingReplacement] = useState<{
@@ -81,9 +81,29 @@ export const GarmentGenealogy: React.FC<GarmentGenealogyProps> = ({
     incomingContext: ActiveStudioContext
   ) => {
     const targetId = STUDIO_GARMENT_MAP[studioGarmentId] || studioGarmentId;
-    if (updateOutfitField) {
-      updateOutfitField("garmentId", targetId);
+    
+    // 1. Reset all outfit fields, setting only the trial garment and clearing previous remix selections
+    setOutfit({
+      ...DEFAULT_OUTFIT,
+      garmentId: targetId,
+      accessoryId: "none",
+      accessoryIds: ["none"],
+    });
+
+    // 2. Clear AI image and frame
+    setResultImage(null);
+    setSelectedFrame("frame-default-none");
+
+    // 3. Reset storage so other categories (bối cảnh, phong cách, phụ kiện, màu sắc) from previous remix are cleared
+    if (typeof window !== "undefined") {
+      try {
+        sessionStorage.setItem("vietphuc_chosen_categories", JSON.stringify(["garmentId"]));
+        sessionStorage.setItem("vietphuc_persona_confirmed", "0");
+        sessionStorage.removeItem("vietphuc_result_image");
+        localStorage.removeItem("vietphuc_result_image");
+      } catch {}
     }
+
     setActiveStudioContext(incomingContext);
     setConfirmModalOpen(false);
     setPendingReplacement(null);

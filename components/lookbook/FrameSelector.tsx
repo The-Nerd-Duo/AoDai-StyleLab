@@ -334,6 +334,8 @@ export const FrameSelector: React.FC<FrameSelectorProps> = ({
                   {/* Render the Exact Live Decorative Frame */}
                   <FrameDecoration
                     theme={f.theme}
+                    frameId={f.id}
+                    image={(f as any).image}
                     borderColor={f.borderColor}
                     accentColor={f.accentColor}
                   />
@@ -344,7 +346,7 @@ export const FrameSelector: React.FC<FrameSelectorProps> = ({
                   {/* Top Badges */}
                   <div className="absolute top-2.5 inset-x-2.5 flex items-center justify-between pointer-events-none z-30">
                     <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-amber-200 border border-amber-300/30 font-semibold shadow-xs">
-                      {f.theme === "none" ? "Nguyên Bản" : f.theme.toUpperCase()}
+                      {f.theme === "none" ? "Nguyên Bản" : f.name.replace("Khung ", "")}
                     </span>
                     {isSelected && isFront ? (
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-vermilion-red text-white font-bold flex items-center gap-1 shadow-xs transition-all">

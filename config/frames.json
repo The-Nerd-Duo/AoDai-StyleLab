@@ -9,66 +9,72 @@
     "accentColor": "#C5A059",
     "badgeText": "ORIGINAL • KHÔNG DÙNG KHUNG",
     "aspectRatio": "9:16",
-    "cornerMotif": "none"
+    "cornerMotif": "none",
+    "image": null
   },
   {
     "id": "frame-heritage-vermilion",
-    "name": "Chu Sa Hoàng Kim (Cung Đình)",
-    "description": "Viền chu sa và mây cuộn hoàng triều cung đình.",
-    "theme": "royal",
+    "name": "Khung Hoàng Kim",
+    "description": "Viền hoàng kim hoa sen tinh tế, quý phái.",
+    "theme": "hoang_kim",
     "borderColor": "#C5A059",
     "secondaryBorderColor": "#BA2D27",
     "accentColor": "#BA2D27",
-    "badgeText": "VIỆT PHỤC REMIX • ĐẠI TRIỀU 2026",
+    "badgeText": "VIỆT PHỤC REMIX • HOÀNG KIM",
     "aspectRatio": "9:16",
-    "cornerMotif": "cloud-curl"
+    "cornerMotif": "cloud-curl",
+    "image": "/frames/khung_hoang_kim.png"
   },
   {
     "id": "frame-minimal-gold",
-    "name": "Tạp Chí Thời Trang (Haute Couture)",
-    "description": "Đường viền chỉ vàng thanh lịch, cao cấp.",
-    "theme": "editorial",
+    "name": "Khung Tạp Chí Thời Trang",
+    "description": "Đường viền Haute Couture thanh lịch phong cách tạp chí thời trang.",
+    "theme": "tap_chi_thoi_trang",
     "borderColor": "#D4AF37",
     "secondaryBorderColor": "#FFFFFF33",
     "accentColor": "#D4AF37",
     "badgeText": "HERITAGE COUTURE • EDITORIAL",
     "aspectRatio": "9:16",
-    "cornerMotif": "editorial-cross"
+    "cornerMotif": "editorial-cross",
+    "image": "/frames/khung_tap_chi_thoi_trang.png"
   },
   {
     "id": "frame-cyber-indochine",
-    "name": "Cyber Indochine (Neo-Heritage)",
-    "description": "Viền dạ quang neon vi mạch hiện đại.",
+    "name": "Khung Cyber",
+    "description": "Viền dạ quang neon vi mạch hiện đại phong cách Cyber Gen Z.",
     "theme": "cyber",
     "borderColor": "#2DD4BF",
     "secondaryBorderColor": "#0D9488",
     "accentColor": "#2DD4BF",
-    "badgeText": "GEN-Z RETROFUTURISM • 2026",
+    "badgeText": "GEN-Z RETROFUTURISM • CYBER",
     "aspectRatio": "9:16",
-    "cornerMotif": "cyber-hud"
+    "cornerMotif": "cyber-hud",
+    "image": "/frames/khung_cyber.png"
   },
   {
     "id": "frame-vintage-stamp",
-    "name": "Bưu Thiếp Đông Dương (Indochine Postal)",
-    "description": "Viền tem răng cưa và dấu mộc hoài cổ.",
-    "theme": "vintage",
-    "borderColor": "#92400E",
+    "name": "Khung Indochine",
+    "description": "Viền tem bưu chính Đông Dương và hoa văn cổ điển trang nhã.",
+    "theme": "indochine",
+    "borderColor": "#B45309",
     "secondaryBorderColor": "#D97706",
     "accentColor": "#B45309",
-    "badgeText": "BƯU CHÍNH ĐÔNG DƯƠNG • 1924-2026",
+    "badgeText": "BƯU CHÍNH ĐÔNG DƯƠNG • INDOCHINE",
     "aspectRatio": "9:16",
-    "cornerMotif": "postal-stamp"
+    "cornerMotif": "postal-stamp",
+    "image": "/frames/khung_indochine.png"
   },
   {
     "id": "frame-museum-curator",
-    "name": "Giám Tuyển Sơn Mài (Museum Collector)",
-    "description": "Sơn mài đen tuyền viền thếp vàng quý phái.",
-    "theme": "curator",
+    "name": "Khung Sơn Mài",
+    "description": "Sơn mài đen tuyền bóng bẩy viền thếp vàng cổ truyền.",
+    "theme": "son_mai",
     "borderColor": "#C5A059",
     "secondaryBorderColor": "#1A1A1A",
     "accentColor": "#E5C158",
-    "badgeText": "ARCHIVE NO. 2026 • DI SẢN QUỐC GIA",
+    "badgeText": "ARCHIVE NO. 2026 • SƠN MÀI",
     "aspectRatio": "9:16",
-    "cornerMotif": "museum-corner"
+    "cornerMotif": "museum-corner",
+    "image": "/frames/khung_son_mai.png"
   }
 ]

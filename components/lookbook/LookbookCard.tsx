@@ -436,18 +436,16 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
-          className="relative w-full max-w-[280px] xs:max-w-[310px] sm:max-w-[350px] aspect-[9/16] rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between select-none bg-[#0D0C0B] cursor-grab active:cursor-grabbing touch-pan-y flex-shrink-0"
+          className="relative w-full max-w-[280px] xs:max-w-[310px] sm:max-w-[350px] aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl flex flex-col justify-end select-none bg-[#0D0C0B] cursor-grab active:cursor-grabbing touch-pan-y flex-shrink-0"
           style={{
-            border: `3.5px solid ${
-              currentFrame.borderColor && currentFrame.borderColor !== "transparent"
+            border: `2px solid ${currentFrame.borderColor && currentFrame.borderColor !== "transparent"
                 ? currentFrame.borderColor
                 : "#2D2A26"
-            }`,
-            boxShadow: `0 20px 50px -10px rgba(0,0,0,0.6), 0 0 25px -5px ${
-              currentFrame.borderColor && currentFrame.borderColor !== "transparent"
+              }`,
+            boxShadow: `0 20px 50px -10px rgba(0,0,0,0.6), 0 0 25px -5px ${currentFrame.borderColor && currentFrame.borderColor !== "transparent"
                 ? currentFrame.borderColor
                 : "#000000"
-            }40`,
+              }40`,
             transition: isDragging ? "none" : "border-color 0.65s ease, box-shadow 0.65s ease",
           }}
         >
@@ -461,8 +459,8 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
                 className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none z-0"
                 onError={() => setImageError(true)}
               />
-              {/* Top protective gradient */}
-              <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-black/85 via-black/40 to-transparent pointer-events-none z-10" />
+              {/* Subtle top protective gradient */}
+              <div className="absolute top-0 inset-x-0 h-16 bg-gradient-to-b from-black/30 to-transparent pointer-events-none z-10" />
               {/* Bottom protective gradient */}
               <div className="absolute bottom-0 inset-x-0 h-64 bg-gradient-to-t from-black/95 via-black/85 to-transparent pointer-events-none z-10" />
               {/* Subtle ambient hue tint */}
@@ -504,6 +502,8 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
           >
             <FrameDecoration
               theme={prevFrame.theme || "none"}
+              frameId={prevFrame.id}
+              image={prevFrame.image}
               borderColor={prevFrame.borderColor}
               accentColor={prevFrame.accentColor}
             />
@@ -520,6 +520,8 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
           >
             <FrameDecoration
               theme={currentFrame.theme || "none"}
+              frameId={currentFrame.id}
+              image={currentFrame.image}
               borderColor={currentFrame.borderColor}
               accentColor={currentFrame.accentColor}
             />
@@ -536,45 +538,30 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
           >
             <FrameDecoration
               theme={nextFrame.theme || "none"}
+              frameId={nextFrame.id}
+              image={nextFrame.image}
               borderColor={nextFrame.borderColor}
               accentColor={nextFrame.accentColor}
             />
           </div>
 
-          {/* Layer 1: Floating Top Seal Header (Layer z-30, Inset Safe Margins) */}
-          <div className="relative z-30 flex items-center justify-between px-6 pt-5 sm:px-7 sm:pt-6 text-white pointer-events-none">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-vermilion-red to-primary flex items-center justify-center text-[13px] font-bold text-white shadow-md border border-white/20">
-                V
-              </div>
-              <div className="flex flex-col">
-                <span className="font-serif text-[11px] leading-tight text-paper-cream tracking-wider uppercase font-bold">
-                  AODAI STYLELAB
-                </span>
-                <span className="font-mono text-[9px] text-bronze-gold tracking-widest uppercase">
-                  {currentFrame.badgeText || "LOOKBOOK ARCHIVE #088"}
-                </span>
-              </div>
-            </div>
-          </div>
-
           {/* Layer 2: Floating Bottom Narrative & QR Tray (Layer z-30, Inset Safe Margins) */}
-          <div className="relative z-30 flex items-end justify-between gap-3 px-6 pb-6 sm:px-7 sm:pb-7 text-white pointer-events-none">
-            <div className="flex flex-col gap-1.5 min-w-0 flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
+          <div className="absolute bottom-0 inset-x-0 z-30 flex items-center justify-between gap-3 px-6 pb-10 sm:px-7 sm:pb-12 text-white pointer-events-none">
+            <div className="flex flex-col gap-1 min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 flex-nowrap overflow-hidden">
                 <span
-                  className="w-3.5 h-3.5 rounded-full border border-white/30 shadow-xs flex-shrink-0"
+                  className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border border-white/30 shadow-xs flex-shrink-0"
                   style={{ backgroundColor: color.hex }}
                 />
-                <span className="text-[11px] text-paper-cream font-medium tracking-wide">
+                <span className="text-[10px] sm:text-[11px] text-paper-cream font-medium tracking-wide truncate">
                   {color.name}
                 </span>
-                <span className="text-[9px] font-mono text-bronze-gold bg-black/40 backdrop-blur-xs px-2 py-0.5 rounded uppercase border border-white/10 font-semibold">
+                <span className="text-[8px] sm:text-[8.5px] font-mono text-bronze-gold bg-black/50 backdrop-blur-xs px-1.5 py-0.5 rounded uppercase border border-white/10 font-semibold flex-shrink-0">
                   {style.name}
                 </span>
               </div>
 
-              <h3 className="font-serif text-lg sm:text-xl font-bold text-white tracking-wide leading-tight drop-shadow-md truncate">
+              <h3 className="font-serif text-[15px] sm:text-base font-bold text-white tracking-wide leading-snug drop-shadow-md truncate">
                 {garment.name}
               </h3>
             </div>
@@ -586,8 +573,8 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
                 className="flex flex-col items-center flex-shrink-0 pointer-events-auto"
               >
                 <div
-                  className="w-12 h-12 sm:w-13 sm:h-13 bg-white p-1 rounded-lg shadow-lg border border-bronze-gold/40 flex items-center justify-center flex-shrink-0"
-                  style={{ width: "48px", height: "48px", minWidth: "48px", minHeight: "48px" }}
+                  className="w-11 h-11 sm:w-11 sm:h-11 bg-white p-1 rounded-md shadow-lg border border-bronze-gold/40 flex items-center justify-center flex-shrink-0"
+                  style={{ width: "42px", height: "42px", minWidth: "42px", minHeight: "42px" }}
                   title="Quét mã QR để xem & remix"
                 >
                   {qrCodeUrl ? (
@@ -599,13 +586,13 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
                     />
                   ) : (
                     <div className="w-full h-full bg-[#1A1A1A] rounded flex items-center justify-center">
-                      <span className="material-symbols-outlined text-[16px] text-white">
+                      <span className="material-symbols-outlined text-[15px] text-white">
                         qr_code
                       </span>
                     </div>
                   )}
                 </div>
-                <span className="font-mono text-[7px] text-paper-cream/80 uppercase tracking-widest mt-1 whitespace-nowrap font-bold">
+                <span className="font-mono text-[7px] text-paper-cream/80 uppercase tracking-widest mt-0.5 whitespace-nowrap font-bold">
                   QUÉT XEM
                 </span>
               </div>
@@ -657,11 +644,10 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
                 if (isBusyRef.current || idx === activeIndex) return;
                 changeFrameByIndex(idx);
               }}
-              className={`transition-all duration-300 rounded-full cursor-pointer ${
-                idx === activeIndex
+              className={`transition-all duration-300 rounded-full cursor-pointer ${idx === activeIndex
                   ? "w-6 h-1.5 bg-vermilion-red shadow-xs"
                   : "w-1.5 h-1.5 bg-border-bronze-light hover:bg-bronze-gold hover:scale-125"
-              }`}
+                }`}
               aria-label={`Chọn ${f.name}`}
               title={f.name}
             />

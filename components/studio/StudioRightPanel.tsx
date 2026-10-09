@@ -184,7 +184,9 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
 
             {/* Heritage Frame Corner Decorations (z-20, sits above image) */}
             <FrameDecoration
-              theme={frame.theme || "royal"}
+              theme={frame.theme || "hoang_kim"}
+              frameId={frame.id}
+              image={(frame as any).image}
               borderColor={frame.borderColor}
               accentColor={frame.accentColor}
             />

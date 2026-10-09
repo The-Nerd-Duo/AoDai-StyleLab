@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { OptionSelector } from "@/components/studio/OptionSelector";
 import { PreviewWorkspace, StudioBadgeInfo } from "@/components/studio/PreviewWorkspace";
 import { CulturalAdvisorCard } from "@/components/studio/CulturalAdvisorCard";
@@ -34,6 +35,7 @@ export const StudioDashboard: React.FC = () => {
     setSelectedFrame,
   } = useOutfitStore();
 
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState<
     "garment" | "color" | "occasion" | "style" | "accessory"
@@ -57,6 +59,7 @@ export const StudioDashboard: React.FC = () => {
     if (typeof window !== "undefined") {
       const active = getActiveStudioContext();
       if (active?.type === "remix") return true;
+      if (active?.type === "trial") return false;
       try {
         const stored = sessionStorage.getItem("vietphuc_persona_confirmed");
         if (stored !== null) return stored === "1";
@@ -71,25 +74,47 @@ export const StudioDashboard: React.FC = () => {
       if (active?.type === "remix") {
         return new Set(["personaId", "garmentId", "colorId", "occasionId", "styleId"]);
       }
+      if (active?.type === "trial") {
+        // For trial, ONLY the trial garment is applied! Persona and all other categories are chosen by the user.
+        return new Set(["garmentId"]);
+      }
       try {
         const stored = sessionStorage.getItem("vietphuc_chosen_categories");
         if (stored) {
           const parsed = JSON.parse(stored);
           if (Array.isArray(parsed)) {
-            const s = new Set<string>(parsed);
-            if (active?.type === "trial" && active.garmentId) {
-              s.add("garmentId");
-            }
-            return s;
+            return new Set<string>(parsed);
           }
         }
       } catch {}
-      if (active?.type === "trial" && active.garmentId) {
-        return new Set(["garmentId"]);
-      }
     }
     return new Set();
   });
+
+  // Keep state in sync whenever searchParams / activeContext updates (e.g. navigation from Bách khoa)
+  useEffect(() => {
+    const active = getActiveStudioContext();
+    if (active) {
+      setBadgeInfo({
+        type: active.type,
+        details: active.details,
+      });
+
+      if (active.type === "trial") {
+        setIsPersonaConfirmed(false);
+        setChosenCategories(new Set(["garmentId"]));
+        setActiveCategory("garment");
+        if (setResultImage && resultImage) {
+          setResultImage(null);
+        }
+      } else if (active.type === "remix") {
+        setIsPersonaConfirmed(true);
+        setChosenCategories(new Set(["personaId", "garmentId", "colorId", "occasionId", "styleId"]));
+      }
+    } else {
+      setBadgeInfo(null);
+    }
+  }, [searchParams]);
 
   const hasMountedRef = useRef(false);
 
