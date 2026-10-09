@@ -10,6 +10,7 @@ import { useOutfitStore } from "@/lib/store";
 import { toPng } from "html-to-image";
 import { Download, Share2, Check, Sparkles, ChevronLeft, ChevronRight, ArrowLeftRight } from "lucide-react";
 import { ShareCommunityModal } from "./ShareCommunityModal";
+import { DownloadChoiceModal } from "./DownloadChoiceModal";
 import { useQrCode } from "@/lib/use-qr-code";
 import { FrameDecoration } from "./FrameDecoration";
 import { getOrGeneratePrivateShareId } from "@/lib/share-service";
@@ -34,6 +35,9 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
   const { resultImage } = useOutfitStore();
   const cardRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
+  const [downloadModalOpen, setDownloadModalOpen] = useState(false);
+  const [downloadMode, setDownloadMode] = useState<"with_qr" | "without_qr" | null>(null);
+  const [isExportingWithoutQr, setIsExportingWithoutQr] = useState(false);
   const [copied, setCopied] = useState(false);
   const [communityModalOpen, setCommunityModalOpen] = useState(false);
 
@@ -323,36 +327,57 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
 
   const qrCodeUrl = useQrCode(displayImage ? shareUrl : "");
 
-  const handleDownload = async () => {
+  const handleExecuteDownload = async (withQr: boolean) => {
     if (!displayImage || !cardRef.current) return;
     setDownloading(true);
+    setDownloadMode(withQr ? "with_qr" : "without_qr");
+
     try {
-      if (!activeShareId && displayImage && (displayImage.startsWith("data:") || displayImage.startsWith("blob:"))) {
-        const id = await getOrGeneratePrivateShareId({
-          outfit,
-          frameId: activeFrameId,
-          imageUrl: displayImage,
-          title: `${garment.name} (Bản Phối Di Sản)`,
-        });
-        if (id) {
-          setInternalShareId(id);
-          await new Promise((r) => setTimeout(r, 220));
+      if (withQr) {
+        if (!activeShareId && displayImage && (displayImage.startsWith("data:") || displayImage.startsWith("blob:"))) {
+          const id = await getOrGeneratePrivateShareId({
+            outfit,
+            frameId: activeFrameId,
+            imageUrl: displayImage,
+            title: `${garment.name} (Bản Phối Di Sản)`,
+          });
+          if (id) {
+            setInternalShareId(id);
+            await new Promise((r) => setTimeout(r, 220));
+          }
         }
+      } else {
+        setIsExportingWithoutQr(true);
+        // Wait for React to unmount the QR code element from DOM before capturing
+        await new Promise((r) => setTimeout(r, 90));
       }
 
       const dataUrl = await toPng(cardRef.current, {
         cacheBust: true,
         pixelRatio: 2, // High resolution export
+        filter: (node: HTMLElement) => {
+          if (!withQr && node.getAttribute && node.getAttribute("data-card-qr") === "true") {
+            return false;
+          }
+          return true;
+        },
       });
+
       const link = document.createElement("a");
-      link.download = `AoDai-StyleLab-Lookbook-${outfit.garmentId}.png`;
+      const suffix = withQr ? "with-qr" : "clean";
+      link.download = `AoDai-StyleLab-Lookbook-${outfit.garmentId}-${suffix}.png`;
       link.href = dataUrl;
       link.click();
+
+      // Close modal smoothly after triggering download
+      setDownloadModalOpen(false);
     } catch (err) {
       console.error("Download failed:", err);
       alert("Không thể tải ảnh. Vui lòng thử lại!");
     } finally {
+      setIsExportingWithoutQr(false);
       setDownloading(false);
+      setDownloadMode(null);
     }
   };
 
@@ -554,9 +579,12 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
               </h3>
             </div>
 
-            {/* QR Code Container - Only shown when AI image has been generated */}
-            {displayImage && (
-              <div className="flex flex-col items-center flex-shrink-0 pointer-events-auto">
+            {/* QR Code Container - Only shown when AI image has been generated and not exporting without QR */}
+            {displayImage && !isExportingWithoutQr && (
+              <div
+                data-card-qr="true"
+                className="flex flex-col items-center flex-shrink-0 pointer-events-auto"
+              >
                 <div
                   className="w-12 h-12 sm:w-13 sm:h-13 bg-white p-1 rounded-lg shadow-lg border border-bronze-gold/40 flex items-center justify-center flex-shrink-0"
                   style={{ width: "48px", height: "48px", minWidth: "48px", minHeight: "48px" }}
@@ -681,10 +709,13 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
         {/* Secondary Actions: Tải PNG & Chép Link */}
         <div className="flex items-center gap-2.5 w-full">
           <button
-            onClick={handleDownload}
+            onClick={() => {
+              if (!displayImage) return;
+              setDownloadModalOpen(true);
+            }}
             disabled={!displayImage || downloading}
             title={!displayImage ? "Vui lòng tạo ảnh phối đồ trước khi tải ảnh" : undefined}
-            className="flex-1 py-2.5 px-3 rounded-xl bg-paper-cream hover:bg-surface-pure border border-border-bronze-light text-text-charcoal font-semibold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+            className="flex-1 py-2.5 px-3 rounded-xl bg-paper-cream hover:bg-surface-pure border border-border-bronze-light text-text-charcoal font-semibold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 cursor-pointer"
           >
             <Download className={`w-3.5 h-3.5 text-vermilion-red ${downloading ? "animate-bounce" : ""}`} />
             <span>{downloading ? "Đang xuất..." : "Tải Thẻ PNG"}</span>
@@ -726,6 +757,16 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
             onShareSuccess(item);
           }
         }}
+      />
+
+      {/* Download Choice Modal (Có hoặc không kèm mã QR) */}
+      <DownloadChoiceModal
+        isOpen={downloadModalOpen}
+        onClose={() => setDownloadModalOpen(false)}
+        onDownload={handleExecuteDownload}
+        downloading={downloading}
+        downloadMode={downloadMode}
+        garmentName={garment.name}
       />
     </div>
   );
