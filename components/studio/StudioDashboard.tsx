@@ -218,6 +218,7 @@ export const StudioDashboard: React.FC = () => {
             setChosenCategories={setChosenCategories}
             activeCategory={activeCategory}
             setActiveCategory={setActiveCategory}
+            onReset={handleDismissBadge}
           />
         </div>
 

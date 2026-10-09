@@ -11,6 +11,7 @@ import {
   Flame,
   ArrowLeft,
   User,
+  RotateCcw,
 } from "lucide-react";
 import { StackedDeckCarousel } from "./StackedDeckCarousel";
 import { PersonaSelector } from "./PersonaSelector";
@@ -24,6 +25,7 @@ interface OptionSelectorProps {
   setChosenCategories?: React.Dispatch<React.SetStateAction<Set<string>>>;
   activeCategory?: "garment" | "color" | "occasion" | "style" | "accessory";
   setActiveCategory?: (cat: "garment" | "color" | "occasion" | "style" | "accessory") => void;
+  onReset?: () => void;
 }
 
 export const OptionSelector: React.FC<OptionSelectorProps> = ({
@@ -35,6 +37,7 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
   setChosenCategories: propSetChosenCategories,
   activeCategory: propActiveCategory,
   setActiveCategory: propSetActiveCategory,
+  onReset,
 }) => {
   const [internalPersonaConfirmed, setInternalPersonaConfirmed] = useState(false);
   const [internalChosenCategories, setInternalChosenCategories] = useState<Set<string>>(() => new Set());
@@ -84,11 +87,23 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
     (chosenCategories.has("styleId")) ||
     (chosenCategories.has("accessory") || chosenCategories.has("accessoryIds"));
 
+  const canReset = hasAnySelected || isPersonaConfirmed;
+
+  const handleReset = () => {
+    if (onReset) {
+      onReset();
+    } else {
+      setChosenCategories(new Set());
+      setIsPersonaConfirmed(false);
+      setActiveCategory("garment");
+    }
+  };
+
   return (
     <aside className="w-full flex flex-col gap-4 bg-surface-pure rounded-2xl p-4 shadow-sm border border-border-bronze-light/60">
       {/* Title Header */}
       <div className="border-b border-border-bronze-light/40 pb-2.5">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-vermilion-red text-[20px]">
               hub
@@ -97,6 +112,29 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
               Studio Mix &amp; Match
             </h2>
           </div>
+
+          {/* Reset / Quay lại ban đầu Button */}
+          <button
+            type="button"
+            onClick={handleReset}
+            disabled={!canReset}
+            title={canReset ? "Đặt lại tất cả lựa chọn về mặc định ban đầu" : "Hiện chưa có lựa chọn nào để đặt lại"}
+            aria-label="Đặt lại tất cả về mặc định ban đầu"
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all duration-200 ${
+              canReset
+                ? "text-text-charcoal hover:text-vermilion-red bg-paper-cream hover:bg-vermilion-red/10 border border-border-bronze-light/70 hover:border-vermilion-red/40 shadow-2xs active:scale-95 cursor-pointer group"
+                : "text-text-warm-gray/40 bg-paper-cream/30 border border-border-bronze-light/30 cursor-not-allowed opacity-50"
+            }`}
+          >
+            <RotateCcw
+              className={`w-3.5 h-3.5 transition-transform duration-300 ${
+                canReset
+                  ? "text-vermilion-red group-hover:-rotate-90"
+                  : "text-text-warm-gray/40"
+              }`}
+            />
+            <span className="text-[11px] font-medium tracking-tight">Đặt lại</span>
+          </button>
         </div>
       </div>
 
