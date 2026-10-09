@@ -70,9 +70,18 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
   const handleOptionChange = <K extends keyof OutfitState>(key: K, value: OutfitState[K]) => {
     setChosenCategories((prev) => {
       const next = new Set(prev);
-      next.add(key as string);
-      if (key === "accessoryId" || key === "accessoryIds") {
-        next.add("accessory");
+      if (
+        (key === "accessoryIds" && Array.isArray(value) && (value.length === 0 || (value.length === 1 && value[0] === "none"))) ||
+        (key === "accessoryId" && value === "none")
+      ) {
+        next.delete("accessory");
+        next.delete("accessoryId");
+        next.delete("accessoryIds");
+      } else {
+        next.add(key as string);
+        if (key === "accessoryId" || key === "accessoryIds") {
+          next.add("accessory");
+        }
       }
       return next;
     });

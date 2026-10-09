@@ -48,7 +48,7 @@ export const StudioDashboard: React.FC = () => {
       if (active) {
         return {
           type: active.type,
-          details: active.details,
+          details: active.type === "remix" && outfit ? formatRemixOutfitSummary(outfit) : active.details,
         };
       }
     }
@@ -57,71 +57,69 @@ export const StudioDashboard: React.FC = () => {
 
   const [isPersonaConfirmed, setIsPersonaConfirmed] = useState<boolean>(() => {
     if (typeof window !== "undefined") {
-      const active = getActiveStudioContext();
-      if (active?.type === "remix") return true;
-      if (active?.type === "trial") return false;
       try {
         const stored = sessionStorage.getItem("vietphuc_persona_confirmed");
         if (stored !== null) return stored === "1";
       } catch { }
+      const active = getActiveStudioContext();
+      if (active?.type === "remix") return true;
+      if (active?.type === "trial") return false;
     }
     return false;
   });
 
   const [chosenCategories, setChosenCategories] = useState<Set<string>>(() => {
     if (typeof window !== "undefined") {
+      try {
+        const stored = sessionStorage.getItem("vietphuc_chosen_categories");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return new Set<string>(parsed);
+          }
+        }
+      } catch { }
       const active = getActiveStudioContext();
       if (active?.type === "remix") {
         return new Set(["personaId", "garmentId", "colorId", "occasionId", "styleId"]);
       }
       if (active?.type === "trial") {
-        // Trial mode focuses the garment in carousel, but does not pre-select it
         return new Set();
       }
-      try {
-        const stored = sessionStorage.getItem("vietphuc_chosen_categories");
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed)) {
-            return new Set<string>(parsed);
-          }
-        }
-      } catch { }
     }
     return new Set();
   });
 
-  // Keep state in sync whenever searchParams / activeContext updates (e.g. navigation from Bách khoa)
+  // Keep badge in sync whenever searchParams / activeContext updates (e.g. navigation from Bách khoa)
   useEffect(() => {
     const active = getActiveStudioContext();
     if (active) {
       setBadgeInfo({
         type: active.type,
-        details: active.details,
+        details: active.type === "remix" ? formatRemixOutfitSummary(outfit) : active.details,
       });
-
-      if (active.type === "trial") {
-        setIsPersonaConfirmed(false);
-        setChosenCategories(new Set());
-        setActiveCategory("garment");
-        if (setResultImage && resultImage) {
-          setResultImage(null);
-        }
-      } else if (active.type === "remix") {
-        setIsPersonaConfirmed(true);
-        setChosenCategories(new Set(["personaId", "garmentId", "colorId", "occasionId", "styleId"]));
-      }
     } else {
       setBadgeInfo(null);
     }
   }, [searchParams]);
 
-  const hasMountedRef = useRef(false);
+  // Keep badge details synced with outfit modifications during remix mode
+  useEffect(() => {
+    if (badgeInfo?.type === "remix") {
+      const summary = formatRemixOutfitSummary(outfit);
+      if (summary && summary !== badgeInfo.details) {
+        setBadgeInfo((prev) => (prev ? { ...prev, details: summary } : null));
+      }
+    }
+  }, [outfit, badgeInfo?.type]);
+
+  const hasMountedCatRef = useRef(false);
+  const hasMountedPersonaRef = useRef(false);
 
   // Sync chosen categories and persona to sessionStorage whenever user alters choices
   useEffect(() => {
-    if (!hasMountedRef.current) {
-      hasMountedRef.current = true;
+    if (!hasMountedCatRef.current) {
+      hasMountedCatRef.current = true;
       return;
     }
     try {
@@ -133,7 +131,10 @@ export const StudioDashboard: React.FC = () => {
   }, [chosenCategories]);
 
   useEffect(() => {
-    if (!hasMountedRef.current) return;
+    if (!hasMountedPersonaRef.current) {
+      hasMountedPersonaRef.current = true;
+      return;
+    }
     try {
       sessionStorage.setItem(
         "vietphuc_persona_confirmed",

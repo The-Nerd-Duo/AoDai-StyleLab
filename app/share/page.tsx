@@ -79,6 +79,16 @@ function ShareContent() {
     if (finalImageToRemix) {
       setResultImage(finalImageToRemix);
     }
+    if (typeof window !== "undefined") {
+      try {
+        const initialCategories = ["personaId", "garmentId", "colorId", "occasionId", "styleId"];
+        if (outfit.accessoryIds && outfit.accessoryIds.some((id) => id !== "none")) {
+          initialCategories.push("accessory");
+        }
+        sessionStorage.setItem("vietphuc_chosen_categories", JSON.stringify(initialCategories));
+        sessionStorage.setItem("vietphuc_persona_confirmed", "1");
+      } catch {}
+    }
     setActiveStudioContext(incomingContext);
     setConfirmModalOpen(false);
     setPendingReplacement(null);

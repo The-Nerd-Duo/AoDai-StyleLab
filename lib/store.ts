@@ -2,6 +2,10 @@
 
 import { useSyncExternalStore, useEffect, useCallback } from "react";
 import { OutfitState } from "./utils";
+import {
+  updateActiveStudioContextOutfit,
+  updateActiveStudioContext,
+} from "./studio-context";
 
 export const DEFAULT_OUTFIT: OutfitState = {
   garmentId: "ao-dai-cach-tan",
@@ -100,6 +104,19 @@ function initFromStorage() {
         parsed.accessoryIds = parsed.accessoryId ? [parsed.accessoryId] : [];
       }
       savedOutfit = parsed;
+    } else {
+      // Fallback only if no savedOutfit in STORAGE_KEY yet
+      try {
+        const activeRaw =
+          sessionStorage.getItem("vietphuc_active_studio_context") ||
+          localStorage.getItem("vietphuc_active_studio_context");
+        if (activeRaw) {
+          const active = JSON.parse(activeRaw);
+          if (active?.outfit) {
+            savedOutfit = active.outfit;
+          }
+        }
+      } catch { }
     }
 
     let savedCompare = currentStoreState.compareOutfit;
@@ -112,36 +129,41 @@ function initFromStorage() {
     const rawFrame = localStorage.getItem(FRAME_KEY);
     if (rawFrame) {
       savedFrame = rawFrame;
+    } else {
+      try {
+        const activeRaw =
+          sessionStorage.getItem("vietphuc_active_studio_context") ||
+          localStorage.getItem("vietphuc_active_studio_context");
+        if (activeRaw) {
+          const active = JSON.parse(activeRaw);
+          if (active?.frameId) {
+            savedFrame = active.frameId;
+          }
+        }
+      } catch { }
     }
 
-    // Restore active studio remix / trial context if present
+    // Result image: stored result image has priority; fall back to active remix image
     let savedImage: string | null = null;
     try {
-      const activeRaw =
-        sessionStorage.getItem("vietphuc_active_studio_context") ||
-        localStorage.getItem("vietphuc_active_studio_context");
-      if (activeRaw) {
-        const active = JSON.parse(activeRaw);
-        if (active?.outfit) {
-          savedOutfit = active.outfit;
-        }
-        if (active?.frameId) {
-          savedFrame = active.frameId;
-        }
-        if (active?.img) {
-          savedImage = active.img;
-        }
+      const storedImg =
+        sessionStorage.getItem(RESULT_IMAGE_KEY) ||
+        localStorage.getItem(RESULT_IMAGE_KEY);
+      if (storedImg && storedImg.trim()) {
+        savedImage = storedImg;
       }
     } catch { }
 
-    // If not in remix with image, check saved result image
     if (!savedImage) {
       try {
-        const storedImg =
-          sessionStorage.getItem(RESULT_IMAGE_KEY) ||
-          localStorage.getItem(RESULT_IMAGE_KEY);
-        if (storedImg && storedImg.trim()) {
-          savedImage = storedImg;
+        const activeRaw =
+          sessionStorage.getItem("vietphuc_active_studio_context") ||
+          localStorage.getItem("vietphuc_active_studio_context");
+        if (activeRaw) {
+          const active = JSON.parse(activeRaw);
+          if (active?.img) {
+            savedImage = active.img;
+          }
         }
       } catch { }
     }
@@ -182,6 +204,7 @@ export function useOutfitStore() {
       outfit: newOutfit,
     };
     persistState(currentStoreState);
+    updateActiveStudioContextOutfit(newOutfit);
     notify();
   }, []);
 
@@ -193,6 +216,7 @@ export function useOutfitStore() {
         outfit: updatedOutfit,
       };
       persistState(currentStoreState);
+      updateActiveStudioContextOutfit(updatedOutfit);
       notify();
     },
     []
@@ -222,6 +246,7 @@ export function useOutfitStore() {
       selectedFrame: frameId,
     };
     persistState(currentStoreState);
+    updateActiveStudioContext({ frameId });
     notify();
   }, []);
 
@@ -231,6 +256,7 @@ export function useOutfitStore() {
       resultImage: url,
     };
     persistState(currentStoreState);
+    updateActiveStudioContext({ img: url });
     notify();
 
     // If it is a blob URL, asynchronously convert to base64 Data URL so it permanently survives
