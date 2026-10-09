@@ -45,6 +45,28 @@
   scrollbar-width: none;
 }
 
+/* Dedicated Lookbook Vertical Scrollbar */
+.lookbook-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.lookbook-scrollbar::-webkit-scrollbar-track {
+  background: #EFE7DC;
+  border-radius: 9999px;
+}
+.lookbook-scrollbar::-webkit-scrollbar-thumb {
+  background: #C5A059;
+  border-radius: 9999px;
+  border: 1.5px solid #EFE7DC;
+}
+.lookbook-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #A68038;
+}
+.lookbook-scrollbar {
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: #C5A059 #EFE7DC;
+}
+
 /* Custom Heritage Aesthetic Classes */
 .cyber-glow {
   box-shadow: 0 0 20px -3px rgba(217, 56, 41, 0.35), 0 0 10px rgba(197, 160, 89, 0.2);

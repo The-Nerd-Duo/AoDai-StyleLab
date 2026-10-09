@@ -121,88 +121,57 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
 
         {/* Mini 9:16 Card Mockup Wrapper (Centered, flexible height) */}
         <div className="flex items-center justify-center flex-1 w-full my-auto py-1">
-          <div
-            className="relative w-full max-w-[210px] sm:max-w-[220px] aspect-[9/16] max-h-[440px] bg-[#111111] rounded-xl overflow-hidden shadow-lg border-2 flex flex-col justify-between p-3 select-none transition-all duration-300 group"
-            style={{
-              borderColor:
-                frame.borderColor && frame.borderColor !== "transparent"
-                  ? frame.borderColor
-                  : "rgba(197, 160, 89, 0.25)",
-            }}
-          >
-            {/* Top Tag */}
-            <div className="flex items-center justify-between z-30">
-              <span className="font-mono text-[8px] uppercase tracking-wider text-surface-pure font-bold px-1.5 py-0.5 bg-vermilion-red/90 rounded">
-                AODAI STYLELAB
-              </span>
-              <span className="text-[8px] font-mono px-1 rounded bg-guardrail-pass text-white font-bold">
-                GEN-Z PROOF
-              </span>
-            </div>
+          {hasDisplayImage ? (
+            <div
+              className="relative w-full max-w-[210px] sm:max-w-[220px] aspect-[9/16] max-h-[440px] bg-[#111111] rounded-xl overflow-hidden shadow-lg border-2 flex flex-col justify-between p-3 select-none transition-all duration-300 group"
+              style={{
+                borderColor:
+                  frame.borderColor && frame.borderColor !== "transparent"
+                    ? frame.borderColor
+                    : "rgba(197, 160, 89, 0.25)",
+              }}
+            >
+              {/* Top Tag */}
+              <div className="flex items-center justify-between z-30">
+                <span className="font-mono text-[8px] uppercase tracking-wider text-surface-pure font-bold px-1.5 py-0.5 bg-vermilion-red/90 rounded">
+                  AODAI STYLELAB
+                </span>
+                <span className="text-[8px] font-mono px-1 rounded bg-guardrail-pass text-white font-bold">
+                  GEN-Z PROOF
+                </span>
+              </div>
 
-            {/* Center: Image or Minimalist Empty Frame */}
-            <div className="absolute inset-0 z-0">
-              {hasDisplayImage ? (
-                <>
-                  <img
-                    alt="Vertical portrait"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    src={resultImage!}
-                    onError={() => setImageError(true)}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-text-charcoal via-transparent to-black/40" />
-                </>
-              ) : (
-                /* Minimalist aesthetic empty state for lookbook card */
-                <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center bg-gradient-to-b from-[#181615] to-[#100F0E] relative overflow-hidden select-none">
-                  {/* Subtle Ambient Color Glow */}
-                  <div
-                    className="absolute inset-0 opacity-20 blur-xl pointer-events-none"
-                    style={{ backgroundColor: color.hex }}
-                  />
+              {/* Full Image */}
+              <div className="absolute inset-0 z-0">
+                <img
+                  alt="Vertical portrait"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  src={resultImage!}
+                  onError={() => setImageError(true)}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-text-charcoal via-transparent to-black/40" />
+              </div>
 
-                  {/* Minimalist Center Icon */}
-                  <div className="relative z-10 w-11 h-11 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-md flex items-center justify-center text-bronze-gold mb-2 shadow-inner">
-                    <Sparkles className="w-5 h-5 opacity-85 text-bronze-gold" />
-                  </div>
+              {/* Heritage Frame Corner Decorations */}
+              <FrameDecoration
+                theme={frame.theme || "hoang_kim"}
+                frameId={frame.id}
+                image={(frame as any).image}
+                borderColor={frame.borderColor}
+                accentColor={frame.accentColor}
+              />
 
-                  <div className="relative z-10 flex flex-col gap-0.5">
-                    <span className="text-[11px] font-serif text-paper-cream font-bold tracking-wide">
-                      Thẻ Lookbook
+              {/* Bottom Card Overlay */}
+              <div className="relative z-20 text-white space-y-1.5">
+                <div className="flex items-end justify-between">
+                  <div>
+                    <span className="font-mono text-[9px] text-bronze-gold block font-semibold uppercase">
+                      {style.name}
                     </span>
-                    <span className="text-[9px] text-white/50 font-sans leading-tight">
-                      Sẵn sàng kết nối ảnh AI
-                    </span>
+                    <p className="font-serif text-[13px] leading-tight font-bold text-white truncate max-w-[120px]">
+                      {garment.name}
+                    </p>
                   </div>
-
-                  <span className="relative z-10 mt-3 px-2 py-0.5 rounded-full bg-white/[0.06] text-paper-cream/80 text-[8px] font-mono border border-white/10">
-                    HERITAGE READY
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Heritage Frame Corner Decorations (z-20, sits above image) */}
-            <FrameDecoration
-              theme={frame.theme || "hoang_kim"}
-              frameId={frame.id}
-              image={(frame as any).image}
-              borderColor={frame.borderColor}
-              accentColor={frame.accentColor}
-            />
-
-            {/* Bottom Card Overlay */}
-            <div className="relative z-20 text-white space-y-1.5">
-              <div className="flex items-end justify-between">
-                <div>
-                  <span className="font-mono text-[9px] text-bronze-gold block font-semibold uppercase">
-                    {style.name}
-                  </span>
-                  <p className="font-serif text-[13px] leading-tight font-bold text-white truncate max-w-[120px]">
-                    {garment.name}
-                  </p>
-                </div>
-                {hasDisplayImage && (
                   <div
                     className="w-9 h-9 bg-white p-0.5 rounded-md shadow-md border border-bronze-gold/40 flex items-center justify-center flex-shrink-0"
                     style={{ width: "36px", height: "36px" }}
@@ -223,19 +192,49 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
                       </div>
                     )}
                   </div>
-                )}
-              </div>
-
-              <div className="flex items-center justify-between pt-1 border-t border-white/20">
-                <div className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color.hex }} />
-                  <span className="w-2 h-2 rounded-full bg-bronze-gold" />
-                  <span className="w-2 h-2 rounded-full bg-white" />
                 </div>
-                <span className="font-mono text-[8px] text-white/70">ID #VN-2026-098</span>
+
+                <div className="flex items-center justify-between pt-1 border-t border-white/20">
+                  <div className="flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color.hex }} />
+                    <span className="w-2 h-2 rounded-full bg-bronze-gold" />
+                    <span className="w-2 h-2 rounded-full bg-white" />
+                  </div>
+                  <span className="font-mono text-[8px] text-white/70">ID #VN-2026-098</span>
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            /* Trạng thái chờ tạo ảnh AI trong bảng Studio: Đồng bộ màu nâu heritage ấm áp như thẻ bên bộ sưu tập */
+            <div
+              className="relative w-full max-w-[210px] sm:max-w-[220px] aspect-[9/16] max-h-[440px] rounded-2xl overflow-hidden flex flex-col items-center justify-center p-4 text-center select-none bg-[#1F1714] border border-bronze-gold/30 shadow-xl backdrop-blur-xs transition-all"
+            >
+              {/* Subtle Ambient Glow matching current color */}
+              <div
+                className="absolute inset-0 opacity-20 blur-3xl pointer-events-none"
+                style={{ backgroundColor: color.hex }}
+              />
+
+              {/* Corner decorative accents */}
+              <div className="absolute top-2.5 left-2.5 w-3 h-3 border-t-2 border-l-2 border-bronze-gold/40 pointer-events-none" />
+              <div className="absolute top-2.5 right-2.5 w-3 h-3 border-t-2 border-r-2 border-bronze-gold/40 pointer-events-none" />
+              <div className="absolute bottom-2.5 left-2.5 w-3 h-3 border-b-2 border-l-2 border-bronze-gold/40 pointer-events-none" />
+              <div className="absolute bottom-2.5 right-2.5 w-3 h-3 border-b-2 border-r-2 border-bronze-gold/40 pointer-events-none" />
+
+              {/* Minimalist Glowing Icon Box */}
+              <div className="relative z-10 w-12 h-12 rounded-2xl bg-white/[0.05] border border-white/10 backdrop-blur-md flex items-center justify-center text-bronze-gold mb-2.5 shadow-inner">
+                <Sparkles className="w-6 h-6 text-bronze-gold/90" />
+              </div>
+
+              <h3 className="relative z-10 font-serif text-sm font-bold text-paper-cream tracking-wide mb-1">
+                Hiện đang chưa có ảnh
+              </h3>
+
+              <p className="relative z-10 text-[11px] text-white/60 leading-relaxed max-w-[170px]">
+                Nhấn nút &ldquo;Tạo Ảnh Phối Đồ AI&rdquo; để tạo và mở khóa thẻ Lookbook.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Action Buttons Panel */}
@@ -248,7 +247,7 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
                   try {
                     sessionStorage.setItem("vietphuc_result_image", resultImage);
                     localStorage.setItem("vietphuc_result_image", resultImage);
-                  } catch {}
+                  } catch { }
                 }
               }}
               className="w-full py-3 px-4 bg-gradient-to-r from-vermilion-red to-primary text-white rounded-xl font-sans text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm hover:opacity-95 active:scale-[0.99] transition-all"
@@ -292,11 +291,10 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
             <button
               onClick={handleCycleFrame}
               disabled={!hasDisplayImage}
-              className={`py-2.5 px-3 rounded-xl font-mono text-[11px] font-semibold flex items-center justify-center gap-1.5 border transition-all shadow-xs ${
-                !hasDisplayImage
+              className={`py-2.5 px-3 rounded-xl font-mono text-[11px] font-semibold flex items-center justify-center gap-1.5 border transition-all shadow-xs ${!hasDisplayImage
                   ? "bg-paper-cream/50 text-text-warm-gray/40 border-border-bronze-light/30 cursor-not-allowed opacity-60"
                   : "bg-paper-cream hover:bg-surface-container text-text-charcoal border-border-bronze-light/60 active:scale-95 cursor-pointer"
-              }`}
+                }`}
               type="button"
               title={
                 !hasDisplayImage
@@ -305,9 +303,8 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
               }
             >
               <span
-                className={`material-symbols-outlined text-[16px] ${
-                  !hasDisplayImage ? "text-text-warm-gray/40" : "text-bronze-gold"
-                }`}
+                className={`material-symbols-outlined text-[16px] ${!hasDisplayImage ? "text-text-warm-gray/40" : "text-bronze-gold"
+                  }`}
               >
                 crop_free
               </span>

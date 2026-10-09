@@ -464,11 +464,10 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
               <div
                 key={item.id}
                 onClick={() => handleToggleAccessory(item.id)}
-                className={`relative h-[175px] rounded-xl overflow-hidden border-2 cursor-pointer select-none transition-all duration-150 active:scale-95 group ${
-                  isSelected
+                className={`relative h-[175px] rounded-xl overflow-hidden border-2 cursor-pointer select-none transition-all duration-150 active:scale-95 group ${isSelected
                     ? "border-vermilion-red shadow-md ring-2 ring-vermilion-red/25"
                     : "border-border-bronze-light/70 hover:border-bronze-gold/70 shadow-2xs"
-                }`}
+                  }`}
               >
                 {isNone ? (
                   /* Option không dùng phụ kiện: Nền xám trơn + hình tròn có gạch chéo */
@@ -593,12 +592,12 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
             category === "garment"
               ? isCategoryChosen("garment") && outfit.garmentId === item.id
               : category === "color"
-              ? isCategoryChosen("color") && outfit.colorId === item.id
-              : category === "occasion"
-              ? isCategoryChosen("occasion") && outfit.occasionId === item.id
-              : category === "style"
-              ? isCategoryChosen("style") && outfit.styleId === item.id
-              : false;
+                ? isCategoryChosen("color") && outfit.colorId === item.id
+                : category === "occasion"
+                  ? isCategoryChosen("occasion") && outfit.occasionId === item.id
+                  : category === "style"
+                    ? isCategoryChosen("style") && outfit.styleId === item.id
+                    : false;
 
           // Render card content based on category
           return (
@@ -610,17 +609,15 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
               {/* Inner Card: Click anywhere to select + Snappy, fast press-down effect */}
               <div
                 onClick={() => handleCardClick(item, offset)}
-                className={`w-full h-full rounded-2xl bg-surface-pure border-2 flex flex-col overflow-hidden select-none cursor-pointer group ${
-                  isFront
+                className={`w-full h-full rounded-2xl bg-surface-pure border-2 flex flex-col overflow-hidden select-none cursor-pointer group ${isFront
                     ? isSelected
                       ? "border-vermilion-red/80 shadow-xl ring-2 ring-vermilion-red/25"
                       : "border-border-bronze-light shadow-md hover:border-bronze-gold/60"
                     : "border-border-bronze-light/70 shadow-md hover:border-bronze-gold/60 opacity-85 hover:opacity-95"
-                } ${
-                  isPressed
+                  } ${isPressed
                     ? "scale-[0.96] translate-y-1.5 shadow-sm ring-2 ring-vermilion-red/60 brightness-95"
                     : "active:scale-[0.97] active:translate-y-1"
-                }`}
+                  }`}
                 style={{
                   transformOrigin: "center center",
                   transition: isPressed
@@ -668,7 +665,7 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
                           </span>
                         ) : (
                           <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/50 text-white/90 border border-white/20 font-medium shadow-xs backdrop-blur-xs">
-                            {isFront && !isCategoryChosen("garment") ? "Chưa mặc" : item.tag}
+                            {isFront && !isCategoryChosen("garment") ? "Chưa chọn" : item.tag}
                           </span>
                         )}
                       </div>
@@ -713,7 +710,7 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
                           </span>
                         ) : (
                           <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-white/90 border border-white/20 font-semibold shadow-xs">
-                            {isFront && !isCategoryChosen("color") ? "Chưa dùng" : item.hex}
+                            {isFront && !isCategoryChosen("color") ? "Chưa chọn" : item.hex}
                           </span>
                         )}
                       </div>
@@ -876,11 +873,10 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
               setActiveIndex(idx);
               applySelectionForIndex(idx);
             }}
-            className={`transition-all duration-300 rounded-full ${
-              idx === activeIndex
+            className={`transition-all duration-300 rounded-full ${idx === activeIndex
                 ? "w-6 h-1.5 bg-vermilion-red shadow-xs"
                 : "w-1.5 h-1.5 bg-border-bronze-light hover:bg-bronze-gold hover:scale-125"
-            }`}
+              }`}
             aria-label={`Chuyển đến lựa chọn ${idx + 1}`}
           />
         ))}

@@ -20,12 +20,12 @@ export const LookbookSkeleton: React.FC = () => {
           {/* Left Column (5 cols, sticky): Lookbook Card Editor Skeleton */}
           <div className="lg:col-span-5 flex flex-col gap-4 lg:sticky lg:top-20">
             <div className="h-5 w-36 bg-border-bronze-light/30 rounded-lg animate-pulse" />
-            <div className="w-full max-w-[360px] mx-auto aspect-[9/16] rounded-3xl bg-[#0D0C0B]/90 border border-bronze-gold/30 shadow-2xl flex flex-col items-center justify-center p-6 text-center animate-pulse">
-              <div className="w-12 h-12 rounded-2xl bg-white/[0.05] border border-bronze-gold/40 flex items-center justify-center text-bronze-gold mb-3">
-                <Sparkles className="w-6 h-6 text-bronze-gold/80" />
+            <div className="w-full max-w-[350px] mx-auto aspect-[9/16] rounded-2xl bg-paper-cream/80 border-2 border-dashed border-border-bronze-light/70 shadow-xs flex flex-col items-center justify-center p-6 text-center animate-pulse">
+              <div className="w-14 h-14 rounded-2xl bg-surface-pure border border-border-bronze-light/80 flex items-center justify-center text-bronze-gold mb-3">
+                <Sparkles className="w-7 h-7 text-bronze-gold/70" />
               </div>
-              <div className="h-4 w-40 bg-white/20 rounded-md mb-2" />
-              <div className="h-3 w-28 bg-white/10 rounded-md" />
+              <div className="h-4 w-36 bg-border-bronze-light/40 rounded-md mb-2" />
+              <div className="h-3 w-48 bg-border-bronze-light/25 rounded-md" />
             </div>
           </div>
 

@@ -48,7 +48,7 @@ export const StudioDashboard: React.FC = () => {
       if (active) {
         return {
           type: active.type,
-          details: active.details,
+          details: active.type === "remix" && outfit ? formatRemixOutfitSummary(outfit) : active.details,
         };
       }
     }
@@ -57,71 +57,95 @@ export const StudioDashboard: React.FC = () => {
 
   const [isPersonaConfirmed, setIsPersonaConfirmed] = useState<boolean>(() => {
     if (typeof window !== "undefined") {
-      const active = getActiveStudioContext();
-      if (active?.type === "remix") return true;
-      if (active?.type === "trial") return false;
       try {
         const stored = sessionStorage.getItem("vietphuc_persona_confirmed");
         if (stored !== null) return stored === "1";
-      } catch {}
+      } catch { }
+      const active = getActiveStudioContext();
+      if (active?.type === "remix") return true;
+      if (active?.type === "trial") return false;
     }
     return false;
   });
 
   const [chosenCategories, setChosenCategories] = useState<Set<string>>(() => {
     if (typeof window !== "undefined") {
+      try {
+        const stored = sessionStorage.getItem("vietphuc_chosen_categories");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const set = new Set<string>(parsed);
+            const active = getActiveStudioContext();
+            if (active?.type === "trial") {
+              set.add("garmentId");
+            }
+            return set;
+          }
+        }
+      } catch { }
       const active = getActiveStudioContext();
       if (active?.type === "remix") {
         return new Set(["personaId", "garmentId", "colorId", "occasionId", "styleId"]);
       }
       if (active?.type === "trial") {
-        // For trial, ONLY the trial garment is applied! Persona and all other categories are chosen by the user.
         return new Set(["garmentId"]);
       }
-      try {
-        const stored = sessionStorage.getItem("vietphuc_chosen_categories");
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed)) {
-            return new Set<string>(parsed);
-          }
-        }
-      } catch {}
     }
     return new Set();
   });
 
-  // Keep state in sync whenever searchParams / activeContext updates (e.g. navigation from Bách khoa)
+  // Keep badge & selections in sync whenever searchParams / activeContext updates (e.g. navigation from Bách khoa)
   useEffect(() => {
     const active = getActiveStudioContext();
     if (active) {
       setBadgeInfo({
         type: active.type,
-        details: active.details,
+        details: active.type === "remix" ? formatRemixOutfitSummary(outfit) : active.details,
       });
 
       if (active.type === "trial") {
-        setIsPersonaConfirmed(false);
-        setChosenCategories(new Set(["garmentId"]));
-        setActiveCategory("garment");
-        if (setResultImage && resultImage) {
-          setResultImage(null);
+        const trialGarmentId = active.garmentId || searchParams.get("g");
+        if (trialGarmentId && outfit.garmentId !== trialGarmentId) {
+          updateOutfitField("garmentId", trialGarmentId);
         }
-      } else if (active.type === "remix") {
-        setIsPersonaConfirmed(true);
-        setChosenCategories(new Set(["personaId", "garmentId", "colorId", "occasionId", "styleId"]));
+        setChosenCategories((prev) => {
+          const next = new Set(prev);
+          next.add("garmentId");
+          return next;
+        });
+        const storedPersona =
+          typeof window !== "undefined"
+            ? sessionStorage.getItem("vietphuc_persona_confirmed")
+            : null;
+        if (storedPersona !== null) {
+          setIsPersonaConfirmed(storedPersona === "1");
+        } else {
+          setIsPersonaConfirmed(false);
+        }
       }
     } else {
       setBadgeInfo(null);
     }
   }, [searchParams]);
 
-  const hasMountedRef = useRef(false);
+  // Keep badge details synced with outfit modifications during remix mode
+  useEffect(() => {
+    if (badgeInfo?.type === "remix") {
+      const summary = formatRemixOutfitSummary(outfit);
+      if (summary && summary !== badgeInfo.details) {
+        setBadgeInfo((prev) => (prev ? { ...prev, details: summary } : null));
+      }
+    }
+  }, [outfit, badgeInfo?.type]);
+
+  const hasMountedCatRef = useRef(false);
+  const hasMountedPersonaRef = useRef(false);
 
   // Sync chosen categories and persona to sessionStorage whenever user alters choices
   useEffect(() => {
-    if (!hasMountedRef.current) {
-      hasMountedRef.current = true;
+    if (!hasMountedCatRef.current) {
+      hasMountedCatRef.current = true;
       return;
     }
     try {
@@ -129,17 +153,20 @@ export const StudioDashboard: React.FC = () => {
         "vietphuc_chosen_categories",
         JSON.stringify(Array.from(chosenCategories))
       );
-    } catch {}
+    } catch { }
   }, [chosenCategories]);
 
   useEffect(() => {
-    if (!hasMountedRef.current) return;
+    if (!hasMountedPersonaRef.current) {
+      hasMountedPersonaRef.current = true;
+      return;
+    }
     try {
       sessionStorage.setItem(
         "vietphuc_persona_confirmed",
         isPersonaConfirmed ? "1" : "0"
       );
-    } catch {}
+    } catch { }
   }, [isPersonaConfirmed]);
 
   // When clicking 'x': ABANDON the remix/trial and reset ALL current selections back to default
@@ -157,7 +184,7 @@ export const StudioDashboard: React.FC = () => {
         sessionStorage.removeItem("vietphuc_persona_confirmed");
         sessionStorage.removeItem("vietphuc_result_image");
         localStorage.removeItem("vietphuc_result_image");
-      } catch {}
+      } catch { }
       if (window.history.replaceState) {
         window.history.replaceState({}, "", window.location.pathname);
       }
@@ -181,9 +208,6 @@ export const StudioDashboard: React.FC = () => {
   };
 
   const missingCategories = REQUIRED_CATEGORIES.filter((req) => {
-    if (req.key === "personaId") {
-      return !isPersonaConfirmed || !chosenCategories.has("personaId");
-    }
     return !chosenCategories.has(req.key);
   });
 
@@ -221,6 +245,7 @@ export const StudioDashboard: React.FC = () => {
             setChosenCategories={setChosenCategories}
             activeCategory={activeCategory}
             setActiveCategory={setActiveCategory}
+            onReset={handleDismissBadge}
           />
         </div>
 

@@ -39,9 +39,7 @@ export function getLocalLookbooks(): LookbookItem[] {
             )
         )
         .map((item) => {
-          const isLiked = userLikedSet.has(item.id);
-          // If the user hasn't liked it and it had legacy 1 auto-like, reset to 0!
-          const expectedLikes = isLiked ? Math.max(1, item.likes || 1) : (item.likes === 1 ? 0 : Math.max(0, item.likes || 0));
+          const expectedLikes = Math.max(0, item.likes || 0);
           if (item.likes !== expectedLikes) {
             needsSave = true;
             return { ...item, likes: expectedLikes };

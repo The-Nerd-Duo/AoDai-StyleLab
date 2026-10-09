@@ -21,6 +21,7 @@ import {
   updateLocalLookbookLikes,
   incrementLocalShare,
   isMyLookbook,
+  getDeviceId,
 } from "@/lib/lookbook-storage";
 import {
   Sparkles,
@@ -75,23 +76,10 @@ export const LookbookWorkspace: React.FC = () => {
   const [isLiveConnected, setIsLiveConnected] = useState(false);
   const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // References for deterministic like state & rapid clicking debouncing
+  // References for deterministic like state & tracking recently toggled cards
   const userLikedIdsRef = useRef<Set<string>>(userLikedIds);
-  const baseLikesMapRef = useRef<Map<string, number>>(new Map());
-  const debounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
-  const initialLikedStatusRef = useRef<Map<string, boolean>>(new Map());
   const recentlyInteractedRef = useRef<Map<string, number>>(new Map());
   const tabIdRef = useRef<string>(`tab-${Math.random().toString(36).substring(2, 9)}-${Date.now()}`);
-
-  // Populate base likes map immediately on client start
-  if (typeof window !== "undefined" && baseLikesMapRef.current.size === 0 && items.length > 0) {
-    items.forEach((item) => {
-      const isUserLiked = userLikedIdsRef.current.has(item.id);
-      const rawLikes = item.likes || 0;
-      const base = isUserLiked ? Math.max(0, rawLikes - 1) : (rawLikes === 1 ? 0 : rawLikes);
-      baseLikesMapRef.current.set(item.id, base);
-    });
-  }
 
   // Show a floating toast notification
   const showToast = useCallback((msg: string) => {
@@ -118,17 +106,7 @@ export const LookbookWorkspace: React.FC = () => {
     // 2. Hydrate from local storage so cards are visible right on page load
     const localData = getLocalLookbooks();
     if (localData.length > 0) {
-      const mappedLocal = localData.map((item) => {
-        const isUserLiked = currentLikedIds.has(item.id);
-        const rawLikes = item.likes || 0;
-        const base = isUserLiked ? Math.max(0, rawLikes - 1) : (rawLikes === 1 ? 0 : rawLikes);
-        baseLikesMapRef.current.set(item.id, base);
-        return {
-          ...item,
-          likes: base + (isUserLiked ? 1 : 0),
-        };
-      });
-      setItems(mappedLocal);
+      setItems(localData);
       setLoading(false);
     }
 
@@ -146,16 +124,6 @@ export const LookbookWorkspace: React.FC = () => {
             );
             const serverIds = new Set(serverItems.map((i) => i.id));
 
-            serverItems.forEach((item) => {
-              const lastInteracted = recentlyInteractedRef.current.get(item.id) || 0;
-              if (Date.now() - lastInteracted > 8000 || !baseLikesMapRef.current.has(item.id)) {
-                const isUserLiked = currentLikedIds.has(item.id);
-                const rawLikes = item.likes || 0;
-                const base = isUserLiked ? Math.max(0, rawLikes - 1) : (rawLikes === 1 ? 0 : rawLikes);
-                baseLikesMapRef.current.set(item.id, base);
-              }
-            });
-
             // Merge server items with any locally created items not yet synced
             const recentLocal = localData.filter(
               (l) =>
@@ -163,11 +131,10 @@ export const LookbookWorkspace: React.FC = () => {
                 !(l.isAnonymous && l.author === "Khách Ẩn Danh" && l.title === "Bản Phối Di Sản 2026") &&
                 Date.now() - new Date(l.createdAt).getTime() < 30 * 60 * 1000
             );
-            const merged = [...recentLocal, ...serverItems].map((item) => {
-              const isUserLiked = currentLikedIds.has(item.id);
-              const base = baseLikesMapRef.current.get(item.id) ?? (isUserLiked ? 0 : (item.likes === 1 ? 0 : (item.likes || 0)));
-              return { ...item, likes: base + (isUserLiked ? 1 : 0) };
-            });
+            const merged = [...recentLocal, ...serverItems].map((item) => ({
+              ...item,
+              likes: Math.max(0, item.likes || 0),
+            }));
             setItems(merged);
 
             try {
@@ -223,14 +190,12 @@ export const LookbookWorkspace: React.FC = () => {
               return;
             }
             const { id, likes } = payload.data;
-            const isUserLiked = userLikedIdsRef.current.has(id);
-            const newBase = Math.max(0, likes - (isUserLiked ? 1 : 0));
-            baseLikesMapRef.current.set(id, newBase);
             setItems((prev) =>
               prev.map((item) =>
-                item.id === id ? { ...item, likes: newBase + (isUserLiked ? 1 : 0) } : item
+                item.id === id ? { ...item, likes: Math.max(0, likes) } : item
               )
             );
+            updateLocalLookbookLikes(id, likes);
           } else if (payload?.type === "UPDATE_SHARES" && payload.data) {
             if (payload.senderId && payload.senderId === tabIdRef.current) {
               return;
@@ -291,21 +256,17 @@ export const LookbookWorkspace: React.FC = () => {
               }
 
               const prevMap = new Map(prev.map((p) => [p.id, p]));
+              const now = Date.now();
               const safeFilteredData = filteredData.map((serverItem: LookbookItem) => {
                 const prevItem = prevMap.get(serverItem.id);
                 const lastInteracted = recentlyInteractedRef.current.get(serverItem.id) || 0;
-                if (Date.now() - lastInteracted < 8000 && prevItem) {
+                // Grace period: keep optimistic local like if user clicked within last 2 seconds
+                if (now - lastInteracted < 2000 && prevItem) {
                   return { ...serverItem, likes: prevItem.likes };
                 }
-                const isUserLiked = userLikedIdsRef.current.has(serverItem.id);
-                const serverLikes = serverItem.likes || 0;
-                const newBase = isUserLiked
-                  ? Math.max(0, serverLikes - 1)
-                  : (serverLikes === 1 ? 0 : serverLikes);
-                baseLikesMapRef.current.set(serverItem.id, newBase);
                 return {
                   ...serverItem,
-                  likes: newBase + (isUserLiked ? 1 : 0),
+                  likes: Math.max(0, serverItem.likes || 0),
                 };
               });
 
@@ -326,23 +287,22 @@ export const LookbookWorkspace: React.FC = () => {
           }
         }
       } catch { }
-    }, 4000);
+    }, 2000);
 
     return () => {
       isSubscribed = false;
       clearInterval(pollInterval);
       if (broadcastChannel) broadcastChannel.close();
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
-      debounceTimersRef.current.forEach((t) => clearTimeout(t));
-      debounceTimersRef.current.clear();
     };
   }, [showToast]);
 
-  // Handle Heart / Like Toggle
-  const handleToggleLike = useCallback((id: string) => {
+  // Handle Heart / Like Toggle (Optimistic, atomic, real-time synchronized)
+  const handleToggleLike = useCallback(async (id: string) => {
     const wasLiked = userLikedIdsRef.current.has(id);
     const willBeLiked = !wasLiked;
 
+    // 1. Update liked IDs state & storage
     if (willBeLiked) {
       userLikedIdsRef.current.add(id);
     } else {
@@ -355,83 +315,71 @@ export const LookbookWorkspace: React.FC = () => {
         JSON.stringify(Array.from(userLikedIdsRef.current))
       );
     } catch { }
-
     setUserLikedIds(new Set(userLikedIdsRef.current));
 
-    let base = baseLikesMapRef.current.get(id);
-    if (base === undefined) {
-      const currentItem = items.find((i) => i.id === id);
-      const rawLikes = currentItem?.likes ?? 0;
-      base = wasLiked ? Math.max(0, rawLikes - 1) : (rawLikes === 1 ? 0 : rawLikes);
-      baseLikesMapRef.current.set(id, base);
-    }
-    const computedLikes = base + (willBeLiked ? 1 : 0);
-
+    // 2. Optimistic UI update
+    let nextLikes = 0;
     setItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, likes: computedLikes } : item))
+      prev.map((item) => {
+        if (item.id === id) {
+          const delta = willBeLiked ? 1 : -1;
+          nextLikes = Math.max(0, (item.likes || 0) + delta);
+          return { ...item, likes: nextLikes };
+        }
+        return item;
+      })
     );
 
+    updateLocalLookbookLikes(id, nextLikes);
     recentlyInteractedRef.current.set(id, Date.now());
 
-    if (!initialLikedStatusRef.current.has(id)) {
-      initialLikedStatusRef.current.set(id, wasLiked);
-    }
-
-    const existingTimer = debounceTimersRef.current.get(id);
-    if (existingTimer) {
-      clearTimeout(existingTimer);
-    }
-
-    const timer = setTimeout(async () => {
-      debounceTimersRef.current.delete(id);
-      const initialLiked = initialLikedStatusRef.current.get(id);
-      initialLikedStatusRef.current.delete(id);
-
-      const finalIsLiked = userLikedIdsRef.current.has(id);
-      const currentBase = baseLikesMapRef.current.get(id) ?? 0;
-      const finalLikes = currentBase + (finalIsLiked ? 1 : 0);
-
-      if (initialLiked !== undefined && finalIsLiked !== initialLiked) {
-        const action = finalIsLiked ? "like" : "unlike";
-        updateLocalLookbookLikes(id, finalLikes);
-
-        try {
-          if (typeof window !== "undefined" && "BroadcastChannel" in window) {
-            const bc = new BroadcastChannel("vietphuc_lookbook_channel");
-            bc.postMessage({
-              type: "UPDATE_LIKES",
-              data: { id, likes: finalLikes },
-              senderId: tabIdRef.current,
-            });
-            bc.close();
-          }
-        } catch { }
-
-        try {
-          const res = await fetch(`/api/lookbook/${id}/like`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action }),
-          });
-          if (res.ok) {
-            const data = await res.json().catch(() => null);
-            if (data?.success && data?.data?.likes !== undefined) {
-              const serverLikes = data.data.likes;
-              const newBase = Math.max(0, serverLikes - (finalIsLiked ? 1 : 0));
-              baseLikesMapRef.current.set(id, newBase);
-              setItems((prev) =>
-                prev.map((item) =>
-                  item.id === id ? { ...item, likes: newBase + (userLikedIdsRef.current.has(id) ? 1 : 0) } : item
-                )
-              );
-            }
-          }
-        } catch { }
+    // 3. Broadcast to other tabs on same machine
+    try {
+      if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+        const bc = new BroadcastChannel("vietphuc_lookbook_channel");
+        bc.postMessage({
+          type: "UPDATE_LIKES",
+          data: { id, likes: nextLikes },
+          senderId: tabIdRef.current,
+        });
+        bc.close();
       }
-    }, 350);
+    } catch { }
 
-    debounceTimersRef.current.set(id, timer);
-  }, [items]);
+    // 4. Send request to server with deviceId for atomic backend handling
+    try {
+      const action = willBeLiked ? "like" : "unlike";
+      const res = await fetch(`/api/lookbook/${id}/like`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, deviceId: getDeviceId() }),
+      });
+      if (res.ok) {
+        const data = await res.json().catch(() => null);
+        if (data?.success && typeof data?.data?.likes === "number") {
+          const authoritativeLikes = data.data.likes;
+          setItems((prev) =>
+            prev.map((item) => (item.id === id ? { ...item, likes: authoritativeLikes } : item))
+          );
+          updateLocalLookbookLikes(id, authoritativeLikes);
+
+          try {
+            if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+              const bc = new BroadcastChannel("vietphuc_lookbook_channel");
+              bc.postMessage({
+                type: "UPDATE_LIKES",
+                data: { id, likes: authoritativeLikes },
+                senderId: tabIdRef.current,
+              });
+              bc.close();
+            }
+          } catch { }
+        }
+      }
+    } catch (err) {
+      console.warn("Toggle like network notice:", err);
+    }
+  }, []);
 
   // Handle Share Lookbook Card
   const handleShareCard = async (item: LookbookItem) => {
@@ -514,6 +462,16 @@ export const LookbookWorkspace: React.FC = () => {
     }
     if (targetItem.img) {
       setResultImage(targetItem.img);
+    }
+    if (typeof window !== "undefined") {
+      try {
+        const initialCategories = ["personaId", "garmentId", "colorId", "occasionId", "styleId"];
+        if (targetOutfit.accessoryIds && targetOutfit.accessoryIds.some((id) => id !== "none")) {
+          initialCategories.push("accessory");
+        }
+        sessionStorage.setItem("vietphuc_chosen_categories", JSON.stringify(initialCategories));
+        sessionStorage.setItem("vietphuc_persona_confirmed", "1");
+      } catch {}
     }
     setActiveStudioContext(incomingContext);
     setConfirmModalOpen(false);
@@ -621,7 +579,6 @@ export const LookbookWorkspace: React.FC = () => {
               onShareSuccess={(newCard) => {
                 setActiveCategory("all");
                 const cardWithZeroLikes = { ...newCard, likes: 0 };
-                baseLikesMapRef.current.set(newCard.id, 0);
                 setItems((prev) => {
                   const clean = [cardWithZeroLikes, ...prev.filter((item) => item.id !== newCard.id)];
                   try {
@@ -646,300 +603,306 @@ export const LookbookWorkspace: React.FC = () => {
             />
           </div>
 
-          {/* Right Column (7 cols): Community Gallery */}
-          <div className="lg:col-span-7 flex flex-col gap-5">
-            {/* Community Header Banner */}
-            <div className="bg-surface-pure rounded-2xl p-4 shadow-sm border border-border-bronze-light/60 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-paper-cream border border-bronze-gold/30 flex items-center justify-center text-bronze-gold flex-shrink-0">
-                <span className="material-symbols-outlined text-[20px] text-bronze-gold">explore</span>
-              </div>
-              <div>
-                <h2 className="font-serif font-bold text-base sm:text-lg text-text-charcoal leading-tight">
-                  Khám phá Lookbook Di sản Gen Z
-                </h2>
-                <p className="text-xs text-text-warm-gray mt-0.5">
-                  Được chia sẻ bởi cộng đồng người yêu trang phục truyền thống
-                </p>
-              </div>
-            </div>
-
-            {/* Category Filter Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-nowrap">
-              <button
-                onClick={() => setActiveCategory("all")}
-                className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all ${activeCategory === "all"
-                  ? "bg-vermilion-red text-white shadow-xs"
-                  : "bg-surface-pure hover:bg-paper-cream text-text-warm-gray border border-border-bronze-light/50"
-                  }`}
-              >
-                Tất cả ({categoryCounts.all})
-              </button>
-              <button
-                onClick={() => setActiveCategory("mine")}
-                className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all flex items-center gap-1.5 ${activeCategory === "mine"
-                  ? "bg-vermilion-red text-white shadow-xs"
-                  : "bg-surface-pure hover:bg-paper-cream text-text-warm-gray border border-border-bronze-light/50"
-                  }`}
-              >
-                <User className={`w-3.5 h-3.5 ${activeCategory === "mine" ? "text-white" : "text-bronze-gold"}`} />
-                <span>Của tôi ({categoryCounts.mine})</span>
-              </button>
-              <button
-                onClick={() => setActiveCategory("favorites")}
-                className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all flex items-center gap-1.5 ${activeCategory === "favorites"
-                  ? "bg-vermilion-red text-white shadow-xs"
-                  : "bg-surface-pure hover:bg-paper-cream text-text-warm-gray border border-border-bronze-light/50"
-                  }`}
-              >
-                <Heart className={`w-3.5 h-3.5 ${activeCategory === "favorites" ? "fill-white text-white" : "fill-vermilion-red/20 text-vermilion-red"}`} />
-                <span>Ưa thích ({categoryCounts.favorites})</span>
-              </button>
-              <button
-                onClick={() => setActiveCategory("pho-co")}
-                className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all ${activeCategory === "pho-co"
-                  ? "bg-vermilion-red text-white shadow-xs"
-                  : "bg-surface-pure hover:bg-paper-cream text-text-warm-gray border border-border-bronze-light/50"
-                  }`}
-              >
-                🏮 Đêm Phố Cổ ({categoryCounts["pho-co"]})
-              </button>
-              <button
-                onClick={() => setActiveCategory("cung-dinh")}
-                className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all ${activeCategory === "cung-dinh"
-                  ? "bg-vermilion-red text-white shadow-xs"
-                  : "bg-surface-pure hover:bg-paper-cream text-text-warm-gray border border-border-bronze-light/50"
-                  }`}
-              >
-                👑 Cung Đình ({categoryCounts["cung-dinh"]})
-              </button>
-              <button
-                onClick={() => setActiveCategory("y2k")}
-                className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all ${activeCategory === "y2k"
-                  ? "bg-vermilion-red text-white shadow-xs"
-                  : "bg-surface-pure hover:bg-paper-cream text-text-warm-gray border border-border-bronze-light/50"
-                  }`}
-              >
-                ⚡ Gen Z Y2K ({categoryCounts.y2k})
-              </button>
-              <button
-                onClick={() => setActiveCategory("da-tiec")}
-                className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all ${activeCategory === "da-tiec"
-                  ? "bg-vermilion-red text-white shadow-xs"
-                  : "bg-surface-pure hover:bg-paper-cream text-text-warm-gray border border-border-bronze-light/50"
-                  }`}
-              >
-                🪷 Dạ tiệc ({categoryCounts["da-tiec"]})
-              </button>
-            </div>
-
-            {/* Cards Grid */}
-            {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {[1, 2, 3, 4, 5, 6].map((n) => (
-                  <div
-                    key={n}
-                    className="bg-surface-pure rounded-xl overflow-hidden shadow-xs border border-border-bronze-light/40 animate-pulse aspect-[9/14]"
-                  />
-                ))}
-              </div>
-            ) : filteredCommunity.length === 0 ? (
-              <div className="bg-surface-pure rounded-3xl p-10 border border-border-bronze-light/60 text-center flex flex-col items-center justify-center gap-3.5 shadow-sm">
-                <div className="w-14 h-14 rounded-2xl bg-paper-cream border border-bronze-gold/30 flex items-center justify-center text-bronze-gold shadow-inner">
-                  {activeCategory === "favorites" ? (
-                    <Heart className="w-7 h-7 text-vermilion-red fill-vermilion-red/20" />
-                  ) : (
-                    <Sparkles className="w-7 h-7 text-bronze-gold" />
-                  )}
+          {/* Right Column (7 cols): Community Gallery - Independent scroll with frozen header */}
+          <div className="lg:col-span-7 flex flex-col h-[650px] sm:h-[720px] lg:h-[calc(100vh-140px)] lg:min-h-[640px] lg:max-h-[860px] lg:sticky lg:top-20">
+            {/* Frozen / Pinned Header Section: Khám phá Lookbook Di sản + Category Filter Pills */}
+            <div className="flex-shrink-0 flex flex-col gap-3 pb-3 bg-[#F8F5F0] z-10">
+              {/* Community Header Banner */}
+              <div className="bg-surface-pure rounded-2xl p-4 shadow-sm border border-border-bronze-light/60 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-paper-cream border border-bronze-gold/30 flex items-center justify-center text-bronze-gold flex-shrink-0">
+                  <span className="material-symbols-outlined text-[20px] text-bronze-gold">explore</span>
                 </div>
-                <div className="max-w-xs">
-                  <h3 className="font-serif font-bold text-base text-text-charcoal mb-1">
-                    {activeCategory === "favorites"
-                      ? "Chưa có bản phối yêu thích"
-                      : activeCategory === "mine"
-                        ? "Bạn chưa chia sẻ bản phối nào"
-                        : "Không có thẻ Lookbook nào"}
-                  </h3>
-                  <p className="text-xs text-text-warm-gray leading-relaxed">
-                    {activeCategory === "favorites"
-                      ? "Hãy nhấn vào biểu tượng trái tim trên các thẻ Lookbook để lưu lại vào danh sách yêu thích của bạn."
-                      : activeCategory === "mine"
-                        ? "Hãy phối một bộ cổ phục ưng ý ở cột bên trái và nhấn 'Chia Sẻ Lên Lookbook' nhé!"
-                        : "Hãy là người đầu tiên tạo và chia sẻ thẻ Lookbook phong cách này!"}
+                <div>
+                  <h2 className="font-serif font-bold text-base sm:text-lg text-text-charcoal leading-tight">
+                    Khám phá Lookbook Di sản Gen Z
+                  </h2>
+                  <p className="text-xs text-text-warm-gray mt-0.5">
+                    Được chia sẻ bởi cộng đồng người yêu trang phục truyền thống
                   </p>
                 </div>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {filteredCommunity.map((item) => {
-                  const garmentMeta = mockupsData.garments.find((g) => g.id === item.outfit?.garmentId);
-                  const colorMeta = mockupsData.colors.find((c) => c.id === item.outfit?.colorId);
-                  const isNewlyAdded = newlyAddedIds.has(item.id);
-                  const isLiked = userLikedIds.has(item.id);
 
-                  return (
+              {/* Category Filter Pills */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-nowrap">
+                <button
+                  onClick={() => setActiveCategory("all")}
+                  className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all ${activeCategory === "all"
+                    ? "bg-vermilion-red text-white shadow-xs"
+                    : "bg-surface-pure hover:bg-paper-cream text-text-warm-gray border border-border-bronze-light/50"
+                    }`}
+                >
+                  Tất cả ({categoryCounts.all})
+                </button>
+                <button
+                  onClick={() => setActiveCategory("mine")}
+                  className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all flex items-center gap-1.5 ${activeCategory === "mine"
+                    ? "bg-vermilion-red text-white shadow-xs"
+                    : "bg-surface-pure hover:bg-paper-cream text-text-warm-gray border border-border-bronze-light/50"
+                    }`}
+                >
+                  <User className={`w-3.5 h-3.5 ${activeCategory === "mine" ? "text-white" : "text-bronze-gold"}`} />
+                  <span>Của tôi ({categoryCounts.mine})</span>
+                </button>
+                <button
+                  onClick={() => setActiveCategory("favorites")}
+                  className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all flex items-center gap-1.5 ${activeCategory === "favorites"
+                    ? "bg-vermilion-red text-white shadow-xs"
+                    : "bg-surface-pure hover:bg-paper-cream text-text-warm-gray border border-border-bronze-light/50"
+                    }`}
+                >
+                  <Heart className={`w-3.5 h-3.5 ${activeCategory === "favorites" ? "fill-white text-white" : "fill-vermilion-red/20 text-vermilion-red"}`} />
+                  <span>Ưa thích ({categoryCounts.favorites})</span>
+                </button>
+                <button
+                  onClick={() => setActiveCategory("pho-co")}
+                  className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all ${activeCategory === "pho-co"
+                    ? "bg-vermilion-red text-white shadow-xs"
+                    : "bg-surface-pure hover:bg-paper-cream text-text-warm-gray border border-border-bronze-light/50"
+                    }`}
+                >
+                  🏮 Đêm Phố Cổ ({categoryCounts["pho-co"]})
+                </button>
+                <button
+                  onClick={() => setActiveCategory("cung-dinh")}
+                  className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all ${activeCategory === "cung-dinh"
+                    ? "bg-vermilion-red text-white shadow-xs"
+                    : "bg-surface-pure hover:bg-paper-cream text-text-warm-gray border border-border-bronze-light/50"
+                    }`}
+                >
+                  👑 Cung Đình ({categoryCounts["cung-dinh"]})
+                </button>
+                <button
+                  onClick={() => setActiveCategory("y2k")}
+                  className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all ${activeCategory === "y2k"
+                    ? "bg-vermilion-red text-white shadow-xs"
+                    : "bg-surface-pure hover:bg-paper-cream text-text-warm-gray border border-border-bronze-light/50"
+                    }`}
+                >
+                  ⚡ Gen Z Y2K ({categoryCounts.y2k})
+                </button>
+                <button
+                  onClick={() => setActiveCategory("da-tiec")}
+                  className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all ${activeCategory === "da-tiec"
+                    ? "bg-vermilion-red text-white shadow-xs"
+                    : "bg-surface-pure hover:bg-paper-cream text-text-warm-gray border border-border-bronze-light/50"
+                    }`}
+                >
+                  🪷 Dạ tiệc ({categoryCounts["da-tiec"]})
+                </button>
+              </div>
+            </div>
+
+            {/* Scrollable Lookbook Cards Area with Dedicated Vertical Scrollbar */}
+            <div className="flex-1 overflow-y-auto overscroll-contain pt-2 pr-1.5 pb-6 lookbook-scrollbar">
+              {/* Cards Grid */}
+              {loading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {[1, 2, 3, 4, 5, 6].map((n) => (
                     <div
-                      key={item.id}
-                      className={`group relative rounded-2xl overflow-hidden bg-surface-pure border border-border-bronze-light shadow-xs hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col ${isNewlyAdded ? "ring-2 ring-emerald-400 ring-offset-2" : ""
-                        }`}
-                    >
-                      {/* Card Visual / Image Canvas */}
-                      <div className="relative aspect-[9/13] w-full bg-[#151413] overflow-hidden flex items-center justify-center">
-                        {item.img ? (
-                          <img
-                            src={item.img}
-                            alt={item.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                            loading="lazy"
-                          />
-                        ) : (
-                          /* Fallback Styled Visual for seeded items without photos */
-                          <div className="w-full h-full flex flex-col justify-between p-4 bg-gradient-to-b from-[#221f1d] via-[#1a1817] to-[#121110] relative overflow-hidden">
-                            <div
-                              className="absolute inset-0 opacity-20 blur-xl pointer-events-none"
-                              style={{ backgroundColor: colorMeta?.hex || "#D93829" }}
+                      key={n}
+                      className="bg-surface-pure rounded-xl overflow-hidden shadow-xs border border-border-bronze-light/40 animate-pulse aspect-[9/14]"
+                    />
+                  ))}
+                </div>
+              ) : filteredCommunity.length === 0 ? (
+                <div className="bg-surface-pure rounded-3xl p-10 border border-border-bronze-light/60 text-center flex flex-col items-center justify-center gap-3.5 shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-paper-cream border border-bronze-gold/30 flex items-center justify-center text-bronze-gold shadow-inner">
+                    {activeCategory === "favorites" ? (
+                      <Heart className="w-7 h-7 text-vermilion-red fill-vermilion-red/20" />
+                    ) : (
+                      <Sparkles className="w-7 h-7 text-bronze-gold" />
+                    )}
+                  </div>
+                  <div className="max-w-xs">
+                    <h3 className="font-serif font-bold text-base text-text-charcoal mb-1">
+                      {activeCategory === "favorites"
+                        ? "Chưa có bản phối yêu thích"
+                        : activeCategory === "mine"
+                          ? "Bạn chưa chia sẻ bản phối nào"
+                          : "Không có thẻ Lookbook nào"}
+                    </h3>
+                    <p className="text-xs text-text-warm-gray leading-relaxed">
+                      {activeCategory === "favorites"
+                        ? "Hãy nhấn vào biểu tượng trái tim trên các thẻ Lookbook để lưu lại vào danh sách yêu thích của bạn."
+                        : activeCategory === "mine"
+                          ? "Hãy phối một bộ cổ phục ưng ý ở cột bên trái và nhấn 'Chia Sẻ Lên Lookbook' nhé!"
+                          : "Hãy là người đầu tiên tạo và chia sẻ thẻ Lookbook phong cách này!"}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {filteredCommunity.map((item) => {
+                    const garmentMeta = mockupsData.garments.find((g) => g.id === item.outfit?.garmentId);
+                    const colorMeta = mockupsData.colors.find((c) => c.id === item.outfit?.colorId);
+                    const isNewlyAdded = newlyAddedIds.has(item.id);
+                    const isLiked = userLikedIds.has(item.id);
+
+                    return (
+                      <div
+                        key={item.id}
+                        className={`group relative rounded-2xl overflow-hidden bg-surface-pure border border-border-bronze-light shadow-xs hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col ${isNewlyAdded ? "ring-2 ring-emerald-400 ring-offset-2" : ""
+                          }`}
+                      >
+                        {/* Card Visual / Image Canvas */}
+                        <div className="relative aspect-[9/13] w-full bg-[#151413] overflow-hidden flex items-center justify-center">
+                          {item.img ? (
+                            <img
+                              src={item.img}
+                              alt={item.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                              loading="lazy"
                             />
-                            {/* Corner Accents */}
-                            <div className="absolute top-2 left-2 w-2 h-2 border-t border-l border-bronze-gold/40" />
-                            <div className="absolute top-2 right-2 w-2 h-2 border-t border-r border-bronze-gold/40" />
-                            <div className="absolute bottom-2 left-2 w-2 h-2 border-b border-l border-bronze-gold/40" />
-                            <div className="absolute bottom-2 right-2 w-2 h-2 border-b border-r border-bronze-gold/40" />
+                          ) : (
+                            /* Fallback Styled Visual for seeded items without photos */
+                            <div className="w-full h-full flex flex-col justify-between p-4 bg-gradient-to-b from-[#221f1d] via-[#1a1817] to-[#121110] relative overflow-hidden">
+                              <div
+                                className="absolute inset-0 opacity-20 blur-xl pointer-events-none"
+                                style={{ backgroundColor: colorMeta?.hex || "#D93829" }}
+                              />
+                              {/* Corner Accents */}
+                              <div className="absolute top-2 left-2 w-2 h-2 border-t border-l border-bronze-gold/40" />
+                              <div className="absolute top-2 right-2 w-2 h-2 border-t border-r border-bronze-gold/40" />
+                              <div className="absolute bottom-2 left-2 w-2 h-2 border-b border-l border-bronze-gold/40" />
+                              <div className="absolute bottom-2 right-2 w-2 h-2 border-b border-r border-bronze-gold/40" />
 
-                            <div className="relative z-10 flex items-center justify-between text-[9px] font-mono text-bronze-gold">
-                              <span>{garmentMeta?.dynasty || item.era}</span>
-                            </div>
-
-                            <div className="relative z-10 text-center my-auto flex flex-col items-center">
-                              <div className="w-10 h-10 rounded-xl bg-white/[0.05] border border-bronze-gold/30 flex items-center justify-center text-bronze-gold mb-2 shadow-inner">
-                                <Layers className="w-5 h-5 text-bronze-gold/85" />
+                              <div className="relative z-10 flex items-center justify-between text-[9px] font-mono text-bronze-gold">
+                                <span>{garmentMeta?.dynasty || item.era}</span>
                               </div>
-                              <span className="font-serif text-xs font-bold text-paper-cream line-clamp-1">
-                                {garmentMeta?.name || item.title}
-                              </span>
-                              <span className="text-[10px] text-paper-cream/60 mt-0.5 line-clamp-1">
-                                {colorMeta?.name || "Sắc Cổ Phong"}
-                              </span>
+
+                              <div className="relative z-10 text-center my-auto flex flex-col items-center">
+                                <div className="w-10 h-10 rounded-xl bg-white/[0.05] border border-bronze-gold/30 flex items-center justify-center text-bronze-gold mb-2 shadow-inner">
+                                  <Layers className="w-5 h-5 text-bronze-gold/85" />
+                                </div>
+                                <span className="font-serif text-xs font-bold text-paper-cream line-clamp-1">
+                                  {garmentMeta?.name || item.title}
+                                </span>
+                                <span className="text-[10px] text-paper-cream/60 mt-0.5 line-clamp-1">
+                                  {colorMeta?.name || "Sắc Cổ Phong"}
+                                </span>
+                              </div>
+
+                              <div className="relative z-10 text-center">
+                                <span className="px-2 py-0.5 rounded-full bg-white/[0.07] text-bronze-gold text-[8px] font-mono border border-bronze-gold/20">
+                                  HERITAGE ARCHIVE
+                                </span>
+                              </div>
                             </div>
+                          )}
 
-                            <div className="relative z-10 text-center">
-                              <span className="px-2 py-0.5 rounded-full bg-white/[0.07] text-bronze-gold text-[8px] font-mono border border-bronze-gold/20">
-                                HERITAGE ARCHIVE
-                              </span>
-                            </div>
-                          </div>
-                        )}
+                          {/* Frame Decoration Overlay */}
+                          {item.frameId && (
+                            <FrameDecoration frameId={item.frameId} />
+                          )}
 
-                        {/* Frame Decoration Overlay */}
-                        {item.frameId && (
-                          <FrameDecoration frameId={item.frameId} />
-                        )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-text-charcoal/80 via-transparent to-transparent pointer-events-none z-10" />
 
-                        <div className="absolute inset-0 bg-gradient-to-t from-text-charcoal/80 via-transparent to-transparent pointer-events-none z-10" />
+                          {/* Huy hiệu Của bạn */}
+                          {isMyLookbook(item) && (
+                            <span className="absolute top-3 left-3 px-2 py-0.5 rounded-full bg-vermilion-red/90 backdrop-blur-md text-white text-[9px] font-mono font-bold shadow-md z-30 flex items-center gap-1 border border-white/30">
+                              <User className="w-2.5 h-2.5" />
+                              Của bạn
+                            </span>
+                          )}
 
-                        {/* Huy hiệu Của bạn */}
-                        {isMyLookbook(item) && (
-                          <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-vermilion-red/90 backdrop-blur-xs text-white text-[9px] font-mono font-bold shadow-md z-25 flex items-center gap-1 border border-white/30">
-                            <User className="w-2.5 h-2.5" />
-                            Của bạn
-                          </span>
-                        )}
-
-                        {/* Nút Tim */}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleToggleLike(item.id);
-                          }}
-                          className={`absolute top-2.5 right-2.5 w-7 h-7 rounded-full flex items-center justify-center transition-all shadow-md z-25 active:scale-90 cursor-pointer ${isLiked
-                            ? "bg-vermilion-red text-white scale-105 ring-2 ring-white/50"
-                            : "bg-text-charcoal/70 hover:bg-vermilion-red text-white"
-                            }`}
-                          type="button"
-                          title={isLiked ? "Bỏ thích" : "Thả tim Lookbook"}
-                        >
-                          <Heart
-                            className={`w-3.5 h-3.5 transition-transform active:scale-125 ${isLiked ? "fill-white text-white" : "text-white"
-                              }`}
-                          />
-                        </button>
-
-                        {/* CTA Overlay on Hover: Remix */}
-                        <div className="absolute inset-0 bg-text-charcoal/60 backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2.5 p-4 z-30">
+                          {/* Nút Tim - Nổi lên trên khung trang trí z-30 */}
                           <button
-                            type="button"
-                            onClick={() => handleRemixLookbook(item)}
-                            className="w-full py-2.5 px-3 rounded-xl bg-vermilion-red hover:bg-primary text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg transition-transform active:scale-95 cursor-pointer"
-                          >
-                            <Sparkles className="w-3.5 h-3.5" />
-                            <span>Remix bản phối này</span>
-                          </button>
-                        </div>
-
-                        {/* Bottom Tag on Card Image */}
-                        <div className="absolute bottom-2.5 left-2.5 right-2.5 z-25 flex flex-col gap-0.5 pointer-events-none">
-                          <span className="text-[10px] text-bronze-gold font-mono uppercase tracking-wider font-semibold">
-                            {item.era}
-                          </span>
-                          <h3 className="font-serif text-[13px] font-bold text-paper-cream truncate">
-                            {item.title}
-                          </h3>
-                        </div>
-                      </div>
-
-                      {/* Card Bottom Bar with Author, Like Count, and Interactive Share Button */}
-                      <div className="p-2.5 flex items-center justify-between bg-surface-pure text-xs text-text-warm-gray border-t border-border-bronze-light/40">
-                        {/* Author Info */}
-                        <div className="flex items-center gap-1.5 min-w-0 flex-1 mr-2">
-                          <div
-                            className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${item.isAnonymous
-                              ? "bg-text-warm-gray/70 text-white"
-                              : "bg-bronze-gold text-white"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleToggleLike(item.id);
+                            }}
+                            className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-md z-30 active:scale-90 cursor-pointer ${isLiked
+                              ? "bg-vermilion-red text-white scale-105 ring-2 ring-white/60 shadow-vermilion-red/30"
+                              : "bg-text-charcoal/75 hover:bg-vermilion-red text-white backdrop-blur-md border border-white/20"
                               }`}
-                            title={item.isAnonymous ? "Khách Ẩn Danh" : item.author}
-                          >
-                            {item.authorInitial}
-                          </div>
-                          <span
-                            className="text-[11px] truncate font-medium text-text-charcoal"
-                            title={item.author}
-                          >
-                            {item.author}
-                          </span>
-                        </div>
-
-                        {/* 2 Nút Hành Động: Tim & Chia sẻ */}
-                        <div className="flex items-center gap-1 flex-shrink-0">
-                          {/* Nút Tim */}
-                          <button
                             type="button"
-                            onClick={() => handleToggleLike(item.id)}
-                            className={`flex items-center gap-1 px-1.5 py-0.5 rounded-lg transition-colors hover:bg-red-50 text-[11px] font-semibold ${isLiked ? "text-vermilion-red font-bold" : "text-text-warm-gray hover:text-vermilion-red"
-                              }`}
-                            title={isLiked ? "Bỏ thích" : "Thả tim"}
+                            title={isLiked ? "Bỏ thích" : "Thả tim Lookbook"}
                           >
                             <Heart
-                              className={`w-3.5 h-3.5 transition-transform active:scale-125 ${isLiked ? "fill-vermilion-red text-vermilion-red" : ""
+                              className={`w-4 h-4 transition-transform active:scale-125 ${isLiked ? "fill-white text-white" : "text-white"
                                 }`}
                             />
-                            <span>{(item.likes || 0).toLocaleString()}</span>
                           </button>
 
-                          {/* Nút Chia sẻ */}
-                          <button
-                            type="button"
-                            onClick={() => handleShareCard(item)}
-                            className="flex items-center gap-1 px-1.5 py-0.5 rounded-lg hover:bg-bronze-gold/10 text-text-warm-gray hover:text-bronze-gold transition-colors text-[11px] font-semibold group/share"
-                            title="Chia sẻ thẻ Lookbook này"
-                          >
-                            <Share2 className="w-3.5 h-3.5 group-hover/share:scale-110 transition-transform text-bronze-gold" />
-                            <span>{item.shares || 0}</span>
-                          </button>
+                          {/* CTA Overlay on Hover: Remix */}
+                          <div className="absolute inset-0 bg-text-charcoal/60 backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2.5 p-4 z-30">
+                            <button
+                              type="button"
+                              onClick={() => handleRemixLookbook(item)}
+                              className="w-full py-2.5 px-3 rounded-xl bg-vermilion-red hover:bg-primary text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg transition-transform active:scale-95 cursor-pointer"
+                            >
+                              <Sparkles className="w-3.5 h-3.5" />
+                              <span>Remix bản phối này</span>
+                            </button>
+                          </div>
+
+                          {/* Bottom Tag on Card Image */}
+                          <div className="absolute bottom-3 left-3 right-3 z-30 flex flex-col gap-0.5 pointer-events-none">
+                            <span className="text-[10px] text-bronze-gold font-mono uppercase tracking-wider font-semibold">
+                              {item.era}
+                            </span>
+                            <h3 className="font-serif text-[13px] font-bold text-paper-cream truncate">
+                              {item.title}
+                            </h3>
+                          </div>
+                        </div>
+
+                        {/* Card Bottom Bar with Author, Like Count, and Interactive Share Button */}
+                        <div className="p-2.5 flex items-center justify-between bg-surface-pure text-xs text-text-warm-gray border-t border-border-bronze-light/40">
+                          {/* Author Info */}
+                          <div className="flex items-center gap-1.5 min-w-0 flex-1 mr-2">
+                            <div
+                              className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${item.isAnonymous
+                                ? "bg-text-warm-gray/70 text-white"
+                                : "bg-bronze-gold text-white"
+                                }`}
+                              title={item.isAnonymous ? "Khách Ẩn Danh" : item.author}
+                            >
+                              {item.authorInitial}
+                            </div>
+                            <span
+                              className="text-[11px] truncate font-medium text-text-charcoal"
+                              title={item.author}
+                            >
+                              {item.author}
+                            </span>
+                          </div>
+
+                          {/* 2 Nút Hành Động: Tim & Chia sẻ */}
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            {/* Nút Tim */}
+                            <button
+                              type="button"
+                              onClick={() => handleToggleLike(item.id)}
+                              className={`flex items-center gap-1 px-1.5 py-0.5 rounded-lg transition-colors hover:bg-red-50 text-[11px] font-semibold ${isLiked ? "text-vermilion-red font-bold" : "text-text-warm-gray hover:text-vermilion-red"
+                                }`}
+                              title={isLiked ? "Bỏ thích" : "Thả tim"}
+                            >
+                              <Heart
+                                className={`w-3.5 h-3.5 transition-transform active:scale-125 ${isLiked ? "fill-vermilion-red text-vermilion-red" : ""
+                                  }`}
+                              />
+                              <span>{(item.likes || 0).toLocaleString()}</span>
+                            </button>
+
+                            {/* Nút Chia sẻ */}
+                            <button
+                              type="button"
+                              onClick={() => handleShareCard(item)}
+                              className="flex items-center gap-1 px-1.5 py-0.5 rounded-lg hover:bg-bronze-gold/10 text-text-warm-gray hover:text-bronze-gold transition-colors text-[11px] font-semibold group/share"
+                              title="Chia sẻ thẻ Lookbook này"
+                            >
+                              <Share2 className="w-3.5 h-3.5 group-hover/share:scale-110 transition-transform text-bronze-gold" />
+                              <span>{item.shares || 0}</span>
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

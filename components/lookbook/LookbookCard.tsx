@@ -410,6 +410,82 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
       ? "none"
       : "transform 0.65s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1)";
 
+  if (!displayImage) {
+    return (
+      <div className="flex flex-col items-center gap-4 w-full">
+        {/* Placeholder: Khung màu đen/nâu heritage đồng bộ với Khung trưng bày, 4 góc họa tiết đồng */}
+        <div
+          className="relative w-full max-w-[280px] xs:max-w-[310px] sm:max-w-[350px] aspect-[9/16] rounded-2xl overflow-hidden flex flex-col items-center justify-center p-6 text-center select-none bg-[#1F1714] border border-bronze-gold/30 shadow-xl backdrop-blur-xs transition-all"
+        >
+          {/* Subtle Ambient Glow */}
+          <div
+            className="absolute inset-0 opacity-20 blur-3xl pointer-events-none"
+            style={{ backgroundColor: color.hex }}
+          />
+
+          {/* Corner decorative accents */}
+          <div className="absolute top-3.5 left-3.5 w-3.5 h-3.5 border-t-2 border-l-2 border-bronze-gold/40 pointer-events-none" />
+          <div className="absolute top-3.5 right-3.5 w-3.5 h-3.5 border-t-2 border-r-2 border-bronze-gold/40 pointer-events-none" />
+          <div className="absolute bottom-3.5 left-3.5 w-3.5 h-3.5 border-b-2 border-l-2 border-bronze-gold/40 pointer-events-none" />
+          <div className="absolute bottom-3.5 right-3.5 w-3.5 h-3.5 border-b-2 border-r-2 border-bronze-gold/40 pointer-events-none" />
+
+          {/* Minimalist Glowing Icon Box */}
+          <div className="relative z-10 w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/[0.05] border border-white/10 backdrop-blur-md flex items-center justify-center text-bronze-gold mb-3 shadow-inner">
+            <Sparkles className="w-7 h-7 sm:w-8 sm:h-8 text-bronze-gold/90" />
+          </div>
+
+          <h3 className="relative z-10 font-serif text-base sm:text-lg font-bold text-paper-cream tracking-wide mb-1.5">
+            Hiện đang chưa có ảnh
+          </h3>
+
+          <p className="relative z-10 text-xs text-white/60 max-w-[210px] leading-relaxed mb-4">
+            Thẻ Lookbook chưa khả dụng vì bạn chưa tạo ảnh phối đồ AI. Hãy tạo ảnh trong Studio để mở khóa thẻ!
+          </p>
+
+          <Link
+            href="/"
+            className="relative z-10 px-4 py-2 rounded-xl bg-gradient-to-r from-vermilion-red to-primary hover:opacity-95 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md transition-all hover:scale-105 active:scale-95 cursor-pointer ring-1 ring-white/20"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-bronze-gold" />
+            <span>Đến Studio Tạo Ảnh Ngay →</span>
+          </Link>
+        </div>
+
+        {/* Action Buttons in disabled state */}
+        <div className="flex flex-col gap-2.5 w-full max-w-[340px] sm:max-w-[380px] opacity-50">
+          <button
+            disabled
+            title="Vui lòng tạo ảnh phối đồ trước khi chia sẻ"
+            className="w-full py-3 px-4 rounded-xl bg-stone-200 text-stone-500 font-bold text-xs flex items-center justify-center gap-2 cursor-not-allowed"
+          >
+            <Sparkles className="w-4 h-4 text-stone-400" />
+            <span>Chia Sẻ Lên Thư Viện Cộng Đồng</span>
+          </button>
+
+          <div className="flex items-center gap-2.5 w-full">
+            <button
+              disabled
+              title="Vui lòng tạo ảnh phối đồ trước khi tải ảnh"
+              className="flex-1 py-2.5 px-3 rounded-xl bg-paper-cream border border-stone-200 text-stone-400 font-semibold text-xs flex items-center justify-center gap-1.5 cursor-not-allowed"
+            >
+              <Download className="w-3.5 h-3.5 text-stone-400" />
+              <span>Tải Thẻ PNG</span>
+            </button>
+
+            <button
+              disabled
+              title="Vui lòng tạo ảnh phối đồ trước khi sao chép liên kết"
+              className="flex-1 py-2.5 px-3 rounded-xl bg-surface-pure border border-stone-200 text-stone-400 font-semibold text-xs flex items-center justify-center gap-1.5 cursor-not-allowed"
+            >
+              <Share2 className="w-3.5 h-3.5 text-stone-400" />
+              <span>Sao chép Link</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center gap-4 w-full">
       {/* 3D Depth Card Stage with Floating Navigation Arrows OUTSIDE the Card (matching StackedDeckCarousel) */}
