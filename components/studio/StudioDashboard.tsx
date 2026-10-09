@@ -75,7 +75,12 @@ export const StudioDashboard: React.FC = () => {
         if (stored) {
           const parsed = JSON.parse(stored);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            return new Set<string>(parsed);
+            const set = new Set<string>(parsed);
+            const active = getActiveStudioContext();
+            if (active?.type === "trial") {
+              set.add("garmentId");
+            }
+            return set;
           }
         }
       } catch { }
@@ -84,13 +89,13 @@ export const StudioDashboard: React.FC = () => {
         return new Set(["personaId", "garmentId", "colorId", "occasionId", "styleId"]);
       }
       if (active?.type === "trial") {
-        return new Set();
+        return new Set(["garmentId"]);
       }
     }
     return new Set();
   });
 
-  // Keep badge in sync whenever searchParams / activeContext updates (e.g. navigation from Bách khoa)
+  // Keep badge & selections in sync whenever searchParams / activeContext updates (e.g. navigation from Bách khoa)
   useEffect(() => {
     const active = getActiveStudioContext();
     if (active) {
@@ -98,6 +103,27 @@ export const StudioDashboard: React.FC = () => {
         type: active.type,
         details: active.type === "remix" ? formatRemixOutfitSummary(outfit) : active.details,
       });
+
+      if (active.type === "trial") {
+        const trialGarmentId = active.garmentId || searchParams.get("g");
+        if (trialGarmentId && outfit.garmentId !== trialGarmentId) {
+          updateOutfitField("garmentId", trialGarmentId);
+        }
+        setChosenCategories((prev) => {
+          const next = new Set(prev);
+          next.add("garmentId");
+          return next;
+        });
+        const storedPersona =
+          typeof window !== "undefined"
+            ? sessionStorage.getItem("vietphuc_persona_confirmed")
+            : null;
+        if (storedPersona !== null) {
+          setIsPersonaConfirmed(storedPersona === "1");
+        } else {
+          setIsPersonaConfirmed(false);
+        }
+      }
     } else {
       setBadgeInfo(null);
     }

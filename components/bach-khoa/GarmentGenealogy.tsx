@@ -82,29 +82,34 @@ export const GarmentGenealogy: React.FC<GarmentGenealogyProps> = ({
   ) => {
     const targetId = STUDIO_GARMENT_MAP[studioGarmentId] || studioGarmentId;
     
-    // 1. Reset all outfit fields, setting only the trial garment and clearing previous remix selections
-    setOutfit({
+    // 1. Reset all outfit fields, setting the trial garment and default persona
+    const newOutfit: OutfitState = {
       ...DEFAULT_OUTFIT,
       garmentId: targetId,
       accessoryId: "none",
       accessoryIds: ["none"],
-    });
+    };
+    setOutfit(newOutfit);
 
     // 2. Clear AI image and frame
     setResultImage(null);
     setSelectedFrame("frame-default-none");
 
-    // 3. Reset storage so other categories (bối cảnh, phong cách, phụ kiện, màu sắc) from previous remix are cleared
+    // 3. Mark garmentId as automatically selected for trial mode (user chooses persona in Studio)
     if (typeof window !== "undefined") {
       try {
-        sessionStorage.setItem("vietphuc_chosen_categories", JSON.stringify([]));
+        sessionStorage.setItem("vietphuc_chosen_categories", JSON.stringify(["garmentId"]));
         sessionStorage.setItem("vietphuc_persona_confirmed", "0");
         sessionStorage.removeItem("vietphuc_result_image");
         localStorage.removeItem("vietphuc_result_image");
       } catch {}
     }
 
-    setActiveStudioContext(incomingContext);
+    setActiveStudioContext({
+      ...incomingContext,
+      garmentId: targetId,
+      outfit: newOutfit,
+    });
     setConfirmModalOpen(false);
     setPendingReplacement(null);
     router.push(`/?mode=trial&g=${encodeURIComponent(targetId)}&name=${encodeURIComponent(garmentName)}`);
