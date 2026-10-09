@@ -97,11 +97,6 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
               Studio Mix &amp; Match
             </h2>
           </div>
-          {!isPersonaConfirmed && (
-            <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-paper-cream border border-border-bronze-light/60 text-bronze-gold font-bold">
-              Chọn Nhân Vật
-            </span>
-          )}
         </div>
       </div>
 
