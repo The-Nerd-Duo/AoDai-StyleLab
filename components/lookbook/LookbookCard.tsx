@@ -410,6 +410,70 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
       ? "none"
       : "transform 0.65s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1)";
 
+  if (!displayImage) {
+    return (
+      <div className="flex flex-col items-center gap-4 w-full">
+        {/* Placeholder: Không có khung, không có mũi tên, hơi mờ để thể hiện chưa khả dụng */}
+        <div
+          className="relative w-full max-w-[280px] xs:max-w-[310px] sm:max-w-[350px] aspect-[9/16] rounded-2xl overflow-hidden flex flex-col items-center justify-center p-6 text-center select-none bg-paper-cream/80 border-2 border-dashed border-border-bronze-light/80 shadow-xs backdrop-blur-xs opacity-75 transition-all"
+        >
+          {/* Subtle icon box */}
+          <div className="w-16 h-16 rounded-2xl bg-surface-pure border border-border-bronze-light/80 flex items-center justify-center text-bronze-gold mb-3 shadow-inner">
+            <Sparkles className="w-8 h-8 text-bronze-gold/75" />
+          </div>
+
+          <h3 className="font-serif text-base sm:text-lg font-bold text-text-charcoal tracking-wide mb-1.5">
+            Hiện đang chưa có ảnh
+          </h3>
+
+          <p className="text-xs text-text-warm-gray max-w-[210px] leading-relaxed mb-4">
+            Thẻ Lookbook chưa khả dụng vì bạn chưa tạo ảnh phối đồ AI. Hãy tạo ảnh trong Studio để mở khóa thẻ!
+          </p>
+
+          <Link
+            href="/"
+            className="px-4 py-2 rounded-xl bg-vermilion-red hover:bg-primary text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all hover:scale-105 active:scale-95 cursor-pointer"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Đến Studio Tạo Ảnh Ngay →</span>
+          </Link>
+        </div>
+
+        {/* Action Buttons in disabled state */}
+        <div className="flex flex-col gap-2.5 w-full max-w-[340px] sm:max-w-[380px] opacity-50">
+          <button
+            disabled
+            title="Vui lòng tạo ảnh phối đồ trước khi chia sẻ"
+            className="w-full py-3 px-4 rounded-xl bg-stone-200 text-stone-500 font-bold text-xs flex items-center justify-center gap-2 cursor-not-allowed"
+          >
+            <Sparkles className="w-4 h-4 text-stone-400" />
+            <span>Chia Sẻ Lên Thư Viện Cộng Đồng</span>
+          </button>
+
+          <div className="flex items-center gap-2.5 w-full">
+            <button
+              disabled
+              title="Vui lòng tạo ảnh phối đồ trước khi tải ảnh"
+              className="flex-1 py-2.5 px-3 rounded-xl bg-paper-cream border border-stone-200 text-stone-400 font-semibold text-xs flex items-center justify-center gap-1.5 cursor-not-allowed"
+            >
+              <Download className="w-3.5 h-3.5 text-stone-400" />
+              <span>Tải Thẻ PNG</span>
+            </button>
+
+            <button
+              disabled
+              title="Vui lòng tạo ảnh phối đồ trước khi sao chép liên kết"
+              className="flex-1 py-2.5 px-3 rounded-xl bg-surface-pure border border-stone-200 text-stone-400 font-semibold text-xs flex items-center justify-center gap-1.5 cursor-not-allowed"
+            >
+              <Share2 className="w-3.5 h-3.5 text-stone-400" />
+              <span>Sao chép Link</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center gap-4 w-full">
       {/* 3D Depth Card Stage with Floating Navigation Arrows OUTSIDE the Card (matching StackedDeckCarousel) */}

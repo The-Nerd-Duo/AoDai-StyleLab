@@ -90,18 +90,43 @@ export async function onRequestPost(context: {
 
     const body: any = await context.request.json().catch(() => ({}));
     const action = body.action === "unlike" ? "unlike" : "like";
+    const deviceId = (body.deviceId && String(body.deviceId).trim()) || `anon_${Date.now()}`;
     const delta = action === "like" ? 1 : -1;
     let newLikes = 0;
+    let storageHandled = false;
 
     // 1. Cloudflare D1
     const d1 = findD1(context.env);
     if (d1) {
       try {
-        const item: any = await d1.prepare("SELECT likes FROM lookbooks WHERE id = ?").bind(id).first();
-        if (item) {
-          newLikes = Math.max(0, (item.likes || 0) + delta);
-          await d1.prepare("UPDATE lookbooks SET likes = ? WHERE id = ?").bind(newLikes, id).run();
+        await d1.prepare(`
+          CREATE TABLE IF NOT EXISTS lookbook_likes (
+            lookbook_id TEXT,
+            device_id TEXT,
+            created_at TEXT,
+            PRIMARY KEY (lookbook_id, device_id)
+          )
+        `).run().catch(() => {});
+
+        if (action === "like") {
+          await d1.prepare("INSERT OR IGNORE INTO lookbook_likes (lookbook_id, device_id, created_at) VALUES (?, ?, ?)")
+            .bind(id, deviceId, new Date().toISOString())
+            .run();
+        } else {
+          await d1.prepare("DELETE FROM lookbook_likes WHERE lookbook_id = ? AND device_id = ?")
+            .bind(id, deviceId)
+            .run();
         }
+
+        const countRow: any = await d1.prepare("SELECT COUNT(*) as cnt FROM lookbook_likes WHERE lookbook_id = ?").bind(id).first();
+        if (countRow && typeof countRow.cnt === "number") {
+          newLikes = countRow.cnt;
+        } else {
+          const item: any = await d1.prepare("SELECT likes FROM lookbooks WHERE id = ?").bind(id).first();
+          newLikes = Math.max(0, (item?.likes || 0) + delta);
+        }
+        await d1.prepare("UPDATE lookbooks SET likes = ? WHERE id = ?").bind(newLikes, id).run();
+        storageHandled = true;
       } catch (err) {
         console.warn("D1 like update error:", err);
       }
@@ -111,21 +136,55 @@ export async function onRequestPost(context: {
     const kv = findKV(context.env);
     if (kv) {
       try {
+        let likers: string[] = [];
+        let baseCount = 0;
+        const likersRaw: any = await kv.get(`lookbook_likers:${id}`, "json");
+        if (Array.isArray(likersRaw)) {
+          likers = likersRaw;
+        } else if (likersRaw && typeof likersRaw === "object") {
+          likers = Array.isArray(likersRaw.likers) ? likersRaw.likers : [];
+          baseCount = typeof likersRaw.baseCount === "number" ? likersRaw.baseCount : 0;
+        }
+
+        // If likers not tracked yet, seed with current item count if available
+        const singleRaw = await kv.get(`lookbook:${id}`, "json");
+        if (likers.length === 0 && baseCount === 0 && singleRaw?.likes) {
+          baseCount = singleRaw.likes;
+        }
+
+        if (action === "like") {
+          if (!likers.includes(deviceId)) {
+            likers.push(deviceId);
+          }
+        } else {
+          if (likers.includes(deviceId)) {
+            likers = likers.filter((d) => d !== deviceId);
+          } else if (baseCount > 0) {
+            baseCount = Math.max(0, baseCount - 1);
+          }
+        }
+
+        if (!storageHandled) {
+          newLikes = Math.max(0, baseCount + likers.length);
+        }
+
+        await kv.put(`lookbook_likers:${id}`, JSON.stringify({ likers, baseCount }));
+
+        if (singleRaw) {
+          singleRaw.likes = newLikes;
+          await kv.put(`lookbook:${id}`, JSON.stringify(singleRaw));
+        }
+
         const raw = await kv.get("lookbooks_community_all", "json");
         if (raw) {
           const items = Array.isArray(raw) ? raw : (typeof raw === "string" ? JSON.parse(raw) : []);
           const idx = items.findIndex((i: any) => i.id === id);
           if (idx !== -1) {
-            newLikes = Math.max(0, (items[idx].likes || 0) + delta);
             items[idx].likes = newLikes;
             await kv.put("lookbooks_community_all", JSON.stringify(items));
           }
         }
-        const singleRaw = await kv.get(`lookbook:${id}`, "json");
-        if (singleRaw) {
-          singleRaw.likes = newLikes;
-          await kv.put(`lookbook:${id}`, JSON.stringify(singleRaw));
-        }
+        storageHandled = true;
       } catch (err) {
         console.warn("KV like update error:", err);
       }
