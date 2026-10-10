@@ -9,12 +9,9 @@ import { StudioRightPanel } from "@/components/studio/StudioRightPanel";
 import { useOutfitStore, DEFAULT_OUTFIT } from "@/lib/store";
 import { generateOutfitPrompt, callFluxWorkerAi } from "@/lib/ai-prompt";
 import { formatRemixOutfitSummary } from "@/lib/utils";
-import {
-  getActiveStudioContext,
-  setActiveStudioContext,
-  clearActiveStudioContext,
-} from "@/lib/studio-context";
+import { getActiveStudioContext, setActiveStudioContext, clearActiveStudioContext } from "@/lib/studio-context";
 import mockupsData from "@/config/mockups.json";
+import { FeatureTour } from "@/components/shared/FeatureTour";
 
 const REQUIRED_CATEGORIES = [
   { key: "personaId", label: "Nhân vật", categoryId: "persona" },
@@ -254,7 +251,7 @@ export const StudioDashboard: React.FC = () => {
           {/* TOP ROW: UI "Kết quả phối đồ" & UI "Thẻ lookbook" - Chiều cao bằng nhau và cố định song song */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch">
             {/* Kết quả phối đồ (md:col-span-7) */}
-            <div className="md:col-span-7 flex flex-col">
+            <div id="preview-workspace" className="md:col-span-7 flex flex-col">
               <PreviewWorkspace
                 outfit={outfit}
                 resultImage={resultImage}
@@ -269,7 +266,7 @@ export const StudioDashboard: React.FC = () => {
             </div>
 
             {/* Thẻ Lookbook 9:16 (md:col-span-5) - Cố định cùng hàng, chiều cao bằng với UI Kết quả phối đồ */}
-            <div className="md:col-span-5 flex flex-col">
+            <div id="lookbook-panel" className="md:col-span-5 flex flex-col">
               <StudioRightPanel
                 outfit={outfit}
                 resultImage={resultImage}
@@ -280,11 +277,14 @@ export const StudioDashboard: React.FC = () => {
           </div>
 
           {/* BOTTOM ROW: Cultural Harmony AI - Mở rộng toàn bộ sang bên phải đến mép của thẻ lookbook */}
-          <div className="w-full">
+          <div id="cultural-advisor" className="w-full">
             <CulturalAdvisorCard outfit={outfit} resultImage={resultImage} />
           </div>
         </div>
       </div>
+
+      {/* ONBOARDING FEATURE TOUR / SPOTLIGHT GUIDE */}
+      <FeatureTour />
     </div>
   );
 };
