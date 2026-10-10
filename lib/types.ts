@@ -1,4 +1,5 @@
 import { OutfitState } from "./utils";
+import { WeatherInfo } from "./weather";
 
 export interface LookbookItem {
   id: string;
@@ -40,6 +41,8 @@ export interface CulturalAdvisorRequest {
   accessoryId?: string;
   accessoryIds?: string[];
   personaId?: string;
+  locationId?: string;
+  weather?: WeatherInfo;
 }
 
 export interface CulturalAdvisorResponse {
@@ -47,6 +50,8 @@ export interface CulturalAdvisorResponse {
   weatherFitScore: number;
   culturalRespectScore: number;
   overallScore: number;
+  originAndSignificance?: string;
+  weatherInfo?: WeatherInfo;
   elementAnalysis: {
     element: string;
     description: string;

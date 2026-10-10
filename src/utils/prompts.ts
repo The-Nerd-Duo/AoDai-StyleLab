@@ -41,11 +41,11 @@ export const GARMENT_PROMPTS: Record<string, string> = {
 
   // Áo tứ thân Kinh Bắc
   "ao-tu-than":
-    "Northern Vietnamese Kinh Bac Ao Tu Than folk costume, four long fluttering panels, two back panels sewn together, two front panels tied casually at belly, worn over an inner diamond-shaped scarlet red halter top (Yem bib), bound at waist with a bright flowing silk sash, paired with a dark floor-length flowing wrap skirt.",
+    "Northern Vietnamese Kinh Bac Ao Tu Than folk costume, demure and modest traditional etiquette, four long fluttering silk panels, two back panels sewn together, two front flowing panels draping modestly over the chest and torso before tying gently at the waist, worn over a modest high-coverage traditional silk Yem bib and inner white blouse fully covering the chest and collarbones up to the base of the throat, strictly zero cleavage, no exposed chest, conservative and respectful neckline, bound at waist with a bright flowing silk sash, paired with a dark floor-length flowing wrap skirt.",
   "Áo Tứ Thân Kinh Bắc":
-    "Northern Vietnamese Kinh Bac Ao Tu Than folk costume, four long fluttering panels, two back panels sewn together, two front panels tied casually at belly, worn over an inner diamond-shaped scarlet red halter top (Yem bib), bound at waist with a bright flowing silk sash, paired with a dark floor-length flowing wrap skirt.",
+    "Northern Vietnamese Kinh Bac Ao Tu Than folk costume, demure and modest traditional etiquette, four long fluttering silk panels, two back panels sewn together, two front flowing panels draping modestly over the chest and torso before tying gently at the waist, worn over a modest high-coverage traditional silk Yem bib and inner white blouse fully covering the chest and collarbones up to the base of the throat, strictly zero cleavage, no exposed chest, conservative and respectful neckline, bound at waist with a bright flowing silk sash, paired with a dark floor-length flowing wrap skirt.",
   "Áo Tứ Thân":
-    "Northern Vietnamese Kinh Bac Ao Tu Than folk costume, four long fluttering panels, two back panels sewn together, two front panels tied casually at belly, worn over an inner diamond-shaped scarlet red halter top (Yem bib), bound at waist with a bright flowing silk sash, paired with a dark floor-length flowing wrap skirt.",
+    "Northern Vietnamese Kinh Bac Ao Tu Than folk costume, demure and modest traditional etiquette, four long fluttering silk panels, two back panels sewn together, two front flowing panels draping modestly over the chest and torso before tying gently at the waist, worn over a modest high-coverage traditional silk Yem bib and inner white blouse fully covering the chest and collarbones up to the base of the throat, strictly zero cleavage, no exposed chest, conservative and respectful neckline, bound at waist with a bright flowing silk sash, paired with a dark floor-length flowing wrap skirt.",
 
   // Áo giao lĩnh (Cổ chéo)
   "ao-giao-linh":
@@ -264,6 +264,9 @@ export function buildFinalPrompt(
   const settingPart = rawSetting ? ` Setting: ${rawSetting}` : "";
   const rawStyle = STYLE_PROMPTS[style] || style;
   const stylePart = rawStyle ? ` Aesthetics: ${rawStyle}` : "";
+  const modestyPart = (garment.includes("ao-tu-than") || garment.includes("Tứ Thân"))
+    ? " Strictly modest and respectful attire, high coverage neckline, zero cleavage, fully covered chest."
+    : "";
 
-  return `${ANCHOR_PROMPT} ${modelPart} wearing ${garmentDesc}${colorPart}.${accessoryPart}${settingPart}${stylePart}`.replace(/\s{2,}/g, " ").trim();
+  return `${ANCHOR_PROMPT} ${modelPart} wearing ${garmentDesc}${colorPart}.${accessoryPart}${settingPart}${stylePart}${modestyPart}`.replace(/\s{2,}/g, " ").trim();
 }
