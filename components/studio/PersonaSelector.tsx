@@ -67,7 +67,6 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartX, setDragStartX] = useState(0);
   const [dragDeltaX, setDragDeltaX] = useState(0);
-  const [pressedItemId, setPressedItemId] = useState<string | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const hasDraggedRef = useRef(false);
@@ -81,18 +80,11 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
     }
   }, [selectedPersonaId]);
 
-  // Apply persona selection with snappy press-down feedback
+  // Apply persona selection
   const applyPersonaSelection = useCallback(
     (idx: number) => {
       const item = PERSONAS[idx];
       if (!item) return;
-
-      // Trigger crisp press-down feedback animation
-      setPressedItemId(item.id);
-      setTimeout(() => {
-        setPressedItemId(null);
-      }, 120);
-
       onSelectPersona(item.id);
     },
     [onSelectPersona]
@@ -204,7 +196,7 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
         filter: "drop-shadow(0 16px 22px rgba(0, 0, 0, 0.12))",
         transition: isDragging
           ? "none"
-          : "transform 0.38s cubic-bezier(0.18, 0.89, 0.32, 1.15), opacity 0.3s ease",
+          : "transform 0.44s cubic-bezier(0.25, 0.85, 0.35, 1), opacity 0.38s ease",
       };
     }
 
@@ -219,7 +211,7 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
         filter: "drop-shadow(0 8px 12px rgba(0, 0, 0, 0.06))",
         transition: isDragging
           ? "none"
-          : "transform 0.38s cubic-bezier(0.18, 0.89, 0.32, 1.15), opacity 0.3s ease",
+          : "transform 0.44s cubic-bezier(0.25, 0.85, 0.35, 1), opacity 0.38s ease",
       };
     }
 
@@ -234,7 +226,7 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
         filter: "drop-shadow(0 8px 12px rgba(0, 0, 0, 0.06))",
         transition: isDragging
           ? "none"
-          : "transform 0.38s cubic-bezier(0.18, 0.89, 0.32, 1.15), opacity 0.3s ease",
+          : "transform 0.44s cubic-bezier(0.25, 0.85, 0.35, 1), opacity 0.38s ease",
       };
     }
 
@@ -308,7 +300,6 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
           const style = getCardTransform(offset);
           const isFront = offset === 0;
           const isSelected = Boolean(selectedPersonaId && selectedPersonaId === item.id && isFront);
-          const isPressed = pressedItemId === item.id;
 
           return (
             <div
@@ -320,18 +311,12 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
                 onClick={() => handleCardClick(item, offset)}
                 style={{
                   transformOrigin: "center center",
-                  transition: isPressed
-                    ? "transform 0.08s ease-out, filter 0.08s ease-out, box-shadow 0.08s ease-out"
-                    : "transform 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.15), filter 0.2s ease, box-shadow 0.2s ease, border-color 0.15s ease",
                 }}
-                className={`w-full h-full rounded-2xl bg-surface-pure border-2 flex flex-col overflow-hidden select-none cursor-pointer group ${isFront
+                className={`w-full h-full rounded-2xl bg-surface-pure border-2 flex flex-col overflow-hidden select-none cursor-pointer group active:scale-[0.98] active:translate-y-0.5 transition-all duration-200 ease-out ${isFront
                     ? isSelected
                       ? "border-vermilion-red/80 shadow-xl ring-2 ring-vermilion-red/25"
                       : "border-border-bronze-light shadow-md hover:border-bronze-gold/60"
                     : "border-border-bronze-light/70 shadow-md hover:border-bronze-gold/60 opacity-85 hover:opacity-95"
-                  } ${isPressed
-                    ? "scale-[0.96] translate-y-1.5 shadow-sm ring-2 ring-vermilion-red/60 brightness-95"
-                    : "active:scale-[0.97] active:translate-y-1"
                   }`}
               >
                 <div className="relative w-full h-full overflow-hidden pointer-events-none">

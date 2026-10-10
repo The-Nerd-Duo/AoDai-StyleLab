@@ -88,11 +88,50 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
   onChange,
   chosenCategories,
 }) => {
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(() => {
+    let targetIndex = 0;
+    if (category === "garment") {
+      targetIndex = mockupsData.garments.findIndex((g) => g.id === outfit.garmentId);
+    } else if (category === "color") {
+      targetIndex = mockupsData.colors.findIndex((c) => c.id === outfit.colorId);
+    } else if (category === "occasion") {
+      targetIndex = mockupsData.occasions.findIndex((o) => o.id === outfit.occasionId);
+    } else if (category === "style") {
+      targetIndex = mockupsData.styles.findIndex((s) => s.id === outfit.styleId);
+    } else if (category === "accessory") {
+      const activeAcc = outfit.accessoryIds?.[0] || outfit.accessoryId;
+      if (activeAcc && activeAcc !== "none") {
+        targetIndex = mockupsData.accessories.findIndex((a) => a.id === activeAcc);
+      }
+    }
+    return targetIndex >= 0 ? targetIndex : 0;
+  });
+
+  // Synchronously update activeIndex when category prop changes during render (zero-flicker sync)
+  const [prevCategory, setPrevCategory] = useState(category);
+  if (prevCategory !== category) {
+    setPrevCategory(category);
+    let targetIndex = 0;
+    if (category === "garment") {
+      targetIndex = mockupsData.garments.findIndex((g) => g.id === outfit.garmentId);
+    } else if (category === "color") {
+      targetIndex = mockupsData.colors.findIndex((c) => c.id === outfit.colorId);
+    } else if (category === "occasion") {
+      targetIndex = mockupsData.occasions.findIndex((o) => o.id === outfit.occasionId);
+    } else if (category === "style") {
+      targetIndex = mockupsData.styles.findIndex((s) => s.id === outfit.styleId);
+    } else if (category === "accessory") {
+      const activeAcc = outfit.accessoryIds?.[0] || outfit.accessoryId;
+      if (activeAcc && activeAcc !== "none") {
+        targetIndex = mockupsData.accessories.findIndex((a) => a.id === activeAcc);
+      }
+    }
+    setActiveIndex(targetIndex >= 0 ? targetIndex : 0);
+  }
+
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartX, setDragStartX] = useState(0);
   const [dragDeltaX, setDragDeltaX] = useState(0);
-  const [pressedItemId, setPressedItemId] = useState<string | null>(null);
 
   const isCategoryChosen = React.useCallback(
     (cat: string) => {
@@ -154,18 +193,12 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
     hasDraggedRef.current = false;
   }, [category, outfit.garmentId, outfit.colorId, outfit.occasionId, outfit.styleId]);
 
-  // Auto-select for single-choice categories with tactile press-down feedback
+  // Auto-select for single-choice categories
   const applySelectionForIndex = useCallback(
     (targetIndex: number) => {
       if (targetIndex < 0 || targetIndex >= items.length) return;
       const targetItem = items[targetIndex];
       if (!targetItem) return;
-
-      // Trigger tactile press-down feedback
-      setPressedItemId(targetItem.id);
-      setTimeout(() => {
-        setPressedItemId(null);
-      }, 120);
 
       // Auto-select for garment, color, occasion, style (single-choice)
       if (category === "garment") {
@@ -177,7 +210,6 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
       } else if (category === "style") {
         onChange("styleId", targetItem.id);
       }
-      // Note: for accessory, do not auto-select on swipe
     },
     [category, items, onChange]
   );
@@ -237,15 +269,9 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
     }
   };
 
-  // Click anywhere on a card to select with snappy, fast press-down animation
+  // Click anywhere on a card to select with instant, silky-smooth press feedback
   const handleCardClick = (item: any, offset: number) => {
     if (hasDraggedRef.current) return;
-
-    // Fast, crisp press-down feedback
-    setPressedItemId(item.id);
-    setTimeout(() => {
-      setPressedItemId(null);
-    }, 120);
 
     const targetIdx = items.findIndex((i: any) => i.id === item.id);
     if (targetIdx !== -1 && targetIdx !== activeIndex) {
@@ -343,7 +369,7 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
         filter: "drop-shadow(0 18px 24px rgba(0, 0, 0, 0.12))",
         transition: isDragging
           ? "none"
-          : "transform 0.38s cubic-bezier(0.18, 0.89, 0.32, 1.15), opacity 0.3s ease, filter 0.3s ease",
+          : "transform 0.44s cubic-bezier(0.25, 0.85, 0.35, 1), opacity 0.38s ease, filter 0.38s ease",
       };
     }
 
@@ -359,7 +385,7 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
         filter: "drop-shadow(0 8px 14px rgba(0, 0, 0, 0.07))",
         transition: isDragging
           ? "none"
-          : "transform 0.38s cubic-bezier(0.18, 0.89, 0.32, 1.15), opacity 0.3s ease, filter 0.3s ease",
+          : "transform 0.44s cubic-bezier(0.25, 0.85, 0.35, 1), opacity 0.38s ease, filter 0.38s ease",
       };
     }
 
@@ -375,7 +401,7 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
         filter: "drop-shadow(0 8px 14px rgba(0, 0, 0, 0.07))",
         transition: isDragging
           ? "none"
-          : "transform 0.38s cubic-bezier(0.18, 0.89, 0.32, 1.15), opacity 0.3s ease, filter 0.3s ease",
+          : "transform 0.44s cubic-bezier(0.25, 0.85, 0.35, 1), opacity 0.38s ease, filter 0.38s ease",
       };
     }
 
@@ -391,7 +417,7 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
         filter: "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.05))",
         transition: isDragging
           ? "none"
-          : "transform 0.38s cubic-bezier(0.18, 0.89, 0.32, 1.15), opacity 0.3s ease, filter 0.3s ease",
+          : "transform 0.44s cubic-bezier(0.25, 0.85, 0.35, 1), opacity 0.38s ease, filter 0.38s ease",
       };
     }
 
@@ -407,7 +433,7 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
         filter: "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.05))",
         transition: isDragging
           ? "none"
-          : "transform 0.38s cubic-bezier(0.18, 0.89, 0.32, 1.15), opacity 0.3s ease, filter 0.3s ease",
+          : "transform 0.44s cubic-bezier(0.25, 0.85, 0.35, 1), opacity 0.38s ease, filter 0.38s ease",
       };
     }
 
@@ -464,7 +490,7 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
               <div
                 key={item.id}
                 onClick={() => handleToggleAccessory(item.id)}
-                className={`relative h-[175px] rounded-xl overflow-hidden border-2 cursor-pointer select-none transition-all duration-150 active:scale-95 group ${isSelected
+                className={`relative h-[175px] rounded-xl overflow-hidden border-2 cursor-pointer select-none transition-all duration-200 active:scale-[0.985] active:translate-y-0.5 ease-out group ${isSelected
                     ? "border-vermilion-red shadow-md ring-2 ring-vermilion-red/25"
                     : "border-border-bronze-light/70 hover:border-bronze-gold/70 shadow-2xs"
                   }`}
@@ -587,7 +613,6 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
           const offset = getCircularOffset(index, activeIndex, total);
           const style = getCardTransform(offset);
           const isFront = offset === 0;
-          const isPressed = pressedItemId === item.id;
           const isSelected =
             category === "garment"
               ? isCategoryChosen("garment") && outfit.garmentId === item.id
@@ -606,23 +631,17 @@ export const StackedDeckCarousel: React.FC<StackedDeckCarouselProps> = ({
               style={style}
               className="absolute top-2 w-[275px] sm:w-[285px] h-[375px]"
             >
-              {/* Inner Card: Click anywhere to select + Snappy, fast press-down effect */}
+              {/* Inner Card: Click anywhere to select + Silky, fluid press-down effect */}
               <div
                 onClick={() => handleCardClick(item, offset)}
-                className={`w-full h-full rounded-2xl bg-surface-pure border-2 flex flex-col overflow-hidden select-none cursor-pointer group ${isFront
+                className={`w-full h-full rounded-2xl bg-surface-pure border-2 flex flex-col overflow-hidden select-none cursor-pointer group active:scale-[0.98] active:translate-y-0.5 transition-all duration-200 ease-out ${isFront
                     ? isSelected
                       ? "border-vermilion-red/80 shadow-xl ring-2 ring-vermilion-red/25"
                       : "border-border-bronze-light shadow-md hover:border-bronze-gold/60"
                     : "border-border-bronze-light/70 shadow-md hover:border-bronze-gold/60 opacity-85 hover:opacity-95"
-                  } ${isPressed
-                    ? "scale-[0.96] translate-y-1.5 shadow-sm ring-2 ring-vermilion-red/60 brightness-95"
-                    : "active:scale-[0.97] active:translate-y-1"
                   }`}
                 style={{
                   transformOrigin: "center center",
-                  transition: isPressed
-                    ? "transform 0.08s ease-out, filter 0.08s ease-out, box-shadow 0.08s ease-out"
-                    : "transform 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.15), filter 0.2s ease, box-shadow 0.2s ease, border-color 0.15s ease",
                 }}
               >
                 {/* CATEGORY 1: GARMENT CARD */}

@@ -625,13 +625,6 @@ export const LookbookCard: React.FC<LookbookCardProps> = ({
           <div className="absolute bottom-0 inset-x-0 z-30 flex items-center justify-between gap-2 px-3.5 pb-4 sm:px-4 sm:pb-4 text-white pointer-events-none">
             <div className="flex flex-col gap-0.5 min-w-0 flex-1">
               <div className="flex items-center gap-1 flex-nowrap overflow-hidden">
-                <span
-                  className="w-2 h-2 rounded-full border border-white/30 shadow-xs flex-shrink-0"
-                  style={{ backgroundColor: color.hex }}
-                />
-                <span className="text-[9px] sm:text-[10px] text-paper-cream font-medium tracking-wide truncate">
-                  {color.name}
-                </span>
                 <span className="text-[7.5px] sm:text-[8px] font-mono text-bronze-gold bg-black/50 backdrop-blur-xs px-1.5 py-0.5 rounded uppercase border border-white/10 font-semibold flex-shrink-0">
                   {style.name}
                 </span>

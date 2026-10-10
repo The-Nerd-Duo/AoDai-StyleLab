@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { Header } from "@/components/shared/Header";
 import { BottomNav } from "@/components/shared/BottomNav";
 
 export const viewport: Viewport = {
@@ -47,6 +48,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen flex flex-col bg-[#F8F5F0] text-text-charcoal font-sans">
+        <Header />
         <main className="flex-1 pb-16 md:pb-0 flex flex-col">{children}</main>
         <BottomNav />
       </body>

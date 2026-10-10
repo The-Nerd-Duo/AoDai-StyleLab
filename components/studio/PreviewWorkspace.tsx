@@ -3,8 +3,9 @@
 import React, { useState } from "react";
 import { OutfitState } from "@/lib/utils";
 import mockupsData from "@/config/mockups.json";
-import { generateOutfitPrompt, callFluxWorkerAi } from "@/lib/ai-prompt";
+import { generateOutfitPrompt, callFluxWorkerAi, isAiQuotaError } from "@/lib/ai-prompt";
 import { Sparkles, RefreshCw, Maximize2, Palette, X } from "lucide-react";
+import { QuotaLimitModal } from "@/components/studio/QuotaLimitModal";
 
 export interface StudioBadgeInfo {
   type: "remix" | "trial";
@@ -42,6 +43,7 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
   const [internalLoading, setInternalLoading] = useState(false);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
+  const [quotaModalOpen, setQuotaModalOpen] = useState(false);
 
   const resultImage = externalResultImage !== undefined ? externalResultImage : internalResultImage;
   const setResultImage = externalSetResultImage || setInternalResultImage;
@@ -73,7 +75,11 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
       const imageUrl = await callFluxWorkerAi(prompt);
       setResultImage(imageUrl);
     } catch (error: any) {
-      alert(error?.message || "Có lỗi khi tạo ảnh từ AI!");
+      if (isAiQuotaError(error)) {
+        setQuotaModalOpen(true);
+      } else {
+        alert(error?.message || "Có lỗi khi tạo ảnh từ AI!");
+      }
     } finally {
       setLoading(false);
     }
@@ -198,10 +204,6 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
                   }
                 }}
               />
-              <div className="absolute bottom-2 left-2 right-2 px-3 py-1.5 rounded-lg bg-black/70 backdrop-blur-md text-white text-[11px] flex items-center justify-between border border-white/10">
-                <span className="font-serif truncate">{garment.name} • {color.name}</span>
-                <span className="text-[10px] text-bronze-gold font-mono">{style.name}</span>
-              </div>
             </div>
           ) : (
             /* Minimalist Neo-Heritage Empty State */
@@ -280,6 +282,12 @@ export const PreviewWorkspace: React.FC<PreviewWorkspaceProps> = ({
           />
         </div>
       )}
+
+      {/* Demo Quota Limit Modal */}
+      <QuotaLimitModal
+        isOpen={quotaModalOpen}
+        onClose={() => setQuotaModalOpen(false)}
+      />
     </div>
   );
 };

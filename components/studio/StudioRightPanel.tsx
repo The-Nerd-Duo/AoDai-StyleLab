@@ -123,7 +123,7 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
         <div className="flex items-center justify-center flex-1 w-full my-auto py-1">
           {hasDisplayImage ? (
             <div
-              className="relative w-full max-w-[210px] sm:max-w-[220px] aspect-[9/16] max-h-[440px] bg-[#111111] rounded-xl overflow-hidden shadow-lg border-2 flex flex-col justify-between p-3 select-none transition-all duration-300 group"
+              className="relative w-full max-w-[210px] sm:max-w-[220px] aspect-[9/16] max-h-[440px] bg-[#111111] rounded-xl overflow-hidden shadow-lg border-2 flex flex-col justify-end p-3.5 select-none transition-all duration-300 group"
               style={{
                 borderColor:
                   frame.borderColor && frame.borderColor !== "transparent"
@@ -131,16 +131,6 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
                     : "rgba(197, 160, 89, 0.25)",
               }}
             >
-              {/* Top Tag */}
-              <div className="flex items-center justify-between z-30">
-                <span className="font-mono text-[8px] uppercase tracking-wider text-surface-pure font-bold px-1.5 py-0.5 bg-vermilion-red/90 rounded">
-                  AODAI STYLELAB
-                </span>
-                <span className="text-[8px] font-mono px-1 rounded bg-guardrail-pass text-white font-bold">
-                  GEN-Z PROOF
-                </span>
-              </div>
-
               {/* Full Image */}
               <div className="absolute inset-0 z-0">
                 <img
@@ -161,14 +151,14 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
                 accentColor={frame.accentColor}
               />
 
-              {/* Bottom Card Overlay */}
-              <div className="relative z-20 text-white space-y-1.5">
-                <div className="flex items-end justify-between">
-                  <div>
-                    <span className="font-mono text-[9px] text-bronze-gold block font-semibold uppercase">
+              {/* Bottom Card Overlay: Fixed at the BOTTOM */}
+              <div className="relative z-20 text-white space-y-1">
+                <div className="flex items-end justify-between gap-1.5">
+                  <div className="min-w-0 flex-1">
+                    <span className="font-mono text-[9px] text-bronze-gold block font-semibold uppercase truncate">
                       {style.name}
                     </span>
-                    <p className="font-serif text-[13px] leading-tight font-bold text-white truncate max-w-[120px]">
+                    <p className="font-serif text-[13px] leading-tight font-bold text-white truncate max-w-[125px]">
                       {garment.name}
                     </p>
                   </div>
@@ -192,15 +182,6 @@ export const StudioRightPanel: React.FC<StudioRightPanelProps> = ({
                       </div>
                     )}
                   </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-1 border-t border-white/20">
-                  <div className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color.hex }} />
-                    <span className="w-2 h-2 rounded-full bg-bronze-gold" />
-                    <span className="w-2 h-2 rounded-full bg-white" />
-                  </div>
-                  <span className="font-mono text-[8px] text-white/70">ID #VN-2026-098</span>
                 </div>
               </div>
             </div>

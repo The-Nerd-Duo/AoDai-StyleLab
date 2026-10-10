@@ -67,6 +67,27 @@
   scrollbar-color: #C5A059 #EFE7DC;
 }
 
+/* Dedicated Lookbook Category Horizontal Scrollbar */
+.category-scrollbar::-webkit-scrollbar {
+  height: 4px;
+}
+.category-scrollbar::-webkit-scrollbar-track {
+  background: #EFE7DC;
+  border-radius: 9999px;
+}
+.category-scrollbar::-webkit-scrollbar-thumb {
+  background: #D93829;
+  border-radius: 9999px;
+  transition: background 0.2s ease;
+}
+.category-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #B9281B;
+}
+.category-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #D93829 #EFE7DC;
+}
+
 /* Custom Heritage Aesthetic Classes */
 .cyber-glow {
   box-shadow: 0 0 20px -3px rgba(217, 56, 41, 0.35), 0 0 10px rgba(197, 160, 89, 0.2);

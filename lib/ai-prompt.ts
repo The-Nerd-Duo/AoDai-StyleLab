@@ -155,6 +155,23 @@ export function generateOutfitPrompt(outfit: OutfitState): string {
   return prompt.replace(/\s{2,}/g, " ").trim();
 }
 
+export function isAiQuotaError(error: any): boolean {
+  if (!error) return false;
+  if (error.isQuota) return true;
+  if (error.status === 429 || error.status === 503) return true;
+  const msg = (error.message || String(error)).toLowerCase();
+  return (
+    msg.includes("quota") ||
+    msg.includes("limit") ||
+    msg.includes("rate") ||
+    msg.includes("429") ||
+    msg.includes("too many") ||
+    msg.includes("exceeded") ||
+    msg.includes("capacity") ||
+    msg.includes("resource_exhausted")
+  );
+}
+
 export const WORKER_AI_DEFAULT_URL = "https://vietphuc-ai-api.tunaemm.workers.dev";
 
 export async function callFluxWorkerAi(prompt: string, workerUrl = WORKER_AI_DEFAULT_URL): Promise<string> {
@@ -170,7 +187,23 @@ export async function callFluxWorkerAi(prompt: string, workerUrl = WORKER_AI_DEF
       const errJson = await res.json();
       if (errJson.error) errMessage = errJson.error;
     } catch {}
-    throw new Error(errMessage);
+
+    const lower = errMessage.toLowerCase();
+    const isQuota =
+      res.status === 429 ||
+      res.status === 503 ||
+      lower.includes("quota") ||
+      lower.includes("rate limit") ||
+      lower.includes("limit") ||
+      lower.includes("too many") ||
+      lower.includes("exceeded") ||
+      lower.includes("capacity") ||
+      lower.includes("resource_exhausted");
+
+    const err = new Error(errMessage);
+    (err as any).status = res.status;
+    (err as any).isQuota = isQuota;
+    throw err;
   }
 
   const contentType = res.headers.get("content-type") || "";
