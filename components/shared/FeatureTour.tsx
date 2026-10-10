@@ -77,7 +77,7 @@ export const TOUR_STEPS: TourStep[] = [
     description:
       "Hệ thống AI tự động đối chiếu trang phục bạn chọn với điển chế cổ nhân, thư tịch triều Nguyễn và Lê triều. Chấm điểm độ hòa hợp và đưa ra lời bình chuyên sâu về ý nghĩa hoa văn, hoa sắc.",
     highlightTip: "Giúp bạn hiểu sâu nguồn gốc lịch sử và cách mặc chuẩn lễ nghi truyền thống.",
-    preferredPlacement: "bottom",
+    preferredPlacement: "top",
     padding: 10,
     radius: 18,
   },
@@ -116,46 +116,54 @@ function measureStep(stepIdx: number, cardEl: HTMLElement | null) {
   const rect = targetEl.getBoundingClientRect();
   const pad = step.padding ?? 10;
   const rad = step.radius ?? 16;
+  const navHeaderHeight = 68;
+  const isHeaderTarget = step.targetSelector === "#header-nav";
 
+  // Calculate spotlight position
+  // Let spotlight retain its full natural dimensions and overflow upwards behind sticky header
   const spotX = Math.max(0, rect.left - pad);
-  const spotY = Math.max(0, rect.top - pad);
+  const spotY = rect.top - pad;
   const spotW = rect.width + pad * 2;
   const spotH = rect.height + pad * 2;
 
   const winW = window.innerWidth;
   const winH = window.innerHeight;
   const cardW = Math.min(380, winW - 32);
-  const cardH = cardEl?.offsetHeight || 260;
+  const cardH = cardEl?.offsetHeight || 310;
 
   let targetPlacement: "top" | "bottom" | "left" | "right" =
     step.preferredPlacement || "bottom";
 
   const isMobile = winW < 768;
 
-  if (isMobile) {
-    const spaceBelow = winH - (spotY + spotH) - 16;
-    const spaceAbove = spotY - 16;
-    targetPlacement = spaceBelow >= cardH || spaceBelow >= spaceAbove ? "bottom" : "top";
-  } else {
-    const spaceRight = winW - (spotX + spotW) - 20;
-    const spaceLeft = spotX - 20;
-    const spaceTop = spotY - 20;
-    const spaceBottom = winH - (spotY + spotH) - 20;
+  const spaceRight = winW - (spotX + spotW) - 16;
+  const spaceLeft = spotX - 16;
+  const spaceTop = Math.max(0, spotY) - navHeaderHeight - 16;
+  const spaceBottom = winH - (spotY + spotH) - 16;
 
+  if (isMobile) {
+    if (targetPlacement === "right" || targetPlacement === "left") {
+      targetPlacement = spaceBottom >= cardH ? "bottom" : spaceTop >= cardH ? "top" : "bottom";
+    } else if (targetPlacement === "bottom" && spaceBottom < cardH && spaceTop > spaceBottom) {
+      targetPlacement = "top";
+    } else if (targetPlacement === "top" && spaceTop < cardH && spaceBottom > spaceTop) {
+      targetPlacement = "bottom";
+    }
+  } else {
     if (targetPlacement === "right") {
       if (spaceRight < cardW) {
-        targetPlacement = spaceLeft >= cardW ? "left" : spaceBottom >= cardH ? "bottom" : "top";
+        targetPlacement = spaceLeft >= cardW ? "left" : spaceTop >= cardH ? "top" : spaceBottom >= cardH ? "bottom" : "left";
       }
     } else if (targetPlacement === "left") {
       if (spaceLeft < cardW) {
-        targetPlacement = spaceRight >= cardW ? "right" : spaceBottom >= cardH ? "bottom" : "top";
+        targetPlacement = spaceRight >= cardW ? "right" : spaceTop >= cardH ? "top" : spaceBottom >= cardH ? "bottom" : "right";
       }
     } else if (targetPlacement === "top") {
-      if (spaceTop < cardH && spaceBottom >= cardH) {
+      if (spaceTop < cardH && spaceBottom > spaceTop) {
         targetPlacement = "bottom";
       }
     } else if (targetPlacement === "bottom") {
-      if (spaceBottom < cardH && spaceTop >= cardH) {
+      if (spaceBottom < cardH && spaceTop > spaceBottom) {
         targetPlacement = "top";
       }
     }
@@ -172,14 +180,26 @@ function measureStep(stepIdx: number, cardEl: HTMLElement | null) {
     finalY = spotY + (spotH - cardH) / 2;
   } else if (targetPlacement === "top") {
     finalX = spotX + (spotW - cardW) / 2;
-    finalY = spotY - cardH - 16;
+    finalY = spotY - cardH - 14;
   } else {
     finalX = spotX + (spotW - cardW) / 2;
-    finalY = spotY + spotH + 16;
+    finalY = spotY + spotH + 14;
   }
 
+  // Prevent horizontal overflow
   finalX = Math.max(16, Math.min(finalX, winW - cardW - 16));
-  finalY = Math.max(16, Math.min(finalY, winH - cardH - 16));
+
+  // Smart vertical collision prevention against spotlight area & sticky header
+  if (targetPlacement === "top") {
+    const maxAllowedY = spotY - cardH - 8;
+    const minAllowedY = isHeaderTarget ? 8 : navHeaderHeight + 8;
+    finalY = Math.min(maxAllowedY, Math.max(minAllowedY, finalY));
+  } else if (targetPlacement === "bottom") {
+    const minAllowedY = Math.max(navHeaderHeight + 8, spotY + spotH + 8);
+    finalY = Math.max(minAllowedY, Math.min(finalY, winH - cardH - 12));
+  } else {
+    finalY = Math.max(navHeaderHeight + 8, Math.min(finalY, winH - cardH - 16));
+  }
 
   return {
     cutout: {
@@ -241,42 +261,45 @@ export const FeatureTour: React.FC<FeatureTourProps> = ({ autoStartDelay = 700 }
 
     if (!targetEl) return;
 
-    const rect = targetEl.getBoundingClientRect();
     const navHeaderHeight = 68;
-    const viewportHeight = window.innerHeight;
+    const cardH = cardRef.current?.offsetHeight || 310;
 
-    // Check if element is already comfortably visible
-    const isAlreadyVisible =
-      rect.top >= navHeaderHeight + 15 &&
-      rect.bottom <= viewportHeight - 15;
+    setIsScrolling(true);
 
-    if (!isAlreadyVisible) {
-      setIsScrolling(true);
-
-      targetEl.scrollIntoView({
-        behavior: "smooth",
-        block: stepIdx === 4 ? "start" : "center",
-      });
-
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-
-      scrollTimeoutRef.current = setTimeout(() => {
-        setIsScrolling(false);
-        updatePositions(stepIdx);
-      }, 650);
+    if (stepIdx === 0) {
+      // Step 0 (#mix-match-selector): Scroll to absolute top so entire card and title are 100% visible below Header
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else if (stepIdx === 4) {
+      // Step 4 (#header-nav): Scroll to top of page
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else if (stepIdx === 3) {
+      // Step 3 (#cultural-advisor): Scroll so that #cultural-advisor is in lower half of screen, leaving at least cardH + navHeaderHeight clearance above it!
+      const targetDocTop = targetEl.getBoundingClientRect().top + window.scrollY;
+      const idealScroll = Math.max(0, targetDocTop - (navHeaderHeight + cardH + 28));
+      window.scrollTo({ top: idealScroll, behavior: "smooth" });
     } else {
-      setIsScrolling(false);
+      // Step 1 (#preview-workspace) & Step 2 (#lookbook-panel): Scroll so top of container is 18px below sticky header
+      const targetDocTop = targetEl.getBoundingClientRect().top + window.scrollY;
+      const idealScroll = Math.max(0, targetDocTop - navHeaderHeight - 18);
+      window.scrollTo({ top: idealScroll, behavior: "smooth" });
     }
+
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+
+    scrollTimeoutRef.current = setTimeout(() => {
+      setIsScrolling(false);
+      updatePositions(stepIdx);
+    }, 650);
 
     updatePositions(stepIdx);
   }, [updatePositions]);
 
   // Open tour handler: pre-measures Step 0 so there is ZERO flying/expansion from (0,0)
   const handleOpenTour = useCallback(() => {
-    // If window is scrolled down, reset scroll first so Step 1 is cleanly in view
-    if (window.scrollY > 50) {
+    // Reset scroll first so Step 1 is cleanly in view below header
+    if (window.scrollY > 0) {
       window.scrollTo({ top: 0, behavior: "instant" });
     }
 
@@ -455,7 +478,11 @@ export const FeatureTour: React.FC<FeatureTourProps> = ({ autoStartDelay = 700 }
 
   return (
     <div
-      className={`fixed inset-0 z-[9990] overflow-hidden select-none transition-opacity duration-300 ease-out ${
+      className={`fixed inset-0 ${
+        TOUR_STEPS[currentStep]?.targetSelector === "#header-nav"
+          ? "z-[9998]"
+          : "z-[9990]"
+      } overflow-hidden select-none transition-opacity duration-300 ease-out ${
         isFadedIn ? "opacity-100" : "opacity-0 pointer-events-none"
       }`}
       aria-label="App Feature Tour"
@@ -471,7 +498,9 @@ export const FeatureTour: React.FC<FeatureTourProps> = ({ autoStartDelay = 700 }
 
       {/* 2. Pure GPU-Accelerated Spotlight Cutout (translate3d + Box-Shadow) */}
       <div
-        className="fixed top-0 left-0 pointer-events-none z-[9992]"
+        className={`fixed top-0 left-0 pointer-events-none ${
+          TOUR_STEPS[currentStep]?.targetSelector === "#header-nav" ? "z-[9997]" : "z-[9992]"
+        }`}
         style={{
           width: cutout.width,
           height: cutout.height,
