@@ -109,7 +109,7 @@ Hệ thống kết hợp mô hình **Local Rule Engine** và **Google Gemini 2.0
 ```
 
 1. **Local Cultural Engine (`lib/cultural-engine.ts`):** Tính toán tức thì điểm số tương sinh ngũ hành, nguyên lý màu sắc và khuyến cáo cơ bản ngay khi chạm vuốt, triệt tiêu hoàn toàn cảm giác chờ đợi.
-2. **Google Gemini 2.0 Flash Engine (`app/api/cultural-advisor/route.ts`):** 
+2. **Google Gemini 3.8 Flash Engine (`app/api/cultural-advisor/route.ts`):** 
    * Đóng vai trò **Cố Vấn Di Sản & Thời Trang Việt Phục Cao Cấp**.
    * Tiếp nhận thông số thời tiết thực tế từ Open-Meteo và toạ độ người dùng.
    * Sinh lời khuyên chất liệu vải thích ứng, ý nghĩa cội nguồn và mẹo sáng tạo Gen Z.
