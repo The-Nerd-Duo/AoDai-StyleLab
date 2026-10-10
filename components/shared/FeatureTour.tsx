@@ -102,10 +102,107 @@ export interface FeatureTourProps {
   autoStartDelay?: number;
 }
 
+// Calculate exact coordinates for any given step
+function measureStep(stepIdx: number, cardEl: HTMLElement | null) {
+  if (typeof window === "undefined" || stepIdx < 0 || stepIdx >= TOUR_STEPS.length) {
+    return null;
+  }
+
+  const step = TOUR_STEPS[stepIdx];
+  const targetEl = document.querySelector(step.targetSelector) as HTMLElement | null;
+
+  if (!targetEl) return null;
+
+  const rect = targetEl.getBoundingClientRect();
+  const pad = step.padding ?? 10;
+  const rad = step.radius ?? 16;
+
+  const spotX = Math.max(0, rect.left - pad);
+  const spotY = Math.max(0, rect.top - pad);
+  const spotW = rect.width + pad * 2;
+  const spotH = rect.height + pad * 2;
+
+  const winW = window.innerWidth;
+  const winH = window.innerHeight;
+  const cardW = Math.min(380, winW - 32);
+  const cardH = cardEl?.offsetHeight || 260;
+
+  let targetPlacement: "top" | "bottom" | "left" | "right" =
+    step.preferredPlacement || "bottom";
+
+  const isMobile = winW < 768;
+
+  if (isMobile) {
+    const spaceBelow = winH - (spotY + spotH) - 16;
+    const spaceAbove = spotY - 16;
+    targetPlacement = spaceBelow >= cardH || spaceBelow >= spaceAbove ? "bottom" : "top";
+  } else {
+    const spaceRight = winW - (spotX + spotW) - 20;
+    const spaceLeft = spotX - 20;
+    const spaceTop = spotY - 20;
+    const spaceBottom = winH - (spotY + spotH) - 20;
+
+    if (targetPlacement === "right") {
+      if (spaceRight < cardW) {
+        targetPlacement = spaceLeft >= cardW ? "left" : spaceBottom >= cardH ? "bottom" : "top";
+      }
+    } else if (targetPlacement === "left") {
+      if (spaceLeft < cardW) {
+        targetPlacement = spaceRight >= cardW ? "right" : spaceBottom >= cardH ? "bottom" : "top";
+      }
+    } else if (targetPlacement === "top") {
+      if (spaceTop < cardH && spaceBottom >= cardH) {
+        targetPlacement = "bottom";
+      }
+    } else if (targetPlacement === "bottom") {
+      if (spaceBottom < cardH && spaceTop >= cardH) {
+        targetPlacement = "top";
+      }
+    }
+  }
+
+  let finalX = 0;
+  let finalY = 0;
+
+  if (targetPlacement === "right") {
+    finalX = spotX + spotW + 16;
+    finalY = spotY + (spotH - cardH) / 2;
+  } else if (targetPlacement === "left") {
+    finalX = spotX - cardW - 16;
+    finalY = spotY + (spotH - cardH) / 2;
+  } else if (targetPlacement === "top") {
+    finalX = spotX + (spotW - cardW) / 2;
+    finalY = spotY - cardH - 16;
+  } else {
+    finalX = spotX + (spotW - cardW) / 2;
+    finalY = spotY + spotH + 16;
+  }
+
+  finalX = Math.max(16, Math.min(finalX, winW - cardW - 16));
+  finalY = Math.max(16, Math.min(finalY, winH - cardH - 16));
+
+  return {
+    cutout: {
+      x: spotX,
+      y: spotY,
+      width: spotW,
+      height: spotH,
+      radius: rad,
+    },
+    cardPos: {
+      x: finalX,
+      y: finalY,
+      placement: targetPlacement,
+    },
+  };
+}
+
 export const FeatureTour: React.FC<FeatureTourProps> = ({ autoStartDelay = 700 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
+  const [isInitialEntry, setIsInitialEntry] = useState(true);
+  const [isFadedIn, setIsFadedIn] = useState(false);
 
   const [cutout, setCutout] = useState({
     x: 0,
@@ -123,100 +220,18 @@ export const FeatureTour: React.FC<FeatureTourProps> = ({ autoStartDelay = 700 }
 
   const cardRef = useRef<HTMLDivElement>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const rafScrollRef = useRef<number | null>(null);
 
-  // Directly update coordinates based on the real getBoundingClientRect() of the DOM element
+  // Directly calculate positions from actual live getBoundingClientRect()
   const updatePositions = useCallback((stepIdx = currentStep) => {
-    if (stepIdx < 0 || stepIdx >= TOUR_STEPS.length) return;
-
-    const step = TOUR_STEPS[stepIdx];
-    const targetEl = document.querySelector(step.targetSelector) as HTMLElement | null;
-
-    if (!targetEl) return;
-
-    const rect = targetEl.getBoundingClientRect();
-    const pad = step.padding ?? 10;
-    const rad = step.radius ?? 16;
-
-    const spotX = Math.max(0, rect.left - pad);
-    const spotY = Math.max(0, rect.top - pad);
-    const spotW = rect.width + pad * 2;
-    const spotH = rect.height + pad * 2;
-
-    setCutout({
-      x: spotX,
-      y: spotY,
-      width: spotW,
-      height: spotH,
-      radius: rad,
-    });
-
-    const winW = window.innerWidth;
-    const winH = window.innerHeight;
-    const cardW = Math.min(380, winW - 32);
-    const cardH = cardRef.current?.offsetHeight || 260;
-
-    let targetPlacement: "top" | "bottom" | "left" | "right" =
-      step.preferredPlacement || "bottom";
-
-    const isMobile = winW < 768;
-
-    if (isMobile) {
-      const spaceBelow = winH - (spotY + spotH) - 16;
-      const spaceAbove = spotY - 16;
-      targetPlacement = spaceBelow >= cardH || spaceBelow >= spaceAbove ? "bottom" : "top";
-    } else {
-      const spaceRight = winW - (spotX + spotW) - 20;
-      const spaceLeft = spotX - 20;
-      const spaceTop = spotY - 20;
-      const spaceBottom = winH - (spotY + spotH) - 20;
-
-      if (targetPlacement === "right") {
-        if (spaceRight < cardW) {
-          targetPlacement = spaceLeft >= cardW ? "left" : spaceBottom >= cardH ? "bottom" : "top";
-        }
-      } else if (targetPlacement === "left") {
-        if (spaceLeft < cardW) {
-          targetPlacement = spaceRight >= cardW ? "right" : spaceBottom >= cardH ? "bottom" : "top";
-        }
-      } else if (targetPlacement === "top") {
-        if (spaceTop < cardH && spaceBottom >= cardH) {
-          targetPlacement = "bottom";
-        }
-      } else if (targetPlacement === "bottom") {
-        if (spaceBottom < cardH && spaceTop >= cardH) {
-          targetPlacement = "top";
-        }
-      }
+    const result = measureStep(stepIdx, cardRef.current);
+    if (result) {
+      setCutout(result.cutout);
+      setCardPos(result.cardPos);
     }
-
-    let finalX = 0;
-    let finalY = 0;
-
-    if (targetPlacement === "right") {
-      finalX = spotX + spotW + 16;
-      finalY = spotY + (spotH - cardH) / 2;
-    } else if (targetPlacement === "left") {
-      finalX = spotX - cardW - 16;
-      finalY = spotY + (spotH - cardH) / 2;
-    } else if (targetPlacement === "top") {
-      finalX = spotX + (spotW - cardW) / 2;
-      finalY = spotY - cardH - 16;
-    } else {
-      finalX = spotX + (spotW - cardW) / 2;
-      finalY = spotY + spotH + 16;
-    }
-
-    finalX = Math.max(16, Math.min(finalX, winW - cardW - 16));
-    finalY = Math.max(16, Math.min(finalY, winH - cardH - 16));
-
-    setCardPos({
-      x: finalX,
-      y: finalY,
-      placement: targetPlacement,
-    });
   }, [currentStep]);
 
-  // Navigate to step with intelligent scroll sync
+  // Navigate to step with ultra-smooth GPU physics and scroll coordination
   const goToStep = useCallback((stepIdx: number) => {
     if (stepIdx < 0 || stepIdx >= TOUR_STEPS.length) return;
 
@@ -236,63 +251,89 @@ export const FeatureTour: React.FC<FeatureTourProps> = ({ autoStartDelay = 700 }
       rect.bottom <= viewportHeight - 15;
 
     if (!isAlreadyVisible) {
-      // Temporarily disable CSS transitions on position so the spotlight stays 100% glued to the element as it scrolls
       setIsScrolling(true);
 
-      // Smoothly scroll into view
       targetEl.scrollIntoView({
         behavior: "smooth",
         block: stepIdx === 4 ? "start" : "center",
       });
 
-      // Clear any prior timer
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current);
       }
 
-      // Re-enable smooth CSS transition once the scroll has fully settled
       scrollTimeoutRef.current = setTimeout(() => {
         setIsScrolling(false);
         updatePositions(stepIdx);
-      }, 550);
+      }, 650);
     } else {
       setIsScrolling(false);
     }
 
-    // Update positions immediately
     updatePositions(stepIdx);
   }, [updatePositions]);
 
-  // Open tour handler
+  // Open tour handler: pre-measures Step 0 so there is ZERO flying/expansion from (0,0)
   const handleOpenTour = useCallback(() => {
-    setIsOpen(true);
-    setTimeout(() => {
-      goToStep(0);
-    }, 60);
-  }, [goToStep]);
+    // If window is scrolled down, reset scroll first so Step 1 is cleanly in view
+    if (window.scrollY > 50) {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
 
-  // Listen to window scroll continuously to keep spotlight locked to DOM elements
+    // Measure Step 0 instantly before rendering
+    const step0Data = measureStep(0, cardRef.current);
+    if (step0Data) {
+      setCutout(step0Data.cutout);
+      setCardPos(step0Data.cardPos);
+    }
+
+    setCurrentStep(0);
+    setIsInitialEntry(true);
+    setIsFadedIn(false);
+    setIsOpen(true);
+
+    // Fade in gracefully in place
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setIsFadedIn(true);
+        setTimeout(() => {
+          setIsInitialEntry(false);
+        }, 350);
+      });
+    });
+  }, []);
+
+  // High-FPS scroll listener throttled with requestAnimationFrame for 120Hz buttery smoothness
   useEffect(() => {
     if (!isOpen) return;
 
     const handleScroll = () => {
-      updatePositions(currentStep);
+      if (rafScrollRef.current !== null) return;
+      rafScrollRef.current = requestAnimationFrame(() => {
+        updatePositions(currentStep);
+        rafScrollRef.current = null;
+      });
 
-      // If scrolling was triggered, extend settling timer
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current);
       }
       scrollTimeoutRef.current = setTimeout(() => {
         setIsScrolling(false);
         updatePositions(currentStep);
-      }, 150);
+      }, 180);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (rafScrollRef.current !== null) {
+        cancelAnimationFrame(rafScrollRef.current);
+        rafScrollRef.current = null;
+      }
+    };
   }, [isOpen, currentStep, updatePositions]);
 
-  // Listen to window resize
+  // High-FPS window resize listener
   useEffect(() => {
     if (!isOpen) return;
 
@@ -382,17 +423,23 @@ export const FeatureTour: React.FC<FeatureTourProps> = ({ autoStartDelay = 700 }
   };
 
   const handleSkip = () => {
-    try {
-      localStorage.setItem(STORAGE_TOUR_KEY, "true");
-    } catch {}
-    setIsOpen(false);
+    setIsFadedIn(false);
+    setTimeout(() => {
+      try {
+        localStorage.setItem(STORAGE_TOUR_KEY, "true");
+      } catch {}
+      setIsOpen(false);
+    }, 200);
   };
 
   const handleComplete = () => {
-    try {
-      localStorage.setItem(STORAGE_TOUR_KEY, "true");
-    } catch {}
-    setIsOpen(false);
+    setIsFadedIn(false);
+    setTimeout(() => {
+      try {
+        localStorage.setItem(STORAGE_TOUR_KEY, "true");
+      } catch {}
+      setIsOpen(false);
+    }, 200);
   };
 
   if (!isOpen) return null;
@@ -402,9 +449,15 @@ export const FeatureTour: React.FC<FeatureTourProps> = ({ autoStartDelay = 700 }
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === TOUR_STEPS.length - 1;
 
+  // Ultra-fluid quintic ease-out curve (Apple luxury physics)
+  const LUXURY_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+  const TRANSITION_DURATION = "0.48s";
+
   return (
     <div
-      className="fixed inset-0 z-[9990] overflow-hidden select-none animate-fadeIn"
+      className={`fixed inset-0 z-[9990] overflow-hidden select-none transition-opacity duration-300 ease-out ${
+        isFadedIn ? "opacity-100" : "opacity-0 pointer-events-none"
+      }`}
       aria-label="App Feature Tour"
       role="dialog"
       aria-modal="true"
@@ -416,24 +469,23 @@ export const FeatureTour: React.FC<FeatureTourProps> = ({ autoStartDelay = 700 }
         title="Bấm ra ngoài để đóng hướng dẫn"
       />
 
-      {/* 2. Hardware-Accelerated Spotlight Cutout (Box-Shadow Technique) */}
+      {/* 2. Pure GPU-Accelerated Spotlight Cutout (translate3d + Box-Shadow) */}
       <div
-        className="fixed pointer-events-none z-[9992]"
+        className="fixed top-0 left-0 pointer-events-none z-[9992]"
         style={{
-          left: cutout.x,
-          top: cutout.y,
           width: cutout.width,
           height: cutout.height,
           borderRadius: cutout.radius,
           boxShadow:
             "0 0 0 9999px rgba(15, 14, 12, 0.78), 0 0 0 2.5px rgba(217, 56, 41, 0.9), 0 0 30px rgba(212, 175, 55, 0.45), inset 0 0 16px rgba(217, 56, 41, 0.15)",
-          // When scrolling, disable position transition so the spotlight is glued 1:1 to the element without lagging behind!
-          // When on the same screen, smoothly glide with 0.35s cubic-bezier!
-          transition: isScrolling
-            ? "width 0.25s ease, height 0.25s ease, border-radius 0.25s ease"
-            : "left 0.35s cubic-bezier(0.16, 1, 0.3, 1), top 0.35s cubic-bezier(0.16, 1, 0.3, 1), width 0.35s cubic-bezier(0.16, 1, 0.3, 1), height 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-radius 0.35s ease",
-          willChange: isScrolling ? "auto" : "left, top, width, height",
-          transform: "translateZ(0)",
+          transform: `translate3d(${cutout.x}px, ${cutout.y}px, 0)`,
+          // If initial entry, NO transform transition so it appears directly in place without flying from (0,0)!
+          transition: isInitialEntry
+            ? "none"
+            : isScrolling
+            ? `width 0.3s ease, height 0.3s ease, border-radius 0.3s ease`
+            : `transform ${TRANSITION_DURATION} ${LUXURY_EASE}, width ${TRANSITION_DURATION} ${LUXURY_EASE}, height ${TRANSITION_DURATION} ${LUXURY_EASE}, border-radius ${TRANSITION_DURATION} ${LUXURY_EASE}`,
+          willChange: isInitialEntry ? "auto" : "transform, width, height",
         }}
       >
         {/* Royal Vietnamese Heritage Corner Accents */}
@@ -443,16 +495,21 @@ export const FeatureTour: React.FC<FeatureTourProps> = ({ autoStartDelay = 700 }
         <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 border-b-2 border-r-2 border-bronze-gold rounded-br-sm pointer-events-none" />
       </div>
 
-      {/* 3. Floating Tooltip / Explanation Card (Hardware GPU Gliding) */}
+      {/* 3. Floating Tooltip / Explanation Card (Matching Pure GPU Glide Physics) */}
       <div
         ref={cardRef}
-        className="fixed top-0 left-0 z-[10000] w-[calc(100vw-32px)] sm:w-[380px] bg-paper-cream rounded-2xl p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-border-bronze-light flex flex-col gap-3.5"
+        className={`fixed top-0 left-0 z-[10000] w-[calc(100vw-32px)] sm:w-[380px] bg-paper-cream rounded-2xl p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-border-bronze-light flex flex-col gap-3.5 transition-transform duration-300 ${
+          isFadedIn ? "scale-100" : "scale-95"
+        }`}
         style={{
           transform: `translate3d(${cardPos.x}px, ${cardPos.y}px, 0)`,
-          transition: isScrolling
+          // If initial entry, NO transform transition so it materializes directly in place
+          transition: isInitialEntry
             ? "none"
-            : "transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
-          willChange: isScrolling ? "auto" : "transform",
+            : isScrolling
+            ? "none"
+            : `transform ${TRANSITION_DURATION} ${LUXURY_EASE}`,
+          willChange: isInitialEntry ? "auto" : "transform",
         }}
         onClick={(e) => e.stopPropagation()}
       >
