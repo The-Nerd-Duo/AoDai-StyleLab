@@ -34,7 +34,6 @@ graph TD
     B --> B2[Persona Đại Diện Nam / Nữ]
     B --> B3[Cultural Harmony AI Engine]
     B --> B4[Tự Động Nhận Diện Vị Trí & Thời Tiết Thực]
-    B --> B5[So Sánh Song Song A/B Testing]
 
     C --> C1[5 Mẫu Khung Nghệ Thuật 9:16]
     C --> C2[Mã QR Động Client-Side]
@@ -56,7 +55,6 @@ graph TD
   * **Phong cách Gen Z:** Neo-Y2K, Streetwear Cyber, Minimalist Luxury, Indochine Vintage.
   * **Phụ kiện phối kèm:** Mặc định "Không dùng phụ kiện" để tôn nét mộc mạc nguyên bản; tùy chọn Mấn Tết cách điệu, Vòng kiềng bạc/vàng, Kính râm Y2K, Sneaker chunky, Túi gấm cung đình, Nón quai thao mini.
 * **Nhân vật đại diện (Persona):** Vuốt trượt mượt mà giữa Persona Nữ (Dáng chuẩn Á Đông) và Persona Nam (Khí chất đĩnh đạc).
-* **So sánh A/B Testing trực quan:** Lưu biến thể trang phục A và so sánh song song đối chiếu với biến thể B trước khi đưa ra quyết định.
 * **Cụm Cố Vấn Văn Hóa Toàn Diện (Cultural Harmony AI - 3 Thẻ Chẩn Đoán):**
   * 📜 **Thẻ 1 - Nguồn gốc & Ý nghĩa:** Phân tích ngắn gọn, chuẩn xác nguồn gốc triều đại và biểu trưng văn hóa của từng kiểu áo cổ truyền.
   * ⛅ **Thẻ 2 - Thời tiết & Chất liệu thích ứng:** 
