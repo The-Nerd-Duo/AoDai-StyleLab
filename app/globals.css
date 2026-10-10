@@ -98,6 +98,7 @@
 .gold-gradient-text {
   background: linear-gradient(135deg, #1A1A1A 0%, #C5A059 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 .cyber-gradient-card {
