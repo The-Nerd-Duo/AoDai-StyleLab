@@ -147,6 +147,11 @@ export function generateOutfitPrompt(outfit: OutfitState): string {
     prompt += ` Aesthetics: ${style}`;
   }
 
+  // Khống chế thuần phong mỹ tục cho trang phục truyền thống (đặc biệt Áo Tứ Thân Kinh Bắc)
+  if (outfit.garmentId === "ao-tu-than") {
+    prompt += " Strictly modest and respectful attire, high coverage neckline, zero cleavage, fully covered chest.";
+  }
+
   return prompt.replace(/\s{2,}/g, " ").trim();
 }
 

@@ -13,6 +13,10 @@ import {
 
 import { evaluateCulturalHarmony } from "@/lib/cultural-engine";
 import { useOutfitStore } from "@/lib/store";
+import {
+  detectUserWeather,
+  WeatherInfo,
+} from "@/lib/weather";
 
 interface CulturalAdvisorCardProps {
   outfit: OutfitState;
@@ -26,9 +30,28 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
 
   const [data, setData] = useState<CulturalAdvisorResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [weatherInfo, setWeatherInfo] = useState<WeatherInfo | null>(null);
+  const [isDetectingWeather, setIsDetectingWeather] = useState(false);
 
   const occasion = mockupsData.occasions.find((o) => o.id === outfit.occasionId) || mockupsData.occasions[0];
   const garment = mockupsData.garments.find((g) => g.id === outfit.garmentId) || mockupsData.garments[0];
+
+  const handleDetectWeather = async (requestGps = false) => {
+    setIsDetectingWeather(true);
+    try {
+      const w = await detectUserWeather(requestGps);
+      setWeatherInfo(w);
+    } catch (err) {
+      console.warn("Lỗi tự động nhận diện thời tiết:", err);
+    } finally {
+      setIsDetectingWeather(false);
+    }
+  };
+
+  // Tự động nhận biết vị trí người dùng và lấy thời tiết thực tế từ Open-Meteo
+  useEffect(() => {
+    handleDetectWeather(false);
+  }, []);
 
   const fetchAdvice = async () => {
     setLoading(true);
@@ -36,7 +59,11 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
       const res = await fetch("/api/cultural-advisor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(outfit),
+        body: JSON.stringify({
+          ...outfit,
+          locationId: weatherInfo?.locationId || "auto",
+          weather: weatherInfo,
+        }),
       });
       if (res.ok) {
         const json = await res.json();
@@ -58,6 +85,7 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
               const rawText = directData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
               const cleanedText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
               const parsed = JSON.parse(cleanedText);
+              parsed.weatherInfo = weatherInfo;
               setData(parsed);
               setLoading(false);
               return;
@@ -66,7 +94,11 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
             console.warn("Direct client advisor call failed:", directErr);
           }
         }
-        setData(json.fallback || json);
+        const finalData = json.fallback || json;
+        if (weatherInfo && !finalData.weatherInfo) {
+          finalData.weatherInfo = weatherInfo;
+        }
+        setData(finalData);
         setLoading(false);
         return;
       }
@@ -82,6 +114,8 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
       accessoryId: outfit.accessoryId,
       accessoryIds: outfit.accessoryIds,
       personaId: outfit.personaId,
+      locationId: weatherInfo?.locationId || "auto",
+      weather: weatherInfo || undefined,
     });
     setData(local);
     setLoading(false);
@@ -93,7 +127,7 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
       return;
     }
 
-    // 1. Cập nhật ngay bằng Local Rule Engine để UI phản hồi mượt 0ms khi vuốt
+    // 1. Cập nhật ngay bằng Local Rule Engine để UI phản hồi mượt 0ms khi vuốt hoặc đổi thời tiết
     const local = evaluateCulturalHarmony({
       garmentId: outfit.garmentId,
       colorId: outfit.colorId,
@@ -102,8 +136,10 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
       accessoryId: outfit.accessoryId,
       accessoryIds: outfit.accessoryIds,
       personaId: outfit.personaId,
+      locationId: weatherInfo?.locationId || "auto",
+      weather: weatherInfo || undefined,
     });
-    setData((prev) => (prev ? { ...prev, colorHarmonyScore: local.colorHarmonyScore, overallScore: local.overallScore, culturalRespectScore: local.culturalRespectScore } : local));
+    setData((prev) => (prev ? { ...prev, ...local } : local));
 
     // 2. Debounce 650ms: chỉ khi dừng vuốt ở món cụ thể mới gửi request gọi Gemini AI
     const timer = setTimeout(() => {
@@ -111,7 +147,17 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
     }, 650);
 
     return () => clearTimeout(timer);
-  }, [hasGenerated, outfit.garmentId, outfit.colorId, outfit.occasionId, outfit.styleId, outfit.accessoryId, outfit.accessoryIds?.join(",")]);
+  }, [
+    hasGenerated,
+    outfit.garmentId,
+    outfit.colorId,
+    outfit.occasionId,
+    outfit.styleId,
+    outfit.accessoryId,
+    outfit.accessoryIds?.join(","),
+    weatherInfo?.cityName,
+    weatherInfo?.temperature,
+  ]);
 
   // Convert 100-point score to 5-star rating (e.g., 98 -> 4.9, 90 -> 4.5)
   const starRating = data ? (data.overallScore / 20).toFixed(1) : "4.9";
@@ -199,57 +245,77 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
         /* Standby State when not evaluated yet */
         <div className="space-y-3">
           {/* 3 Standby Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1 items-stretch">
             {/* Metric 1: Nguồn gốc & Ý nghĩa */}
-            <div className="p-2.5 rounded-xl bg-paper-cream/60 border border-border-bronze-light/50 flex flex-col justify-between space-y-1.5 shadow-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1 truncate max-w-[140px]">
-                  <span className="material-symbols-outlined text-[14px] text-stone-400">
-                    history_edu
-                  </span>
+            <div className="p-3 rounded-xl bg-paper-cream/60 border border-border-bronze-light/50 flex flex-col justify-start space-y-2 shadow-xs h-full">
+              <div className="flex items-center gap-1.5 pb-0.5">
+                <span className="material-symbols-outlined text-[15px] text-stone-400">
+                  history_edu
+                </span>
+                <span className="font-mono text-[11px] text-text-charcoal font-bold">
                   Nguồn gốc &amp; Ý nghĩa
                 </span>
-                <span className="text-[9px] font-mono text-stone-500 font-medium px-1.5 py-0.5 rounded bg-stone-100 border border-stone-200">
-                  Chờ chấm điểm
-                </span>
               </div>
-              <p className="text-text-warm-gray/70 leading-relaxed text-[11px] line-clamp-3 italic">
+              <p className="text-text-warm-gray/70 leading-relaxed text-[11px] italic flex-1">
                 Chưa có dữ liệu. AI sẽ phân tích nguồn gốc triều đại và ý nghĩa biểu trưng sau khi tạo ảnh.
               </p>
             </div>
 
             {/* Metric 2: Thời tiết & Chất liệu */}
-            <div className="p-2.5 rounded-xl bg-paper-cream/60 border border-border-bronze-light/50 flex flex-col justify-between space-y-1.5 shadow-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[14px] text-stone-400">
-                    thermostat
+            <div className="p-3 rounded-xl bg-paper-cream/60 border border-border-bronze-light/50 flex flex-col justify-start space-y-2 shadow-xs h-full relative">
+              <div className="flex items-center justify-between gap-1.5 pb-0.5">
+                <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1.5 shrink-0">
+                  <span className="material-symbols-outlined text-[15px] text-stone-400">
+                    {weatherInfo?.iconName || "thermostat"}
                   </span>
                   Thời tiết &amp; Chất liệu
                 </span>
-                <span className="text-[9px] font-mono text-stone-500 font-medium px-1.5 py-0.5 rounded bg-stone-100 border border-stone-200">
-                  Chờ chấm điểm
+                <span className="text-[9px] font-mono text-stone-500 font-medium px-1.5 py-0.5 rounded bg-stone-100 border border-stone-200 shrink-0">
+                  {weatherInfo ? `${weatherInfo.temperature}°C` : "Chờ chấm điểm"}
                 </span>
               </div>
-              <p className="text-text-warm-gray/70 leading-relaxed text-[11px] line-clamp-3 italic">
-                Chưa có dữ liệu. AI sẽ phân tích độ phù hợp của chất liệu vải với thời tiết sau khi tạo ảnh.
+
+              {/* Tự động nhận diện vị trí thực của người dùng */}
+              <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-surface-pure/80 border border-border-bronze-light/60 text-[10px] text-text-charcoal shadow-2xs font-mono">
+                <span className="flex items-center gap-1 font-bold truncate">
+                  <span className="material-symbols-outlined text-[13px] text-vermilion-red">location_on</span>
+                  {weatherInfo ? `${weatherInfo.cityName}: ${weatherInfo.temperature}°C` : "Đang xác định vị trí..."}
+                </span>
+                <div className="flex items-center gap-1 text-text-warm-gray text-[9.5px] shrink-0 font-sans">
+                  <span>{weatherInfo?.conditionText || "Đang lấy thời tiết..."}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleDetectWeather(true)}
+                    disabled={isDetectingWeather}
+                    className="p-0.5 hover:text-text-charcoal transition-colors ml-0.5 text-text-warm-gray hover:bg-paper-cream rounded"
+                    title="Cập nhật lại vị trí & thời tiết"
+                  >
+                    <RefreshCw className={`w-3 h-3 ${isDetectingWeather ? "animate-spin text-vermilion-red" : "text-stone-400 hover:text-stone-600"}`} />
+                  </button>
+                </div>
+              </div>
+
+              <p className="text-text-warm-gray/70 leading-relaxed text-[11px] italic flex-1">
+                {weatherInfo
+                  ? `Thời tiết thực tế tại ${weatherInfo.cityName} đang là ${weatherInfo.temperature}°C (${weatherInfo.conditionText}). Hãy bấm "Tạo Ảnh Phối Đồ" để AI phân tích chất liệu vải thích ứng.`
+                  : "Chưa có dữ liệu. AI sẽ phân tích độ phù hợp của chất liệu vải với thời tiết sau khi tạo ảnh."}
               </p>
             </div>
 
             {/* Metric 3: Quy chế Di sản */}
-            <div className="p-2.5 rounded-xl bg-paper-cream/60 border border-border-bronze-light/50 flex flex-col justify-between space-y-1.5 shadow-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[14px] text-stone-400">
+            <div className="p-3 rounded-xl bg-paper-cream/60 border border-border-bronze-light/50 flex flex-col justify-start space-y-2 shadow-xs h-full">
+              <div className="flex items-center justify-between gap-1.5 pb-0.5">
+                <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1.5 shrink-0">
+                  <span className="material-symbols-outlined text-[15px] text-stone-400">
                     rule
                   </span>
                   Quy chế Di sản
                 </span>
-                <span className="text-[9px] font-mono text-stone-500 font-medium px-1.5 py-0.5 rounded bg-stone-100 border border-stone-200">
+                <span className="text-[9px] font-mono text-stone-500 font-medium px-1.5 py-0.5 rounded bg-stone-100 border border-stone-200 shrink-0">
                   Chờ chấm điểm
                 </span>
               </div>
-              <p className="text-text-warm-gray/70 leading-relaxed text-[11px] line-clamp-3 italic">
+              <p className="text-text-warm-gray/70 leading-relaxed text-[11px] italic flex-1">
                 Chưa có dữ liệu. AI sẽ thẩm định phom dáng cổ phục và quy chuẩn nghi lễ sau khi tạo ảnh.
               </p>
             </div>
@@ -284,57 +350,75 @@ export const CulturalAdvisorCard: React.FC<CulturalAdvisorCardProps> = ({ outfit
           )}
 
           {/* 3 Diagnostic Cards Matching Prototype Design */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1 items-stretch">
             {/* Metric 1: Nguồn gốc & Ý nghĩa (Left) */}
-            <div className="p-2.5 rounded-xl bg-paper-cream border border-border-bronze-light/50 flex flex-col justify-between space-y-1.5 shadow-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1 truncate max-w-[140px]">
-                  <span className="material-symbols-outlined text-[14px] text-vermilion-red">
-                    history_edu
-                  </span>
+            <div className="p-3 rounded-xl bg-paper-cream border border-border-bronze-light/50 flex flex-col justify-start space-y-2 shadow-xs h-full">
+              <div className="flex items-center gap-1.5 pb-0.5">
+                <span className="material-symbols-outlined text-[15px] text-vermilion-red">
+                  history_edu
+                </span>
+                <span className="font-mono text-[11px] text-text-charcoal font-bold">
                   Nguồn gốc &amp; Ý nghĩa
                 </span>
-                <span className="text-[9px] font-mono text-bronze-gold font-bold px-1.5 py-0.5 rounded bg-[#F4EFEA] border border-border-bronze-light/40 truncate max-w-[90px]">
-                  {garment.dynasty ? garment.dynasty.split("(")[0].trim() : "DI SẢN"}
-                </span>
               </div>
-              <p className="text-text-warm-gray leading-relaxed text-[11px] line-clamp-3">
-                {garment.culturalSignificance || garment.description || "Di sản trang phục truyền thống mang đậm bản sắc văn hóa Việt Nam."}
+              <p className="text-text-warm-gray leading-relaxed text-[11px] flex-1">
+                {data.originAndSignificance || garment.culturalSignificance || garment.description || "Di sản trang phục truyền thống mang đậm bản sắc văn hóa Việt Nam."}
               </p>
             </div>
 
             {/* Metric 2: Thời tiết & Chất liệu (Middle) */}
-            <div className="p-2.5 rounded-xl bg-paper-cream border border-border-bronze-light/50 flex flex-col justify-between space-y-1.5 shadow-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[14px] text-bronze-gold">
-                    thermostat
+            <div className="p-3 rounded-xl bg-paper-cream border border-border-bronze-light/50 flex flex-col justify-start space-y-2 shadow-xs h-full relative">
+              <div className="flex items-center justify-between gap-1.5 pb-0.5">
+                <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1.5 shrink-0">
+                  <span className="material-symbols-outlined text-[15px] text-bronze-gold">
+                    {weatherInfo?.iconName || "thermostat"}
                   </span>
                   Thời tiết &amp; Chất liệu
                 </span>
-                <span className="text-[9px] font-mono text-guardrail-pass font-bold px-1.5 py-0.5 rounded bg-guardrail-pass-surface border border-guardrail-pass/30">
+                <span className="text-[9px] font-mono text-guardrail-pass font-bold px-1.5 py-0.5 rounded bg-guardrail-pass-surface border border-guardrail-pass/30 shrink-0">
                   {data.weatherFitScore >= 80 ? "LÝ TƯỞNG" : `${data.weatherFitScore}%`}
                 </span>
               </div>
-              <p className="text-text-warm-gray leading-relaxed text-[11px] line-clamp-3">
+
+              {/* Tự động nhận diện vị trí thực của người dùng */}
+              <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-surface-pure/80 border border-border-bronze-light/60 text-[10px] text-text-charcoal shadow-2xs font-mono">
+                <span className="flex items-center gap-1 font-bold truncate">
+                  <span className="material-symbols-outlined text-[13px] text-vermilion-red">location_on</span>
+                  {weatherInfo ? `${weatherInfo.cityName}: ${weatherInfo.temperature}°C` : "Đang xác định vị trí..."}
+                </span>
+                <div className="flex items-center gap-1 text-text-warm-gray text-[9.5px] shrink-0 font-sans">
+                  <span>{weatherInfo?.conditionText}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleDetectWeather(true)}
+                    disabled={isDetectingWeather}
+                    className="p-0.5 hover:text-text-charcoal transition-colors ml-0.5 text-text-warm-gray hover:bg-paper-cream rounded"
+                    title="Cập nhật lại vị trí & thời tiết"
+                  >
+                    <RefreshCw className={`w-3 h-3 ${isDetectingWeather ? "animate-spin text-vermilion-red" : "text-stone-400 hover:text-stone-600"}`} />
+                  </button>
+                </div>
+              </div>
+
+              <p className="text-text-warm-gray leading-relaxed text-[11px] flex-1 pt-0.5">
                 {data.weatherAdvice}
               </p>
             </div>
 
             {/* Metric 3: Quy chế Di sản (Right) */}
-            <div className="p-2.5 rounded-xl bg-paper-cream border border-border-bronze-light/50 flex flex-col justify-between space-y-1.5 shadow-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[14px] text-guardrail-pass">
+            <div className="p-3 rounded-xl bg-paper-cream border border-border-bronze-light/50 flex flex-col justify-start space-y-2 shadow-xs h-full">
+              <div className="flex items-center justify-between gap-1.5 pb-0.5">
+                <span className="font-mono text-[11px] text-text-charcoal font-bold flex items-center gap-1.5 shrink-0">
+                  <span className="material-symbols-outlined text-[15px] text-guardrail-pass">
                     rule
                   </span>
                   Quy chế Di sản
                 </span>
-                <span className="text-[9px] font-mono text-guardrail-pass font-bold px-1.5 py-0.5 rounded bg-guardrail-pass-surface border border-guardrail-pass/30">
+                <span className="text-[9px] font-mono text-guardrail-pass font-bold px-1.5 py-0.5 rounded bg-guardrail-pass-surface border border-guardrail-pass/30 shrink-0">
                   {data.culturalRespectScore >= 85 ? "CHUẨN 100%" : "CẦN LƯU Ý"}
                 </span>
               </div>
-              <p className="text-text-warm-gray leading-relaxed text-[11px] line-clamp-3">
+              <p className="text-text-warm-gray leading-relaxed text-[11px] flex-1">
                 {data.culturalNotes}
               </p>
             </div>
