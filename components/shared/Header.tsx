@@ -43,7 +43,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCompare, hasCompareOutfit 
   ];
 
   return (
-    <header className="sticky top-0 w-full z-50 bg-[#FDFBF7]/95 backdrop-blur-md border-b border-border-bronze-light/50 shadow-[0_2px_12px_rgba(26,26,26,0.05)]">
+    <header className="sticky top-0 w-full z-[9995] bg-[#FDFBF7] backdrop-blur-md border-b border-border-bronze-light/50 shadow-[0_2px_12px_rgba(26,26,26,0.05)]">
       <div className="h-16 max-w-7xl mx-auto px-4 sm:px-6 md:px-8 flex items-center justify-between gap-4">
         {/* Brand & Responsible AI Badge */}
         <div className="flex items-center gap-3 sm:gap-4">
