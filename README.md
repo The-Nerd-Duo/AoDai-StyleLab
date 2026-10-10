@@ -1,4 +1,4 @@
-# 🇻🇳 VIỆT PHỤC REMIX (AoDai StyleLab)
+# AoDai StyleLab
 
 > **Cuộc thi:** AI Arena Vietnam 2026  
 > **Đề thi Vòng Audition:** Việt phục Remix - Phối trang phục truyền thống theo phong cách Gen Z  
@@ -145,7 +145,7 @@ Hệ thống kết hợp mô hình **Local Rule Engine** và **Google Gemini 2.0
 | :--- | :--- | :--- | :--- |
 | **Fullstack Framework** | Next.js (App Router, TypeScript) | `14.2.24` | SSR/SSG tối ưu SEO, routing hiện đại, API routes tích hợp |
 | **Styling & Icons** | Tailwind CSS + Lucide Icons | `3.4.17` / `0.475` | Thiết kế giao diện Di sản (Heritage Gold, Son Đỏ, Giấy Dó, Ngọc Bích) |
-| **GenAI Model** | Google Gemini 2.0 Flash (`@google/genai`) | `^2.24.0` | Cố vấn di sản văn hóa và Trợ lý AI Bách khoa |
+| **GenAI Model** | Google Gemini 3.8 Flash (`@google/genai`) | `^2.24.0` | Cố vấn di sản văn hóa và Trợ lý AI Bách khoa |
 | **Weather API** | Open-Meteo API | REST v1 | Cung cấp dữ liệu thời tiết thời gian thực không cần API key |
 | **Geo Location** | Silent IP Geolocation + HTML5 GPS | Browser / REST | Tự động nhận diện vị trí người dùng mượt mà |
 | **QR Code Engine** | `qrcode` | `^1.5.4` | Sinh mã QR động chuẩn xác phía Client-side |
