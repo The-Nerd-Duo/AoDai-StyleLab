@@ -641,10 +641,10 @@ export const LookbookWorkspace: React.FC = () => {
 
             {/* Category Filter Pills - Sticky right beneath Header */}
             <div className="sticky top-16 z-20 bg-[#F8F5F0]/95 backdrop-blur-md pt-1 pb-3 -mx-1 px-1">
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-nowrap">
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-2 category-scrollbar text-nowrap">
                 <button
                   onClick={() => setActiveCategory("all")}
-                  className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all ${activeCategory === "all"
+                  className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all cursor-pointer ${activeCategory === "all"
                     ? "bg-vermilion-red text-white shadow-xs"
                     : "bg-surface-pure hover:bg-paper-cream text-text-warm-gray border border-border-bronze-light/50"
                     }`}
@@ -652,18 +652,8 @@ export const LookbookWorkspace: React.FC = () => {
                   Tất cả ({categoryCounts.all})
                 </button>
                 <button
-                  onClick={() => setActiveCategory("mine")}
-                  className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all flex items-center gap-1.5 ${activeCategory === "mine"
-                    ? "bg-vermilion-red text-white shadow-xs"
-                    : "bg-surface-pure hover:bg-paper-cream text-text-warm-gray border border-border-bronze-light/50"
-                    }`}
-                >
-                  <User className={`w-3.5 h-3.5 ${activeCategory === "mine" ? "text-white" : "text-bronze-gold"}`} />
-                  <span>Của tôi ({categoryCounts.mine})</span>
-                </button>
-                <button
                   onClick={() => setActiveCategory("favorites")}
-                  className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all flex items-center gap-1.5 ${activeCategory === "favorites"
+                  className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all flex items-center gap-1.5 cursor-pointer ${activeCategory === "favorites"
                     ? "bg-vermilion-red text-white shadow-xs"
                     : "bg-surface-pure hover:bg-paper-cream text-text-warm-gray border border-border-bronze-light/50"
                     }`}
@@ -796,9 +786,6 @@ export const LookbookWorkspace: React.FC = () => {
                                 </div>
                                 <span className="font-serif text-xs font-bold text-paper-cream line-clamp-1">
                                   {garmentMeta?.name || item.title}
-                                </span>
-                                <span className="text-[10px] text-paper-cream/60 mt-0.5 line-clamp-1">
-                                  {colorMeta?.name || "Sắc Cổ Phong"}
                                 </span>
                               </div>
 

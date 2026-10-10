@@ -7,11 +7,12 @@ import { PreviewWorkspace, StudioBadgeInfo } from "@/components/studio/PreviewWo
 import { CulturalAdvisorCard } from "@/components/studio/CulturalAdvisorCard";
 import { StudioRightPanel } from "@/components/studio/StudioRightPanel";
 import { useOutfitStore, DEFAULT_OUTFIT } from "@/lib/store";
-import { generateOutfitPrompt, callFluxWorkerAi } from "@/lib/ai-prompt";
+import { generateOutfitPrompt, callFluxWorkerAi, isAiQuotaError } from "@/lib/ai-prompt";
 import { formatRemixOutfitSummary } from "@/lib/utils";
 import { getActiveStudioContext, setActiveStudioContext, clearActiveStudioContext } from "@/lib/studio-context";
 import mockupsData from "@/config/mockups.json";
 import { FeatureTour } from "@/components/shared/FeatureTour";
+import { QuotaLimitModal } from "@/components/studio/QuotaLimitModal";
 
 const REQUIRED_CATEGORIES = [
   { key: "personaId", label: "Nhân vật", categoryId: "persona" },
@@ -34,6 +35,7 @@ export const StudioDashboard: React.FC = () => {
 
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
+  const [quotaModalOpen, setQuotaModalOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<
     "garment" | "color" | "occasion" | "style" | "accessory"
   >("garment");
@@ -221,7 +223,11 @@ export const StudioDashboard: React.FC = () => {
       const imageUrl = await callFluxWorkerAi(prompt);
       setResultImage(imageUrl);
     } catch (error: any) {
-      alert(error?.message || "Có lỗi khi tạo ảnh từ AI!");
+      if (isAiQuotaError(error)) {
+        setQuotaModalOpen(true);
+      } else {
+        alert(error?.message || "Có lỗi khi tạo ảnh từ AI!");
+      }
     } finally {
       setLoading(false);
     }
@@ -285,6 +291,12 @@ export const StudioDashboard: React.FC = () => {
 
       {/* ONBOARDING FEATURE TOUR / SPOTLIGHT GUIDE */}
       <FeatureTour />
+
+      {/* DEMO QUOTA / LIMIT POPUP MODAL */}
+      <QuotaLimitModal
+        isOpen={quotaModalOpen}
+        onClose={() => setQuotaModalOpen(false)}
+      />
     </div>
   );
 };

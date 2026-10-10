@@ -299,8 +299,6 @@ export default function BachKhoaPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FDFBF7]">
-      <Header />
-
       <main className="w-full flex-1 flex flex-col">
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 md:px-8 py-6 space-y-10">
           {/* Top Editorial Header */}

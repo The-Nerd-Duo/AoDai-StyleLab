@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { OutfitState } from "@/lib/utils";
 import { getOutfitPromptBreakdown } from "@/lib/ai-prompt";
 import {
@@ -65,6 +65,39 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
     { id: "style", label: "Phong Cách", icon: Flame },
   ];
 
+  const [sliderStyle, setSliderStyle] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
+  const buttonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
+  const navContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isPersonaConfirmed) return;
+    const activeEl = buttonRefs.current[activeCategory];
+    if (activeEl) {
+      setSliderStyle({
+        left: activeEl.offsetLeft,
+        top: activeEl.offsetTop,
+        width: activeEl.offsetWidth,
+        height: activeEl.offsetHeight,
+      });
+    }
+  }, [activeCategory, isPersonaConfirmed]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const activeEl = buttonRefs.current[activeCategory];
+      if (activeEl) {
+        setSliderStyle({
+          left: activeEl.offsetLeft,
+          top: activeEl.offsetTop,
+          width: activeEl.offsetWidth,
+          height: activeEl.offsetHeight,
+        });
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [activeCategory]);
+
   const breakdown = getOutfitPromptBreakdown(outfit);
 
   const handleOptionChange = <K extends keyof OutfitState>(key: K, value: OutfitState[K]) => {
@@ -108,6 +141,19 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
     }
   };
 
+  const handleCategoryClick = (catId: any, e: React.MouseEvent<HTMLButtonElement>) => {
+    const el = e.currentTarget;
+    if (el) {
+      setSliderStyle({
+        left: el.offsetLeft,
+        top: el.offsetTop,
+        width: el.offsetWidth,
+        height: el.offsetHeight,
+      });
+    }
+    setActiveCategory(catId);
+  };
+
   return (
     <aside className="w-full flex flex-col gap-4 bg-surface-pure rounded-2xl p-4 shadow-sm border border-border-bronze-light/60">
       {/* Title Header */}
@@ -131,7 +177,7 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
             aria-label="Đặt lại tất cả về mặc định ban đầu"
             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all duration-200 ${
               canReset
-                ? "text-text-charcoal hover:text-vermilion-red bg-paper-cream hover:bg-vermilion-red/10 border border-border-bronze-light/70 hover:border-vermilion-red/40 shadow-2xs active:scale-95 cursor-pointer group"
+                ? "text-text-charcoal hover:text-vermilion-red bg-paper-cream hover:bg-vermilion-red/10 border border-border-bronze-light/70 hover:border-vermilion-red/40 shadow-2xs cursor-pointer group"
                 : "text-text-warm-gray/40 bg-paper-cream/30 border border-border-bronze-light/30 cursor-not-allowed opacity-50"
             }`}
           >
@@ -149,7 +195,7 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
 
       {/* GIAI ĐOẠN 1: CHỌN NHÂN VẬT ĐẠI DIỆN (VUỐT NGANG NAM/NỮ) */}
       {!isPersonaConfirmed ? (
-        <div className="animate-fadeIn">
+        <div>
           <PersonaSelector
             selectedPersonaId={chosenCategories.has("personaId") ? outfit.personaId : ""}
             onSelectPersona={(id) => {
@@ -164,13 +210,13 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
         </div>
       ) : (
         /* GIAI ĐOẠN 2: PHỐI CỔ PHỤC & MÀU SẮC */
-        <div className="flex flex-col gap-4 animate-fadeIn">
+        <div className="flex flex-col gap-4">
           {/* Top Bar with "Quay lại chọn nhân vật" button & active persona status */}
           <div className="bg-paper-cream/90 p-2.5 rounded-xl border border-border-bronze-light/60 flex items-center justify-between gap-2 shadow-2xs">
             <button
               type="button"
               onClick={() => setIsPersonaConfirmed(false)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-pure hover:bg-paper-cream border border-border-bronze-light/70 text-xs font-bold text-text-charcoal hover:text-vermilion-red transition-all shadow-2xs active:scale-95 group"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-pure hover:bg-paper-cream border border-border-bronze-light/70 text-xs font-bold text-text-charcoal hover:text-vermilion-red transition-all shadow-2xs group"
             >
               <ArrowLeft className="w-3.5 h-3.5 text-vermilion-red group-hover:-translate-x-0.5 transition-transform" />
               <span>Quay lại chọn nhân vật</span>
@@ -188,23 +234,44 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
             </div>
           </div>
 
-          {/* Category Navigation - 5 Options Grid */}
-          <div className="grid grid-cols-5 gap-1 sm:gap-1.5 p-1 bg-paper-cream/70 rounded-xl border border-border-bronze-light/50">
+          {/* Category Navigation - 5 Options Grid with instant smooth sliding red indicator */}
+          <div
+            ref={navContainerRef}
+            className="relative grid grid-cols-5 gap-1 sm:gap-1.5 p-1 bg-paper-cream/70 rounded-xl border border-border-bronze-light/50"
+          >
+            {/* Sliding Red Button / Pill Indicator */}
+            {sliderStyle && (
+              <div
+                className="absolute rounded-lg bg-vermilion-red shadow-xs transition-all duration-[460ms] ease-[cubic-bezier(0.25,0.85,0.35,1)] pointer-events-none z-0"
+                style={{
+                  transform: `translate3d(${sliderStyle.left}px, ${sliderStyle.top}px, 0)`,
+                  width: `${sliderStyle.width}px`,
+                  height: `${sliderStyle.height}px`,
+                  left: 0,
+                  top: 0,
+                }}
+              />
+            )}
+
             {categories.map((cat) => {
               const Icon = cat.icon;
               const isActive = activeCategory === cat.id;
               return (
                 <button
                   key={cat.id}
+                  ref={(el) => {
+                    buttonRefs.current[cat.id] = el;
+                  }}
                   type="button"
-                  onClick={() => setActiveCategory(cat.id as any)}
-                  className={`flex flex-col items-center justify-center py-2 px-0.5 sm:px-1 rounded-lg text-center transition-all duration-150 active:scale-95 active:translate-y-0.5 ${isActive
-                      ? "bg-vermilion-red text-white shadow-xs font-bold"
-                      : "text-text-warm-gray hover:text-text-charcoal hover:bg-surface-pure font-medium"
-                    }`}
+                  onClick={(e) => handleCategoryClick(cat.id as any, e)}
+                  className={`relative z-10 flex flex-col items-center justify-center py-2 px-0.5 sm:px-1 rounded-lg text-center transition-all duration-300 cursor-pointer active:scale-95 ${
+                    isActive
+                      ? "text-white font-bold"
+                      : "text-text-warm-gray hover:text-text-charcoal hover:bg-surface-pure/60 font-medium"
+                  }`}
                 >
-                  <Icon className="w-4 h-4 mb-1 shrink-0" />
-                  <span className="text-[10px] sm:text-xs leading-tight font-semibold">
+                  <Icon className={`w-4 h-4 mb-1 shrink-0 transition-colors duration-300 ${isActive ? "text-white" : "text-text-warm-gray"}`} />
+                  <span className="text-[10px] sm:text-xs leading-tight font-semibold transition-colors duration-300">
                     {cat.label}
                   </span>
                 </button>
@@ -214,7 +281,7 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
 
           {/* Active Selection Chips - Nằm giữa thanh chọn 5 mục và phần Cổ phục giám tuyển */}
           {hasAnySelected && (
-            <div className="flex flex-wrap gap-1 text-[9px] p-2 bg-paper-cream/60 rounded-xl border border-border-bronze-light/50 items-center animate-fadeIn">
+            <div className="flex flex-wrap gap-1 text-[9px] p-2 bg-paper-cream/60 rounded-xl border border-border-bronze-light/50 items-center">
               {chosenCategories.has("personaId") && (
                 <span className="px-2 py-0.5 rounded-lg bg-vermilion-red/10 text-vermilion-red border border-vermilion-red/25 font-bold truncate">
                   👤 {outfit.personaId === "female-modern" ? "Nữ" : "Nam"}

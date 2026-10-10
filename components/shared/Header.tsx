@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Sparkles } from "lucide-react";
@@ -42,6 +42,58 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCompare, hasCompareOutfit 
     },
   ];
 
+  const [targetPath, setTargetPath] = useState<string | null>(null);
+  const activePath = targetPath ?? pathname;
+
+  const [sliderStyle, setSliderStyle] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
+  const tabRefs = useRef<{ [key: string]: HTMLAnchorElement | null }>({});
+  const navRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    setTargetPath(null);
+  }, [pathname]);
+
+  useEffect(() => {
+    const activeEl = tabRefs.current[activePath];
+    if (activeEl) {
+      setSliderStyle({
+        left: activeEl.offsetLeft,
+        top: activeEl.offsetTop,
+        width: activeEl.offsetWidth,
+        height: activeEl.offsetHeight,
+      });
+    }
+  }, [activePath]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const activeEl = tabRefs.current[activePath];
+      if (activeEl) {
+        setSliderStyle({
+          left: activeEl.offsetLeft,
+          top: activeEl.offsetTop,
+          width: activeEl.offsetWidth,
+          height: activeEl.offsetHeight,
+        });
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [activePath]);
+
+  const handleTabClick = (href: string, e: React.MouseEvent<HTMLAnchorElement>) => {
+    const el = e.currentTarget;
+    if (el) {
+      setSliderStyle({
+        left: el.offsetLeft,
+        top: el.offsetTop,
+        width: el.offsetWidth,
+        height: el.offsetHeight,
+      });
+      setTargetPath(href);
+    }
+  };
+
   return (
     <header className="sticky top-0 w-full z-[9995] bg-[#FDFBF7] backdrop-blur-md border-b border-border-bronze-light/50 shadow-[0_2px_12px_rgba(26,26,26,0.05)]">
       <div className="h-16 max-w-7xl mx-auto px-4 sm:px-6 md:px-8 flex items-center justify-between gap-4">
@@ -54,24 +106,54 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCompare, hasCompareOutfit 
           </Link>
         </div>
 
-        {/* Pill Segmented Switcher / Floating Capsule Bar */}
-        <nav id="header-nav" aria-label="Main Navigation" className="hidden md:flex items-center bg-[#F2EDE7]/90 p-1 rounded-full border border-border-bronze-light/60 shadow-inner gap-1">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`px-4 py-1.5 rounded-full font-sans text-[13px] leading-tight flex items-center gap-1.5 transition-all ${
-                item.isActive
-                  ? "bg-vermilion-red text-white font-semibold shadow-sm"
-                  : "text-stone-700 hover:text-text-charcoal hover:bg-surface-pure/80 font-medium"
-              }`}
-            >
-              <span className={`material-symbols-outlined text-[16px] ${item.isActive ? "text-white" : "text-stone-500"}`}>
-                {item.icon}
-              </span>
-              <span>{item.label}</span>
-            </Link>
-          ))}
+        {/* Pill Segmented Switcher / Floating Capsule Bar with smooth sliding red animation */}
+        <nav
+          ref={navRef}
+          id="header-nav"
+          aria-label="Main Navigation"
+          className="relative hidden md:flex items-center bg-[#F2EDE7]/90 p-1 rounded-full border border-border-bronze-light/60 shadow-inner gap-1"
+        >
+          {/* Sliding Red Pill Indicator */}
+          {sliderStyle && (
+            <div
+              className="absolute rounded-full bg-vermilion-red shadow-sm transition-all duration-[460ms] ease-[cubic-bezier(0.25,0.85,0.35,1)] pointer-events-none z-0"
+              style={{
+                transform: `translate3d(${sliderStyle.left}px, ${sliderStyle.top}px, 0)`,
+                width: `${sliderStyle.width}px`,
+                height: `${sliderStyle.height}px`,
+                left: 0,
+                top: 0,
+              }}
+            />
+          )}
+
+          {navItems.map((item) => {
+            const isTabActive = item.href === activePath;
+            return (
+              <Link
+                key={item.href}
+                ref={(el) => {
+                  tabRefs.current[item.href] = el;
+                }}
+                href={item.href}
+                onClick={(e) => handleTabClick(item.href, e)}
+                className={`relative z-10 px-4 py-1.5 rounded-full font-sans text-[13px] leading-tight flex items-center gap-1.5 transition-all duration-300 cursor-pointer active:scale-95 ${
+                  isTabActive
+                    ? "text-white font-semibold"
+                    : "text-stone-700 hover:text-text-charcoal hover:bg-surface-pure/60 font-medium"
+                }`}
+              >
+                <span
+                  className={`material-symbols-outlined text-[16px] transition-colors duration-200 ${
+                    isTabActive ? "text-white" : "text-stone-500"
+                  }`}
+                >
+                  {item.icon}
+                </span>
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Right Corner: Hướng Dẫn (Feature Tour Trigger) */}

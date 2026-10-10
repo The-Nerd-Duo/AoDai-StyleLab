@@ -176,7 +176,6 @@ function ShareContent() {
 export default function SharePage() {
   return (
     <div className="min-h-screen flex flex-col bg-[#F8F5F0]">
-      <Header />
       <main className="flex-1 flex flex-col justify-center">
         <Suspense fallback={<div className="p-8 text-center text-text-warm-gray text-xs">Đang tải thẻ chia sẻ...</div>}>
           <ShareContent />
