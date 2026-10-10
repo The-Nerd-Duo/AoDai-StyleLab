@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Sparkles } from "lucide-react";
 
 interface HeaderProps {
   onOpenCompare?: () => void;
@@ -11,6 +12,14 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onOpenCompare, hasCompareOutfit }) => {
   const pathname = usePathname();
+
+  const handleStartTour = () => {
+    if (pathname === "/") {
+      window.dispatchEvent(new CustomEvent("vietphuc_open_tour"));
+    } else {
+      window.location.href = "/?tour=1";
+    }
+  };
 
   const navItems = [
     {
@@ -46,7 +55,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCompare, hasCompareOutfit 
         </div>
 
         {/* Pill Segmented Switcher / Floating Capsule Bar */}
-        <nav aria-label="Main Navigation" className="hidden md:flex items-center bg-[#F2EDE7]/90 p-1 rounded-full border border-border-bronze-light/60 shadow-inner gap-1">
+        <nav id="header-nav" aria-label="Main Navigation" className="hidden md:flex items-center bg-[#F2EDE7]/90 p-1 rounded-full border border-border-bronze-light/60 shadow-inner gap-1">
           {navItems.map((item) => (
             <Link
               key={item.href}
@@ -65,8 +74,20 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCompare, hasCompareOutfit 
           ))}
         </nav>
 
-        {/* Right Corner (Balanced spacer) */}
-        <div className="hidden sm:block w-28" />
+        {/* Right Corner: Hướng Dẫn (Feature Tour Trigger) */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleStartTour}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-vermilion-red bg-vermilion-red/10 hover:bg-vermilion-red hover:text-white border border-vermilion-red/25 transition-all shadow-2xs group active:scale-95 cursor-pointer"
+            title="Khám phá hướng dẫn sử dụng (Feature Tour)"
+            aria-label="Khám phá hướng dẫn sử dụng"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-vermilion-red group-hover:text-white transition-colors" />
+            <span className="hidden sm:inline">Hướng dẫn</span>
+            <span className="sm:hidden text-[11px]">Tour</span>
+          </button>
+        </div>
       </div>
     </header>
   );
