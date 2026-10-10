@@ -1,10 +1,10 @@
-# AoDai StyleLab
+# 🇻🇳 VIỆT PHỤC REMIX (AoDai StyleLab)
 
 > **Cuộc thi:** AI Arena Vietnam 2026  
 > **Đề thi Vòng Audition:** Việt phục Remix - Phối trang phục truyền thống theo phong cách Gen Z  
 > **Đơn vị tổ chức:** Đại học Quốc gia Hà Nội (VNU) & Google  
 > **Đội ngũ phát triển:** The Nerd Duo  
-> **Phiên bản:** v2.2 (Cập nhật Kiến trúc AI Đa Tầng, Thời tiết Thời gian thực & Tự động Định vị Vị trí)
+> **Phiên bản:** v2.3 (Kiến trúc Hybrid Multi-Cloud: Google Cloud Run & Cloudflare Pages, Gemini AI & Workers AI FLUX.1)
 
 ---
 
@@ -18,7 +18,7 @@ Tuy nhiên, thế hệ trẻ (Gen Z) đang đối mặt với những rào cản
 3. **Thích ứng thực tế & Thời tiết địa phương:** Cổ phục truyền thống có nhiều lớp và chất liệu đặc thù (gấm, tơ tằm, sa, đũi). Người mặc thường bối rối không biết chất liệu nào phù hợp với điều kiện thời tiết thực tế tại địa phương chụp ảnh.
 4. **Nguy cơ sai lệch thẩm mỹ & Hở hang phản cảm khi tạo ảnh AI:** Nhiều mô hình AI tạo sinh trang phục truyền thống dễ bị nhầm lẫn phom dáng, lai tạp văn hóa hoặc tạo ra hình ảnh thiếu kín đáo, không phù hợp thuần phong mỹ tục Việt Nam.
 
-👉 **Việt Phục Remix (AoDai StyleLab)** ra đời như một **Cyber-Heritage Fashion Lab**—kết hợp sức mạnh của **Google Gemini AI**, **Open-Meteo Real-Time Weather API** và **FLUX Prompt Engine có Guardrails Văn Hóa**, giúp Gen Z tự do sáng tạo bản phối thời trang độc bản mà vẫn tuyệt đối tôn trọng và bảo tồn giá trị di sản.
+👉 **Việt Phục Remix (AoDai StyleLab)** ra đời như một **Cyber-Heritage Fashion Lab**—kết hợp sức mạnh của **Google Gemini AI**, **Cloudflare Workers AI (FLUX.1)**, **Open-Meteo Real-Time Weather API** và **FLUX Prompt Engine có Guardrails Văn Hóa**, giúp Gen Z tự do sáng tạo bản phối thời trang độc bản mà vẫn tuyệt đối tôn trọng và bảo tồn giá trị di sản.
 
 ---
 
@@ -34,10 +34,11 @@ graph TD
     B --> B2[Persona Đại Diện Nam / Nữ]
     B --> B3[Cultural Harmony AI Engine]
     B --> B4[Tự Động Nhận Diện Vị Trí & Thời Tiết Thực]
+    B --> B5[Sinh Ảnh AI FLUX.1 qua Cloudflare Workers AI]
 
     C --> C1[5 Mẫu Khung Nghệ Thuật 9:16]
     C --> C2[Mã QR Động Client-Side]
-    C --> C3[Chia Sẻ Stateless URL & Cộng Đồng]
+    C --> C3[Chia Sẻ Stateless URL & Cloudflare KV Gallery]
     C --> C4[Xuất File PNG Sắc Nét]
 
     D --> D1[Visual Timeline 1000 Năm Di Sản]
@@ -62,6 +63,8 @@ graph TD
     * Gemini AI đưa ra lời khuyên chọn chất liệu vải thông minh (lụa tơ tằm, sa cát, gấm dày, đũi mát...) phù hợp hoàn hảo với thời tiết thực tế tại địa phương.
   * ⚖️ **Thẻ 3 - Quy chế Di sản:** Đánh giá độ chuẩn mực nghi lễ, chấm điểm chuẩn mực 100% hoặc đưa ra cảnh báo guardrail khi phát hiện bản phối phạm quy chế.
   * ⭐ **Đánh giá tổng thể 5 sao & Mẹo Phối Đồ Gen Z:** Gợi ý cách phối tạo điểm nhấn cá tính, hiện đại mà không làm mất đi tính trang nghiêm của trang phục cội nguồn.
+* **Tạo Ảnh AI Thực Tế (AI Fashion Visualizer):**
+  * Trực tiếp gửi bản phối qua **Cloudflare Workers AI (chạy mô hình FLUX.1)** để sinh ảnh mockup trang phục người mẫu mặc cổ phục Việt Nam sống động, đậm tính điện ảnh.
 
 ---
 
@@ -70,7 +73,7 @@ graph TD
 * **Mã QR động Client-side:** Tự động tạo mã QR chuẩn tương thích quét tức thì trên camera điện thoại mọi nền tảng.
 * **Cơ chế chia sẻ kép:**
   * **Stateless URL (0% Database):** Đóng gói toàn bộ cấu hình phối đồ vào Query Parameters (`/share?g=...&c=...`), chia sẻ tức thì không tốn chi phí lưu trữ máy chủ.
-  * **Phòng trưng bày cộng đồng:** Khám phá và tương tác các bản phối sáng tạo từ cộng đồng yêu Việt phục.
+  * **Phòng trưng bày cộng đồng (Cloudflare KV Serverless):** Khám phá và tương tác các bản phối sáng tạo từ cộng đồng yêu Việt phục, lưu trữ phi máy chủ với độ trễ phản hồi mili-giây qua Cloudflare KV.
 * **Xuất ảnh chất lượng cao:** Chụp và tải xuống file ảnh PNG độ phân giải sắc nét qua `html-to-image`.
 
 ---
@@ -84,37 +87,52 @@ graph TD
 
 ## 🧠 3. Kiến Trúc AI Đột Phá & Responsible AI Guardrails
 
-### 🔄 1. Mô Hình Hybrid AI Architecture (Zero-Latency + Deep Intelligence)
+### 🔄 1. Mô Hình Hybrid AI Pipeline (Zero-Latency + LLM Cố Vấn + Diffusion Tạo Ảnh)
 
-Hệ thống kết hợp mô hình **Local Rule Engine** và **Google Gemini 2.0 Flash**:
+Hệ thống kết hợp 3 tầng trí tuệ nhân tạo phối hợp nhịp nhàng:
 
 ```
-[Người dùng vuốt chọn đồ]
+[Người dùng tương tác bản phối]
            │
-           ├─► (0ms Latency) ──► [Local Cultural Engine] ────────► Cập nhật UI & Điểm Ngũ Hành ngay lập tức
+           ├─► (0ms Latency) ──► [Local Cultural Engine] ────────► Cập nhật UI & Ngũ Hành tức thì
            │
-           └─► (Debounce 650ms) ─► [In-Memory Cache Check]
-                                           │
-                               ┌───────────┴───────────┐
-                           (Đã có cache)           (Chưa có cache)
-                               │                       │
-                               ▼                       ▼
-                         Trả kết quả tức thì      Gọi Gemini 2.0 Flash API (với context thời tiết thực tế)
-                                                       │
-                                       ┌───────────────┴───────────────┐
-                                    (Thành công)                 (429 / Offline)
-                                       │                               │
-                                       ▼                               ▼
-                             Cập nhật đánh giá sâu         Tự động Fallback về Rule Engine
+           ├─► (Debounce 650ms) ─► [In-Memory Cache Check]
+           │                               │
+           │                       ┌───────┴───────┐
+           │                  (Đã cache)      (Chưa cache)
+           │                      │               │
+           │                      ▼               ▼
+           │                 Trả kết quả     Gọi Google Gemini AI (kèm context thời tiết thực)
+           │                                      │
+           │                              ┌───────┴───────┐
+           │                          (Thành công)    (Offline / Quota)
+           │                              │               │
+           │                              ▼               ▼
+           │                      Cố vấn chuyên sâu   Fallback về Rule Engine
+           │
+           └─► (Người dùng bấm Tạo Ảnh AI)
+                                  │
+                                  ▼
+                     [FLUX Cultural Prompt Engine]
+                     (Áp dụng Guardrails thuần phong mỹ tục)
+                                  │
+                                  ▼
+                     [Cloudflare Workers AI (FLUX.1)]
+                     (Serverless Edge Inference <10s)
+                                  │
+                                  ▼
+                     Xuất ảnh Việt phục chân thực độ nét cao
 ```
 
 1. **Local Cultural Engine (`lib/cultural-engine.ts`):** Tính toán tức thì điểm số tương sinh ngũ hành, nguyên lý màu sắc và khuyến cáo cơ bản ngay khi chạm vuốt, triệt tiêu hoàn toàn cảm giác chờ đợi.
-2. **Google Gemini 3.8 Flash Engine (`app/api/cultural-advisor/route.ts`):** 
+2. **Google Gemini Flash Engine (`app/api/cultural-advisor/route.ts` & `functions/api/cultural-advisor.ts`):** 
    * Đóng vai trò **Cố Vấn Di Sản & Thời Trang Việt Phục Cao Cấp**.
    * Tiếp nhận thông số thời tiết thực tế từ Open-Meteo và toạ độ người dùng.
    * Sinh lời khuyên chất liệu vải thích ứng, ý nghĩa cội nguồn và mẹo sáng tạo Gen Z.
-3. **In-Memory Caching (15 phút):** Lưu trữ kết quả đánh giá theo tổ hợp món đồ & toạ độ nhằm tối ưu hạn mức API và phản hồi tức thì.
-4. **Client-Side Direct Fallback:** Đảm bảo hệ thống hoạt động bền bỉ 100%, tự động dự phòng nếu máy chủ gặp hạn chế vị trí địa lý hoặc mất mạng.
+3. **Cloudflare Workers AI FLUX.1 Engine (`lib/ai-prompt.ts`):**
+   * Đóng vai trò **Họa Sĩ Thời Trang Số**.
+   * Thực thi mô hình tạo ảnh FLUX.1 trực tiếp trên mạng lưới Cloudflare Workers AI Serverless, giải quyết triệt để bài toán tạo ảnh trực quan với chi phí $0 và tốc độ cao.
+4. **In-Memory Caching & Client Fallback:** Lưu trữ kết quả đánh giá theo tổ hợp món đồ & toạ độ nhằm tối ưu hạn mức API và phản hồi tức thì, bảo đảm ứng dụng luôn sẵn sàng 100%.
 
 ---
 
@@ -124,7 +142,7 @@ Hệ thống kết hợp mô hình **Local Rule Engine** và **Google Gemini 2.0
 * **Tự động nhận diện vị trí người dùng (Auto-Detection):**
   * Tự động nhận diện ngầm qua **IP Geolocation** (`ipwho.is` / `ipapi.co`) chỉ trong 200ms, không hiển thị pop-up xin quyền vị trí gây gián đoạn trải nghiệm.
   * Tự động ưu tiên GPS chính xác cao nếu người dùng đã cấp quyền cho trình duyệt.
-  * Tinh giản giao diện: Chỉ hiển thị thanh badge trang nhã `📍 [Thành phố]: [Nhiệt độ]°C • [Tình trạng]` kèm nút refresh nhanh, loại bỏ các chỉ số rườm rà gây chật hẹp khung nhìn.
+  * Tinh giản giao diện: Chỉ hiển thị thanh badge trang nhã `📍 [Thành phố]: [Nhiệt độ]°C • [Tình trạng]` kèm nút refresh nhanh.
 
 ---
 
@@ -139,17 +157,31 @@ Hệ thống kết hợp mô hình **Local Rule Engine** và **Google Gemini 2.0
 
 ---
 
+### ⚡ 4. Kiến Trúc Serverless Edge Toàn Cầu (Cloudflare Pages & Cloudflare KV)
+
+* **Cloudflare Pages (Global Edge Hosting):** 
+  * Dự án được biên dịch dưới dạng **Static HTML Export** kết hợp **Cloudflare Pages Functions** (`functions/api/*`).
+  * Phân phối qua mạng lưới Edge CDN của Cloudflare trên 300+ thành phố toàn cầu với độ trễ cực thấp (<50ms).
+* **Cloudflare KV (`LOOKBOOK_KV`):**
+  * Lưu trữ phi máy chủ (Serverless Key-Value) cho các bản phối Lookbook được chia sẻ lên Cộng đồng.
+  * Không tốn chi phí duy trì cơ sở dữ liệu truyền thống, khả năng mở rộng tức thì không giới hạn.
+
+---
+
 ## 🛠️ 4. Tech Stack Tinh Gọn (0$ Cost)
 
-| Thành phần | Công nghệ sử dụng | Phiên bản | Vai trò kiến trúc |
+| Thành phần | Công nghệ sử dụng | Phiên bản / Kiểu | Vai trò kiến trúc |
 | :--- | :--- | :--- | :--- |
-| **Fullstack Framework** | Next.js (App Router, TypeScript) | `14.2.24` | SSR/SSG tối ưu SEO, routing hiện đại, API routes tích hợp |
-| **Styling & Icons** | Tailwind CSS + Lucide Icons | `3.4.17` / `0.475` | Thiết kế giao diện Di sản (Heritage Gold, Son Đỏ, Giấy Dó, Ngọc Bích) |
-| **GenAI Model** | Google Gemini 3.8 Flash (`@google/genai`) | `^2.24.0` | Cố vấn di sản văn hóa và Trợ lý AI Bách khoa |
+| **Fullstack Framework** | Next.js (App Router, TypeScript) | `14.2.24` | Static Export + Serverless Pages Functions & API Routes |
+| **Styling & UI Icons** | Tailwind CSS + Lucide Icons | `3.4.17` / `0.475` | Thiết kế Di sản (Heritage Gold, Son Đỏ, Giấy Dó, Ngọc Bích) |
+| **Reasoning GenAI** | Google Gemini 2.0 / 3.5 / 3.8 Flash | `@google/genai` | Cố vấn di sản văn hóa và Trợ lý AI Bách khoa |
+| **Diffusion Image GenAI**| Cloudflare Workers AI (FLUX.1 Engine) | Serverless Inference | Sinh ảnh minh họa phối đồ cổ phục chất lượng cao trực tiếp tại Edge |
+| **Edge Platform** | Cloudflare Pages + Pages Functions | Serverless Edge | Phân phối ứng dụng toàn cầu với thời gian tải trang <500ms |
+| **Edge Storage** | Cloudflare KV (`LOOKBOOK_KV`) | Serverless Key-Value | Lưu trữ thư viện Lookbook cộng đồng chi phí $0 |
 | **Weather API** | Open-Meteo API | REST v1 | Cung cấp dữ liệu thời tiết thời gian thực không cần API key |
 | **Geo Location** | Silent IP Geolocation + HTML5 GPS | Browser / REST | Tự động nhận diện vị trí người dùng mượt mà |
 | **QR Code Engine** | `qrcode` | `^1.5.4` | Sinh mã QR động chuẩn xác phía Client-side |
-| **Image Generation** | `html-to-image` | `^1.11.11` | Render và xuất thẻ Lookbook PNG độ nét cao |
+| **Lookbook Capture** | `html-to-image` | `^1.11.11` | Render và xuất thẻ Lookbook PNG độ nét cao |
 | **Prompt Engine** | FLUX Heritage Prompt Engine | v2.0 | Chuẩn hóa prompt tạo ảnh với Guardrails thuần phong mỹ tục |
 | **Container & Cloud** | Docker + Google Cloud Run | Multi-stage | Đóng gói container chuẩn hóa, mở rộng tức thì trên Google Cloud |
 
@@ -171,9 +203,12 @@ npm install
 ### 3. Cấu hình Biến Môi Trường (Environment Variables)
 Tạo file `.env.local` tại thư mục gốc của dự án:
 ```env
-# Google AI Studio API Key (Gemini 2.0 Flash)
+# Google AI Studio API Key (Gemini)
 GEMINI_API_KEY=your_google_ai_studio_api_key_here
 NEXT_PUBLIC_GEMINI_API_KEY=your_google_ai_studio_api_key_here
+
+# (Tùy chọn) Endpoint Cloudflare Workers AI sinh ảnh FLUX.1
+# Mặc định sử dụng: https://vietphuc-ai-api.tunaemm.workers.dev
 ```
 *(Nếu chưa cấu hình API Key, hệ thống tự động kích hoạt Heritage Rule Engine thông minh dự phòng, bảo đảm ứng dụng luôn vận hành mượt mà 100%).*
 
@@ -183,30 +218,59 @@ npm run dev
 ```
 Mở trình duyệt và truy cập: `http://localhost:3000`
 
-### 5. Kiểm tra Build Production
+### 5. Kiểm tra Build Production Cục Bộ
 ```bash
 npm run build
-npm run start
 ```
+*(Ứng dụng sẽ tự động xuất thư mục tĩnh tối ưu vào `./out` theo cấu hình `output: "export"`).*
 
-### 6. Build Docker & Triển khai Google Cloud Run
-Dự án đã cấu hình sẵn `Dockerfile` đa tầng tối ưu dung lượng:
-```bash
-# Build Docker image
-docker build -t vietphuc-remix:latest .
+---
 
-# Chạy thử container cục bộ
-docker run -p 8080:8080 -e GEMINI_API_KEY=your_key vietphuc-remix:latest
-```
+### 🌐 6. Tùy Chọn 1: Triển Khai Lên Cloudflare Pages & Workers (Khuyên dùng - 0$ Chi Phí)
 
-Triển khai lên Google Cloud Run theo hướng dẫn chuẩn của Google Cloud SDK:
-```bash
-gcloud run deploy vietphuc-remix \
-  --image gcr.io/YOUR_PROJECT_ID/vietphuc-remix:latest \
-  --platform managed \
-  --region asia-southeast1 \
-  --allow-unauthenticated
-```
+Dự án đã tích hợp sẵn tệp cấu hình `wrangler.toml` và thư mục `functions/`:
+
+1. **Build tĩnh ứng dụng:**
+   ```bash
+   npm run build
+   ```
+
+2. **Triển khai tức thì qua Cloudflare Wrangler CLI:**
+   ```bash
+   npx wrangler pages deploy out --project-name aodai-stylelab
+   ```
+
+3. **Hoặc kết nối trực tiếp với GitHub Repository trên Cloudflare Dashboard:**
+   * **Framework preset:** `Next.js (Static HTML Export)`
+   * **Build command:** `npm run build`
+   * **Build output directory:** `out`
+   * **Environment Variables:** Thêm `GEMINI_API_KEY`
+   * **KV Namespace Bindings:** Gán biến `LOOKBOOK_KV` với ID tương ứng trong `wrangler.toml`.
+
+---
+
+### 🐳 7. Tùy Chọn 2: Đóng Gói Docker & Triển Khai Google Cloud Run
+
+Dự án cung cấp sẵn `Dockerfile` đa tầng tối ưu hóa cho môi trường container độc lập:
+
+1. **Build Docker image:**
+   ```bash
+   docker build -t vietphuc-remix:latest .
+   ```
+
+2. **Chạy thử container cục bộ:**
+   ```bash
+   docker run -p 8080:8080 -e GEMINI_API_KEY=your_key vietphuc-remix:latest
+   ```
+
+3. **Triển khai lên Google Cloud Run:**
+   ```bash
+   gcloud run deploy vietphuc-remix \
+     --image gcr.io/YOUR_PROJECT_ID/vietphuc-remix:latest \
+     --platform managed \
+     --region asia-southeast1 \
+     --allow-unauthenticated
+   ```
 
 ---
 
